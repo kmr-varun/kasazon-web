@@ -1,0 +1,1454 @@
+# Kasazon Web Portal - Built Pages
+
+## All Pages
+
+### 0a. Uniform & Workwear Page
+- **URL**: `/uniform` or `http://localhost:3000/uniform`
+- **File**: `app/uniform/page.tsx`
+- **Layout**: Header + Content + Footer
+- **For**: Approved professionals who need to confirm uniform receipt
+- **Sections**:
+  - "Uniform & Workwear" heading
+  - Description: "Manage your Kasazon uniform and delivery status"
+  - Uniform package preview card:
+    - Uniform image
+    - "Kasazon Professional Uniform" title
+    - Size: L
+    - Tracking #KZ-8842-US
+  - Question: "Did you receive your uniform?"
+  - Radio button options:
+    - "Yes, I Received It" (selected by default)
+    - "No, I Haven't Received It"
+  - "Confirm" button
+  - Help text with support email link
+- **Functionality**:
+  - Radio button selection
+  - On confirm with "Yes": Redirects to dashboard
+  - On confirm with "No": Navigates to uniform tracking page
+
+### 0a.1. Uniform Not Received Tracking Page
+- **URL**: `/uniform/not-received` or `http://localhost:3000/uniform/not-received`
+- **File**: `app/uniform/not-received/page.tsx`
+- **Layout**: Header + Content + Footer
+- **Accessed From**: Uniform page when user selects "No, I Haven't Received It"
+- **Sections**:
+  - "Uniform Not Received" heading
+  - Description: "Manage your Kasazon uniform and delivery status"
+  - Issue Details Card:
+    - Report Summary heading with Order #KZ-782 badge
+    - Reported Reason: "Not delivered yet"
+    - Reported Date: "10 Oct 2026, 14:48 GMT"
+    - Your Note: Quote in light blue box
+    - Dispatch Destination: Address with location pin icon
+  - Audit Tracking Timeline (gray background):
+    - "Estimated 24h" duration
+    - Step 1: ✓ Issue Submitted (completed - blue checkmark)
+    - Step 2: ○ Under Review (in progress - orange "In Progress" badge)
+    - Step 3: ○ Resolution (upcoming - gray)
+    - Connecting lines between steps
+  - "Contact Support" button (opens mailto link)
+  - "Back to Uniform Status" link
+- **Functionality**:
+  - Timeline shows 3-step tracking process
+  - Visual status indicators (completed, in progress, upcoming)
+  - Contact support opens email with pre-filled subject
+
+### 0b. Login Modal (Header Integration)
+- **Integrated in**: All pages with header
+- **Component**: `components/LoginModal.tsx`
+- **Trigger**: Click "Login" button in header (desktop or mobile)
+- **Demo Page**: `/login-demo` or `http://localhost:3000/login-demo`
+- **Features**:
+  - Full name input with validation
+  - Language selector dropdown (English, Spanish, French, German, Chinese, Arabic, Portuguese, Hindi)
+  - Country code selector (+233 Ghana, +234 Nigeria, +1 USA, +44 UK, +91 India)
+  - Phone number input (numbers only validation)
+  - Form validation with error messages
+  - Login button
+  - OTP verification modal (test code: 123456)
+  - Terms & Privacy links
+  - Social login buttons (Google, Apple, Facebook)
+  - Backdrop close functionality
+  - Fully responsive design (mobile, tablet, desktop)
+- **Assets**:
+  - `login-dropdown-arrow.svg`
+  - `login-separator-vertical.svg`
+  - `login-separator-horizontal.svg`
+  - `google-logo.svg`
+  - `apple-logo.svg`
+  - `facebook-logo.svg`
+
+### 0c. My Account Page
+- **URL**: `/account` or `http://localhost:3000/account`
+- **File**: `app/account/page.tsx`
+- **Layout**: Header + Two-Column Content + Footer
+- **For**: Logged-in users to manage their account settings
+- **Sections**:
+  - Page Header:
+    - "My Account" title
+    - Description: "Manage your profile, bookings, payments, and account preferences."
+  - **Left Sidebar** (Profile & Navigation):
+    - User Profile Card:
+      - Avatar with initials (LB)
+      - Name: Leo Boateng
+      - Email: leo.boateng@.com
+      - Phone: +233 8986547436
+      - "Edit Profile" button
+    - Navigation Menu with sections:
+      - **ACCOUNT**: Favorite Services, Saved Addresses, Payment Methods, Wallet, Refer & Earn
+      - **PREFERENCES**: Language (English badge), Notifications (blue dot indicator)
+      - **SUPPORT**: Help & Support, Rate the App, Privacy Policy
+      - **SYSTEM**: Delete Account (red text), Log Out
+  - **Right Content** (Payment Methods):
+    - "Payment Method" heading
+    - Saved Payment Methods:
+      - Mobile Money (MTN) with "Default" badge - •••• 4521
+      - Visa Card - •••• 7890
+      - "Remove" button for each
+    - Add Payment Method accordion (expandable):
+      - Method selection: Mobile Money / Debit/Credit Card
+      - Network Provider buttons: MTN, Telecel, AirtelTigo
+      - Phone Number input with +233 prefix
+      - Account Name input
+      - Trust strip with lock icon: "Your payment details are encrypted and securely stored."
+    - "Add Payment Method" button
+- **Functionality**:
+  - Profile card displays user information
+  - Navigation links to different account sections
+  - Expandable/collapsible "Add Payment Method" accordion
+  - Payment method selection (Mobile Money / Card)
+  - Network provider selection (MTN, Telecel, AirtelTigo)
+  - Form inputs for phone number and account name
+- **Assets**:
+  - `phone-icon.svg`, `favorite-icon.svg`, `saved-address-icon.svg`
+  - `payment-method-icon.svg`, `wallet-icon.svg`, `refer-earn-icon.svg`
+  - `language-icon.svg`, `notification-icon.svg`
+  - `help-support-icon.svg`, `rate-app-icon.svg`, `privacy-icon.svg`
+  - `delete-account-icon.svg`, `logout-icon.svg`
+  - `mobile-money-icon.svg`, `visa-card-icon.svg`
+  - `add-payment-icon.svg`, `chevron-down-icon.svg`
+  - `mobile-money-large-icon.svg`, `card-icon.svg`
+  - `divider-vertical.svg`, `lock-icon.svg`
+
+### 0d. Wallet Page
+- **URL**: `/account/wallet` or `http://localhost:3000/account/wallet`
+- **File**: `app/account/wallet/page.tsx`
+- **Layout**: Header + Two-Column Content + Footer
+- **For**: Logged-in users to view and manage their wallet
+- **Sections**:
+  - **Left Sidebar** (same as account page):
+    - User Profile Card with Edit Profile button
+    - Navigation menu with all account sections
+  - **Right Content** (Wallet):
+    - "Wallet" heading
+    - Balance Card (blue background):
+      - "Available Balance" text
+      - Large balance amount: "₵1,297"
+      - "Add Money" button (white)
+      - 3D wallet illustration with coins and credit cards
+    - Recent Transactions section:
+      - "Recent Transactions" heading
+      - Transaction list (6 items):
+        - Each row: icon, transaction type, service name, date/time, amount
+        - Transaction types: Refund Received (+green), Wallet Used (-green), Cashback Earned (-red)
+        - Circular icon with colored background
+        - Service name with bullet point separator
+    - Add Money section:
+      - "Add Money" heading and description
+      - "Amount to Add" input field
+      - "RECOMMENDED AMOUNTS" label
+      - Four amount chips (+₵100, +₵250, +₵500, +₵1000)
+      - Selected chip shows blue background with white text
+    - "Add Money" button (blue, full width on mobile, max-width on desktop)
+- **Functionality**:
+  - Display wallet balance prominently
+  - Show recent transaction history with visual indicators
+  - Quick amount selection with recommended chips
+  - Custom amount input
+  - Amount selection updates input field
+- **Assets**:
+  - `wallet-illustration.png` (3D illustration)
+  - `transaction-in-icon.svg`, `transaction-out-icon.svg`
+  - Plus all sidebar icons (reused from account page)
+
+### 0e. Refer & Earn Page
+- **URL**: `/account/refer` or `http://localhost:3000/account/refer`
+- **File**: `app/account/refer/page.tsx`
+- **Layout**: Header + Two-Column Content + Footer
+- **For**: Logged-in users to view and share their referral code
+- **Sections**:
+  - **Left Sidebar** (same as account page):
+    - User Profile Card with Edit Profile button
+    - Navigation menu with all account sections
+  - **Right Content** (Refer & Earn):
+    - "Refer & Earn" heading
+    - Two-column layout:
+      - **Left Column (7/12)**:
+        - Your Referral Code Card (white with border):
+          - Gift icon + "Your Referral Code" heading + "Active" badge (green)
+          - Code display box (light blue background):
+            - "Referral Voucher Code" label
+            - Large code: "KASAZON-AMA24" (blue text, letter-spaced)
+            - "Copy Code" button (blue with copy icon)
+          - Your Referral Link section:
+            - Link display (light blue background)
+            - Full URL with "Copy Link" button
+        - Share Your Referral Card (white with border):
+          - "Share Your Referral" heading
+          - Description text
+          - Three share buttons:
+            - "Share via WhatsApp" (green tinted with WhatsApp icon)
+            - "Share via SMS" (white outline with SMS icon)
+            - "Copy Link" (white outline, text changes to "Link Copied!")
+      - **Right Column (5/12)**:
+        - Referral illustration (people with phones and coin)
+    - How it Works section (teal background):
+      - "How it works" heading
+      - 4 numbered steps with teal circle badges:
+        1. Share your code with friends
+        2. They sign up and enter your code
+        3. They complete their first booking
+        4. You both get ₵20 credit
+- **Functionality**:
+  - Copy referral code to clipboard
+  - Copy referral link to clipboard
+  - Share via WhatsApp (opens WhatsApp with pre-filled message)
+  - Share via SMS (opens SMS app with pre-filled message)
+  - Visual feedback when copying (button text changes temporarily)
+- **Assets**:
+  - `referral-illustration.png` (people with phones illustration)
+  - `icons/gift-icon.svg`, `icons/copy-icon.svg`, `icons/link-icon.svg`
+  - `icons/whatsapp-icon.svg`, `icons/sms-icon.svg`
+  - Plus all sidebar icons (reused from account page)
+
+### 0f. Help & Support Page
+- **URL**: `/support` or `http://localhost:3000/support`
+- **File**: `app/support/page.tsx`
+- **Layout**: Header + Two-Column Content + Footer
+- **For**: All users seeking help and support
+- **Sections**:
+  - **Left Sidebar** (same as account pages):
+    - User Profile Card
+    - Navigation menu
+  - **Right Content** (Help & Support):
+    - "Help & Support" heading
+    - Search Bar:
+      - Search input with placeholder "Search your service"
+      - Blue circular search button with search icon
+      - Border and shadow styling
+    - Two Support Cards (side by side):
+      - **Chat with Support**:
+        - Chat icon
+        - "Chat with Support" heading
+        - Description about 24-hour Accra concierge support
+        - "Start Chat" link with arrow
+        - Enhanced shadow (blue tint)
+      - **Call Support**:
+        - Phone icon  
+        - "Call Support" heading
+        - Description about Airport Residential operations specialist
+        - "Call Now" link with arrow
+        - Light shadow
+    - Common Topics section:
+      - "Common Topics" heading
+      - List of 5 clickable topics (white cards with border):
+        1. Booking & Scheduling (calendar icon)
+        2. Payments & Refunds (money icon)
+        3. Disputes & Rework (dispute icon)
+        4. Account & Verification (shield icon)
+        5. Ratings & Reviews (star icon)
+      - Each row has icon, title, and chevron right arrow
+      - Borders between rows
+- **Functionality**:
+  - Search input for filtering/searching
+  - Click cards to start chat or call
+  - Click topic rows to navigate to specific help articles
+- **Assets**:
+  - `search-icon.svg`, `search-button-icon.svg`
+  - `chat-icon.svg`, `phone-call-icon.svg`, `arrow-right-icon.svg`
+  - `calendar-icon.svg`, `money-icon.svg`, `dispute-icon.svg`
+  - `account-shield-icon.svg`, `star-rating-icon.svg`, `chevron-right.svg`
+  - Plus all sidebar icons (reused from account page)
+
+### 0g. Favorite Services Page
+- **URL**: `/account/favorites` or `http://localhost:3000/account/favorites`
+- **File**: `app/account/favorites/page.tsx`
+- **Layout**: Header + Two-Column Content + Footer
+- **For**: Logged-in users to view their saved/favorite services
+- **Sections**:
+  - **Left Sidebar** (same as account pages):
+    - User Profile Card
+    - Navigation menu
+  - **Right Content** (Favorite Services):
+    - "Favorite Services" heading
+    - 3-column grid of service cards (9 services shown):
+      - **Each Service Card**:
+        - Service image (rounded corners)
+        - Heart icon button (top right, white circle background)
+        - Service name: "Foam-jet AC Service"
+        - Star rating: 4.5 with star icon
+        - Review count: "890+ reviews" (with bullet separator)
+        - Starting price: "Starts At ₵40"
+        - Blue "+ Add" button (bottom right)
+      - White background with border
+      - Hover effects on cards
+- **Functionality**:
+  - Grid displays all favorite/saved services
+  - Heart icon to unfavorite/remove service
+  - "+ Add" button to add service to cart
+  - Click card to view service details
+  - Responsive grid (3 cols desktop, 2 cols tablet, 1 col mobile)
+- **Assets**:
+  - `service-card-image.png` (AC service photo)
+  - `star-filled.png` (rating star)
+  - `icons/heart-favorite.svg` (favorite heart icon)
+  - `icons/add-plus.svg` (plus icon for add button)
+  - Plus all sidebar icons (reused from account page)
+
+### 0h. Privacy Policy Page
+- **URL**: `/privacy` or `http://localhost:3000/privacy`
+- **File**: `app/privacy/page.tsx`
+- **Layout**: Header + Two-Column Content + Footer
+- **For**: All users to view Kasazon's privacy policy
+- **Sections**:
+  - **Left Sidebar** (same as account pages):
+    - User Profile Card
+    - Navigation menu
+  - **Right Content** (Privacy Policy):
+    - "Privacy Policy" heading
+    - Privacy policy text content with sections:
+      - Introduction and consent statement
+      - **1. Information We Collect**:
+        - Personal Information (bulleted list)
+        - Professional Information (bulleted list)
+        - Booking & Service Information (bulleted list)
+        - Payment Information (paragraphs)
+        - Device & Usage Information (bulleted list)
+      - Text formatting with headings, paragraphs, and bullet lists
+      - Proper spacing and typography
+- **Content Structure**:
+  - Main heading (h2): 24px, medium weight
+  - Section headings (h3): 16px, medium weight  
+  - Subsection headings (h4): 14px, medium weight
+  - Body text: 14px Poppins Regular
+  - Bulleted lists with proper indentation
+  - Space between sections for readability
+- **Functionality**:
+  - Static content display
+  - Scrollable content area
+  - No interactive elements in the policy text
+- **Assets**:
+  - Plus all sidebar icons (reused from account page)
+
+### 0i. Saved Addresses Page
+- **URL**: `/account/addresses` or `http://localhost:3000/account/addresses`
+- **File**: `app/account/addresses/page.tsx`
+- **Layout**: Header + Two-Column Content + Footer
+- **For**: Users to manage their saved addresses
+- **Sections**:
+  - **Left Sidebar** (same as account pages):
+    - User Profile Card (LB avatar, Leo Boateng, email, phone, Edit Profile button)
+    - Navigation menu with all account sections
+  - **Right Content** (Saved Addresses):
+    - "Saved Addresses" heading
+    - **Saved Address Cards** (2 cards displayed):
+      - Home Address Card (selected with blue border):
+        - Home icon in blue circular background
+        - Label: "Home"
+        - Location: "East Legon, Accra"
+        - Details: "Near Shell fuel station, blue gate"
+        - Edit icon in top right
+      - Work Address Card (unselected with gray border):
+        - Work icon in gray circular background
+        - Label: "Work"
+        - Location: "Airport Residential Area"
+        - Details: "3rd floor, Standard Chartered Building"
+        - More options icon in top right
+    - **Add New Address Accordion** (expandable/collapsible):
+      - Header with location icon, title, description, and chevron toggle
+      - **Expandable Form Content**:
+        - Map preview image showing location
+        - "Use My Current Location" link with location icon
+        - Address Line 1 input field
+        - Address Line 2 (optional) input field
+        - Country dropdown (pre-filled: "Accra")
+        - State dropdown (pre-filled: "Greater Accra")
+        - City dropdown (pre-filled: "Ghana")
+        - Zip Code input field
+        - Landmark input field
+        - Address type toggle buttons: Home, Work, Other (Home selected by default)
+        - "Save as my default address" checkbox
+    - **Save Button** (shown when accordion is expanded):
+      - Blue primary button
+      - Text: "Save"
+      - Max width 512px
+- **Functionality**:
+  - Toggle accordion open/closed on header click
+  - Chevron icon rotates when accordion opens/closes
+  - Address type button selection (Home/Work/Other)
+  - Checkbox toggle for default address
+  - Form validation on save
+  - Visual selection state for saved addresses (blue border for selected)
+- **Assets**:
+  - `/images/icons/home-location-icon.svg` - Home address icon
+  - `/images/icons/work-location-icon.svg` - Work address icon
+  - `/images/icons/edit-address-icon.svg` - Edit action icon
+  - `/images/icons/more-options-icon.svg` - More options icon
+  - `/images/icons/add-location-icon.svg` - Add new address icon
+  - `/images/icons/chevron-down-accordion.svg` - Accordion toggle chevron
+  - `/images/icons/current-location-icon.svg` - Current location icon
+  - `/images/icons/dropdown-chevron.svg` - Dropdown select chevron
+  - `/images/map-preview.png` - Map preview image
+  - Plus all sidebar icons (reused from account page)
+
+### 0j. Edit Profile Page
+- **URL**: `/account/edit` or `http://localhost:3000/account/edit`
+- **File**: `app/account/edit/page.tsx`
+- **Layout**: Header + Two-Column Content + Footer
+- **For**: Users to edit their profile information
+- **Sections**:
+  - **Left Sidebar** (same as account pages):
+    - User Profile Card (LB avatar, Leo Boateng, email, phone, Edit Profile button)
+    - Navigation menu with all account sections
+  - **Right Content** (Edit Profile):
+    - "Edit Profile" heading
+    - **Profile Photo Section**:
+      - Large circular profile photo (118px diameter)
+      - Blue circular edit button with white border in bottom-right corner
+      - Edit icon (white pen icon)
+    - **Profile Form** (max-width 592px, centered):
+      - Full Name input (pre-filled: "Leo Boateng")
+      - Phone Number input (pre-filled: "+233 5678905643")
+      - Email input with inline "Verify" button on right (pre-filled: "leo@hmail.com")
+      - Date of Birth input (pre-filled: "04/01/1998")
+      - Gender input (pre-filled: "Female")
+      - Country dropdown (placeholder: "Choose your country")
+      - City dropdown (placeholder: "Choose your city")
+    - **Save Button**:
+      - Blue primary button
+      - Text: "Save"
+      - Width: 512px
+      - Height: 64px
+- **Functionality**:
+  - Form inputs are editable (controlled state)
+  - Email field has inline "Verify" action button
+  - Dropdowns for Country and City (with chevron icons)
+  - Edit photo button opens photo upload dialog
+  - Save button submits form changes
+  - Input focus states with blue border
+- **Assets**:
+  - `/images/profile-photo.png` - User profile photo
+  - `/images/icons/edit-photo-icon.svg` - Edit photo icon (white pen)
+  - `/images/icons/dropdown-chevron.svg` - Dropdown select chevron
+  - Plus all sidebar icons (reused from account page)
+
+### 0k. My Bookings Page
+- **URL**: `/bookings` or `http://localhost:3000/bookings`
+- **File**: `app/bookings/page.tsx`
+- **Layout**: Header + Content + Footer
+- **For**: Users to view and manage their bookings
+- **Sections**:
+  - **Page Header**:
+    - "My Booking" heading (40px, medium weight)
+    - Description: "Check your service details before proceeding to payment."
+  - **Two-Column Layout**:
+    - **Left Column** (8 cols on desktop) - Booking Cards:
+      - Each booking card displays:
+        - Service name (20px, medium weight)
+        - Provider name with person icon
+        - Date/time with calendar icon
+        - "Reschedule" button (blue)
+        - Service image (154px × 116px, right side)
+      - 3 booking cards shown (all AC Servicing examples)
+    - **Right Column** (4 cols on desktop) - Activity & Support:
+      - **Booking Activity Widget**:
+        - White card with shadow
+        - "Booking Activity" heading
+        - 3 stat rows with colored dots:
+          - Upcoming Service: 1 Booking (green dot #006c49)
+          - Ongoing Renovation: 1 Active Project (orange dot #f59e0b)
+          - Past Executions: 1 Completed (gray dot #565e74)
+        - Each row shows label and count
+      - **Need Help Card**:
+        - White card with border
+        - Blue circular icon background
+        - "Location assistance needed?" text
+        - "Kasazon Support 24/7 on call" subtitle
+        - "Call Now" link button
+- **Functionality**:
+  - Reschedule button for each booking
+  - Call Now button opens phone dialer
+  - Responsive grid layout (stacks on mobile)
+- **Mock Data**:
+  - 3 bookings (all same service for demo)
+  - Each with provider name, date/time, image
+- **Assets**:
+  - `/images/booking-service-image.png` - Service image for bookings
+  - `/images/icons/provider-icon.svg` - Provider/person icon
+  - `/images/icons/calendar-booking-icon.svg` - Calendar icon
+  - `/images/icons/help-support-booking-icon.svg` - Help support icon
+
+### 0l. Upcoming Bookings Page
+- **URL**: `/bookings/upcoming` or `http://localhost:3000/bookings/upcoming`
+- **File**: `app/bookings/upcoming/page.tsx`
+- **Layout**: Header + Content + Footer
+- **For**: Users to view their upcoming bookings
+- **Sections**:
+  - **Two-Column Layout** (same as My Bookings):
+    - **Left Column** (8 cols on desktop) - Booking Cards:
+      - 4 upcoming booking cards (clickable links)
+      - Each card shows:
+        - Service name (AC Servicing)
+        - Provider name with icon
+        - Date/time with calendar icon
+        - "Reschedule" button
+        - Service image thumbnail
+      - Cards have hover effect (blue border on hover)
+    - **Right Column** (4 cols on desktop) - Activity & Support:
+      - Same Booking Activity Widget
+      - Same Need Help Card
+- **Functionality**:
+  - Booking cards are clickable (link to booking detail)
+  - Reschedule button (prevents navigation)
+  - Call Now button for support
+  - Responsive layout
+- **Differences from My Bookings**:
+  - Shows 4 bookings instead of 3
+  - No page header (integrated into parent bookings page)
+  - Booking cards are clickable links
+- **Mock Data**:
+  - 4 bookings (all AC Servicing for demo)
+- **Assets**:
+  - Same assets as My Bookings page (reused)
+
+### 0m. Ongoing Bookings Page
+- **URL**: `/bookings/ongoing` or `http://localhost:3000/bookings/ongoing`
+- **File**: `app/bookings/ongoing/page.tsx`
+- **Layout**: Header + Content + Footer
+- **For**: Users to view and track their ongoing/in-progress bookings
+- **Sections**:
+  - **Two-Column Layout** (same as Upcoming):
+    - **Left Column** (8 cols on desktop) - Booking Cards:
+      - 4 ongoing booking cards (clickable links)
+      - Each card shows:
+        - **"In Progress" status badge** (yellow/orange color #cf9d00 with bullet point)
+        - Service name (AC Servicing)
+        - Provider name with icon
+        - **NO date/time shown** (differs from upcoming)
+        - "Track Booking" button (blue)
+        - Service image thumbnail
+      - Cards have hover effect (blue border)
+    - **Right Column** (4 cols on desktop):
+      - Same Booking Activity Widget
+      - Same Need Help Card
+- **Functionality**:
+  - Booking cards are clickable links to booking detail
+  - Track Booking button (prevents navigation, shows tracking view)
+  - Call Now button for support
+  - Responsive layout
+- **Key Differences**:
+  - Status badge: "In Progress" (yellow/orange)
+  - Button text: "Track Booking" instead of "Reschedule"
+  - No date/time shown (service is already in progress)
+  - 4 bookings displayed
+- **Mock Data**:
+  - 4 ongoing bookings (all AC Servicing for demo)
+  - All have "In Progress" status
+- **Assets**:
+  - Same assets as My Bookings/Upcoming (reused)
+
+### 0n. Completed Bookings Page
+- **URL**: `/bookings/completed` or `http://localhost:3000/bookings/completed`
+- **File**: `app/bookings/completed/page.tsx`
+- **Layout**: Header + Content + Footer
+- **For**: Users to view completed bookings and rate/reorder services
+- **Sections**:
+  - **Two-Column Layout** (same structure as other booking pages):
+    - **Left Column** (8 cols on desktop) - Booking Cards:
+      - 3 completed booking cards (clickable links)
+      - Each card shows:
+        - Service name (AC Servicing)
+        - Provider name with icon
+        - Completion date/time with bullet separator (12 July, 3:47PM)
+        - **5-star rating component** (interactive, large 52.5px stars)
+        - "Reorder" button (blue)
+        - Service image thumbnail
+      - Cards have hover effect
+    - **Right Column** (4 cols on desktop):
+      - Same Booking Activity Widget
+      - Same Need Help Card
+- **Functionality**:
+  - Booking cards are clickable links
+  - **Interactive star rating**: Click stars to rate (1-5 stars)
+  - Rating state tracked per booking
+  - Stars change opacity based on rating (filled vs unfilled)
+  - Reorder button (prevents navigation, triggers reorder flow)
+  - Call Now button for support
+- **Key Differences**:
+  - Shows completion date instead of upcoming date
+  - Large interactive star rating (52.5px star icons)
+  - "Reorder" button instead of "Reschedule"/"Track Booking"
+  - 3 bookings displayed
+- **Mock Data**:
+  - 3 completed bookings (all AC Servicing)
+  - Initial rating: 0 stars (user can rate)
+- **Assets**:
+  - `/images/icons/star-filled.svg` - Filled star for rating
+  - `/images/icons/star-half.svg` - Half star (downloaded but not used yet)
+  - `/images/icons/star-empty.svg` - Empty star (downloaded but not used yet)
+  - Plus reused assets from other booking pages
+
+### 0o. Booking Detail Page (Upcoming)
+- **URL**: `/bookings/[id]` or `http://localhost:3000/bookings/123` (dynamic route)
+- **File**: `app/bookings/[id]/page.tsx`
+- **Layout**: Header + Content + Footer
+- **For**: Users to view full details of a specific booking
+- **Sections**:
+  - **Page Header**: "Booking Details" (40px heading)
+  - **Booking Header Banner**:
+    - Status badge (Upcoming - blue pill)
+    - Service title (24px)
+    - Booking ID with copy button (KASA-AC-30926)
+    - Service image (235px × 121px)
+  - **Two-Column Layout**:
+    - **Left Column** (8 cols):
+      - **Service Details Card**: Service name, add-ons, amount paid
+      - **Issue Description**: Expandable card with issue text
+      - **Schedule & Location Info Card**: Date/time with calendar icon, location with pin icon
+      - **Provider Card**: Avatar (64px), name, rating, specialty, distance, Call/Chat buttons
+      - **Start Code Display**: Light blue box with 4-digit code
+      - **Action Buttons**: Reschedule (blue), Cancel Booking (red outline)
+    - **Right Column** (4 cols):
+      - **Booking Summary Card**: Service info, cost breakdown (service + platform fee), total
+      - **Need Help Card**: Same as other booking pages
+- **Functionality**:
+  - Copy booking ID to clipboard (with visual feedback)
+  - Expandable issue description (click to toggle)
+  - Call button (opens phone dialer)
+  - Chat button (opens chat interface)
+  - Reschedule button (opens reschedule flow)
+  - Cancel Booking button (opens cancel confirmation)
+  - Call Now for support
+- **Mock Data**:
+  - Booking ID: KASA-AC-30926
+  - Service: Foam-Jet AC Service
+  - Provider: Yaw Boateng (4.9 rating)
+  - Start Code: 4 8 2 1
+  - Total: ₵544
+- **Assets**:
+  - `/images/icons/copy-booking-id.svg` - Copy button icon
+  - `/images/icons/service-details-icon.svg` - Service section icon
+  - `/images/icons/dropdown-arrow.svg` - Expandable section arrow
+  - `/images/icons/calendar-time-icon.svg` - Calendar/time icon
+  - `/images/icons/location-marker-icon.svg` - Location marker icon
+  - `/images/provider-avatar.png` - Provider avatar photo
+  - `/images/icons/star-rating-icon.svg` - Star rating icon
+  - `/images/icons/location-pin-icon.svg` - Location pin icon
+  - `/images/icons/call-icon.svg` - Call button icon
+  - `/images/icons/chat-message-icon.svg` - Chat button icon
+  - Plus reused booking-service-image.png and help icon
+
+### 0p. Ongoing Booking Detail Page
+- **URL**: `/bookings/ongoing/[id]` or `http://localhost:3000/bookings/ongoing/123` (dynamic route)
+- **File**: `app/bookings/ongoing/[id]/page.tsx`
+- **Layout**: Header + Content + Footer
+- **For**: Users to view and track ongoing bookings in real-time
+- **Sections**:
+  - **Page Header**: "Booking Details" (40px heading)
+  - **Booking Header Banner**:
+    - Status badge ("Ongoing" - blue pill: #e9f6ff background, #02368c text)
+    - Service title (24px bold)
+    - Booking ID with copy button (KASA-AC-30926)
+    - Service image (235px × 121px)
+  - **Two-Column Layout**:
+    - **Left Column** (8 cols):
+      - **Progress Tracker** (horizontal 5-stage timeline):
+        - Stages: Confirmed → Assigned → En Route → In Progress → Done
+        - Visual states per stage:
+          - **Completed** (first 3 stages): Blue circle (#02368c) with white checkmark icon
+          - **Current** (In Progress): White circle with blue border (#02368c), small center dot
+          - **Pending** (Done): Grey circle (#eae7e7) with grey border (#c5c6cf)
+        - Connecting lines between stages:
+          - Blue lines (#02368c) between completed stages
+          - Grey lines (#e2e8f0) from current to pending stages
+        - Stage labels below circles, color-coded:
+          - Completed: #111 (black)
+          - Current: #02368c (blue)
+          - Pending: #777 (grey)
+      - **Service Details Card**: Icon + heading, service name with add-ons, "Amount Paid" label with price
+      - **Issue Description**: Expandable card with heading, issue text preview, dropdown arrow
+      - **Schedule & Location Info Card** (grey background #f5f5f5):
+        - Calendar icon + scheduled time
+        - Horizontal divider
+        - Location pin icon + address with details
+      - **Provider Card**: 
+        - Provider avatar (64px, rounded-full)
+        - Name, rating (4.9 with star icon), specialty, distance
+        - Action buttons:
+          - "Call" button (white background, blue border)
+          - "Chat" button (blue background #02368c)
+    - **Right Column** (4 cols):
+      - **Booking Summary Card**: Service name with star rating (★ 4.5) and reviews, cost breakdown (AC Servicing, Platform Fee), blue divider, total amount
+      - **Need Help Card**: Blue circular help icon, "Location assistance needed?", support text, "Call Now" button
+- **Key Differences from Upcoming Booking**:
+  - Has progress tracker showing current stage of booking
+  - No "Start Code" section (code already used)
+  - No "Reschedule" button (can't reschedule ongoing booking)
+  - No "Cancel Booking" button (can't cancel ongoing booking)
+  - Status badge is "Ongoing" instead of "Upcoming"
+  - Focus is on tracking service progress, not managing the booking
+- **Functionality**:
+  - Copy booking ID to clipboard (with visual feedback)
+  - Expandable issue description (click to toggle)
+  - Call button (opens phone dialer)
+  - Chat button (opens chat interface)
+  - Visual progress tracker shows real-time status
+  - Call Now for support
+- **Progress Tracker Implementation**:
+  - 5 circular stage indicators with connecting lines
+  - Dynamic status: completed (blue with checkmark), current (outlined with dot), pending (grey)
+  - Responsive spacing between stages
+  - Labels positioned below each stage
+- **Mock Data**:
+  - Booking ID: KASA-AC-30926
+  - Service: Foam-Jet AC Service
+  - Provider: Yaw Boateng (4.9 rating)
+  - Current Stage: In Progress (3 of 5 stages completed)
+  - Total: ₵544
+- **Assets**:
+  - `/images/icons/progress-check-icon.svg` - White checkmark for completed stages (NEW)
+  - All other assets reused from Upcoming Booking Detail page:
+    - `/images/icons/copy-booking-id.svg`
+    - `/images/icons/service-details-icon.svg`
+    - `/images/icons/dropdown-arrow.svg`
+    - `/images/icons/calendar-time-icon.svg`
+    - `/images/icons/location-marker-icon.svg`
+    - `/images/provider-avatar.png`
+    - `/images/icons/star-rating-icon.svg`
+    - `/images/icons/location-pin-icon.svg`
+    - `/images/icons/call-icon.svg`
+    - `/images/icons/chat-message-icon.svg`
+    - `/images/booking-service-image.png`
+    - `/images/icons/help-support-booking-icon.svg`
+
+### 0q. Completed Booking Detail Page
+- **URL**: `/bookings/completed/[id]` or `http://localhost:3000/bookings/completed/123` (dynamic route)
+- **File**: `app/bookings/completed/[id]/page.tsx`
+- **Layout**: Header + Content + Footer
+- **For**: Users to view completed booking details with service proof and feedback
+- **Sections**:
+  - **Page Header**: "Booking Details" (40px heading)
+  - **Booking Header Banner**:
+    - Status badge ("Completed" - blue pill: #f0f9ff background, #02368c text)
+    - Service title (24px bold)
+    - Booking ID with copy button (KASA-AC-30926)
+    - Service image (235px × 121px)
+  - **Two-Column Layout**:
+    - **Left Column** (8 cols):
+      - **Service Details Card**: Icon + heading, service name with add-ons, "Amount Paid" label with price (₵499)
+      - **Completion Date & Location Info Card** (grey background #f5f5f5):
+        - Calendar icon + completion date/time: "Completed 12 July, 10:00 AM"
+        - Horizontal divider
+        - Location pin icon + address with details
+      - **Checklist Section**:
+        - "Checklist" heading (20px medium)
+        - 6 completed tasks, each with:
+          - Green checkmark in square (17x17px, #2e9e5b background)
+          - Task description (16px Poppins, 70% opacity)
+        - Tasks:
+          1. Filter cleaning
+          2. Coil cleaning (indoor & outdoor)
+          3. Vent & Panel cleaning
+          4. Function test
+          5. Vent & Panel cleaning
+          6. Anti-bacterial coating applied
+      - **Before/After Photos Section**:
+        - Two columns side-by-side
+        - Each photo card:
+          - Heading: "Before Photo" / "After Photo" (16px medium)
+          - Photo (278px wide × 128px high, rounded-lg)
+          - Dark overlay (rgba(26,43,76,0.2))
+      - **Customer Feedback Card** (grey background #f5f5f5, max-width 397px):
+        - Rating: "5.0" with 5 small star icons (13x13px)
+        - Review quote: "Great work, very professional!"
+    - **Right Column** (4 cols):
+      - **Booking Summary Card**: 
+        - Service name with star rating (★ 4.5) and reviews
+        - Cost breakdown (AC Servicing, Platform Fee)
+        - Blue divider
+        - Total amount (₵544)
+        - **Download Receipt Button** (NEW):
+          - Blue border, white background
+          - Download icon + "Download Receipt" text
+          - Full width within summary card
+          - Positioned after total amount
+      - **Need Help Card**: Blue circular help icon, "Location assistance needed?", support text, "Call Now" button
+- **Key Differences from Upcoming/Ongoing**:
+  - Status is "Completed" instead of "Upcoming" or "Ongoing"
+  - No progress tracker (service already done)
+  - No provider card with Call/Chat buttons
+  - No issue description section
+  - No start code section
+  - No action buttons (Reschedule/Cancel)
+  - Shows completion date instead of scheduled/future date
+  - **NEW: Checklist section** showing all completed service tasks
+  - **NEW: Before/After photos** showing service evidence
+  - **NEW: Customer feedback card** with rating and review
+  - **NEW: Download Receipt button** in booking summary
+- **Functionality**:
+  - Copy booking ID to clipboard (with visual feedback)
+  - Download receipt as PDF (downloadReceipt function)
+  - View before/after service photos
+  - See completed service checklist
+  - View customer feedback/rating given
+  - Call Now for support
+- **Mock Data**:
+  - Booking ID: KASA-AC-30926
+  - Service: Foam-Jet AC Service
+  - Completion: 12 July, 10:00 AM
+  - Rating: 5.0 stars
+  - Review: "Great work, very professional!"
+  - 6 completed checklist items
+  - Total: ₵544
+- **Assets**:
+  - `/images/icons/checklist-check-icon.svg` - Green checkmark for completed tasks (NEW)
+  - `/images/icons/download-receipt-icon.svg` - Download icon for receipt button (NEW)
+  - `/images/icons/star-small-icon.svg` - Small star for feedback rating (NEW)
+  - `/images/before-after-photo.png` - Before/after photo placeholder (NEW)
+  - Reused assets from other booking pages:
+    - `/images/icons/copy-booking-id.svg`
+    - `/images/icons/service-details-icon.svg`
+    - `/images/icons/calendar-time-icon.svg`
+    - `/images/icons/location-marker-icon.svg`
+    - `/images/booking-service-image.png`
+    - `/images/icons/help-support-booking-icon.svg`
+
+### 0r. Canceled Booking Detail Page
+- **URL**: `/bookings/canceled/[id]` or `http://localhost:3000/bookings/canceled/123` (dynamic route)
+- **File**: `app/bookings/canceled/[id]/page.tsx`
+- **Layout**: Header + Content + Footer
+- **For**: Users to view details of canceled bookings
+- **Sections**:
+  - **Page Header**: "Booking Details" (40px heading)
+  - **Booking Header Banner**:
+    - NO status badge (intentionally omitted for canceled bookings)
+    - Service title (24px bold)
+    - Booking ID with copy button (KASA-AC-30926)
+    - Service image (235px × 121px)
+  - **Two-Column Layout**:
+    - **Left Column** (8 cols):
+      - **Service Details Card**: Icon + heading, service name with add-ons, "Amount Paid" label with price (₵499)
+      - **Cancellation Details Card** (NEW - grey background #f5f5f5):
+        - "Cancelled by: You" (20px medium Poppins, #111)
+        - "Reason: Schedule conflict" (18px regular Poppins, #777)
+        - Grey border (rgba(0,0,0,0.1))
+        - Rounded corners (8px)
+      - **Warning Banner** (NEW - pink/red background #ffdad6):
+        - Warning triangle icon (22x23px, red)
+        - Warning text (12px Roboto Flex, color: #93000a):
+          - "Cancelling jobs after acceptance may affect your reliability score. Try to avoid cancelling once a job is confirmed."
+        - Horizontal layout with icon on left, text on right
+        - Rounded corners (8px)
+    - **Right Column** (4 cols):
+      - **Booking Summary Card**: 
+        - Service name with star rating (★ 4.5) and reviews
+        - Cost breakdown (AC Servicing, Platform Fee)
+        - Blue divider
+        - Total amount (₵544)
+        - NO Download Receipt button (different from completed bookings)
+      - **Need Help Card**: Blue circular help icon, "Location assistance needed?", support text, "Call Now" button
+- **Key Differences from Other Booking Types**:
+  - **No status badge** (not shown for canceled bookings)
+  - **No date/time info** (no completion date, no scheduled date)
+  - **No location info** (service never happened)
+  - **No provider card** (provider was never assigned or no longer relevant)
+  - **No progress tracker** (booking was canceled before completion)
+  - **No action buttons** (no Reschedule, Cancel, or Reorder)
+  - **No checklist or photos** (service was never performed)
+  - **NEW: Cancellation Details Card** showing who canceled and why
+  - **NEW: Warning Banner** about reliability score impact
+  - Simpler layout focused only on what was canceled and why
+- **Functionality**:
+  - Copy booking ID to clipboard (with visual feedback)
+  - View cancellation details (who canceled, reason)
+  - See warning about reliability score
+  - Call Now for support
+- **Mock Data**:
+  - Booking ID: KASA-AC-30926
+  - Service: Foam-Jet AC Service
+  - Canceled by: You
+  - Cancel reason: Schedule conflict
+  - Total: ₵544
+- **Assets**:
+  - `/images/icons/warning-icon.svg` - Red warning triangle icon (NEW)
+  - Reused assets from other booking pages:
+    - `/images/icons/copy-booking-id.svg`
+    - `/images/icons/service-details-icon.svg`
+    - `/images/booking-service-image.png`
+    - `/images/icons/help-support-booking-icon.svg`
+
+### 0s. Disputed Booking Detail Page (Completed with Dispute)
+- **URL**: `/bookings/disputed/[id]` or `http://localhost:3000/bookings/disputed/123` (dynamic route)
+- **File**: `app/bookings/disputed/[id]/page.tsx`
+- **Layout**: Header + Content + Footer
+- **For**: Service providers to respond to customer disputes on completed bookings
+- **Sections**:
+  - **Page Header**: "Booking Details" (40px heading)
+  - **Booking Header Banner**:
+    - NO status badge (intentionally omitted for disputed bookings)
+    - Service title (24px bold)
+    - Booking ID with copy button (KASA-AC-30926)
+    - Service image (235px × 121px)
+  - **Two-Column Layout**:
+    - **Left Column** (8 cols):
+      - **Customer's Complaint Card** (NEW - grey background #f5f5f5):
+        - Heading: "Customer's Complaint" (16px Poppins)
+        - Reason: "Reason: Incomplete work" (18px medium Poppins)
+        - Two-column layout:
+          - Left: Complaint description in white box with rounded corners
+          - Right: Evidence thumbnail photo (80px × 86px)
+        - Border: #ebebeb
+      - **Your Submitted Evidence Section** (NEW):
+        - White background with border
+        - Heading: "Your Submitted Evidence" (18px Roboto Condensed medium)
+        - Before/After photos side-by-side (max-width 351px total)
+        - Each photo: 128px height, rounded-lg, dark overlay
+      - **Customer Info Card** (NEW):
+        - White background with border
+        - Customer avatar (62px × 62px, rounded-full, with shadow)
+        - Customer name: "Ama Owusu" (16px medium Poppins)
+        - Dispute timeline: "Dispute Submitted 2 days ago" (14px Poppins, #44474e)
+      - **Response Textarea Section** (NEW):
+        - Label: "Share your side of the story" (18px Poppins)
+        - Large textarea (138px height)
+        - Placeholder: "Explain what happened from your perspective..."
+        - Border focus state: #02368c
+      - **Trust Strip** (NEW - teal/cyan background):
+        - Background: rgba(59,156,156,0.15)
+        - Border: rgba(59,156,156,0.2)
+        - Info icon (24px × 24px) on left
+        - Message text (14px Poppins):
+          - "Our team is reviewing evidence from both sides. Resolution typically takes 24–48 hours. Your payment for this job remains held until resolved."
+        - Rounded corners (8px)
+      - **Action Buttons** (NEW):
+        - "Submit Your Response" button (blue #02368c, 354px wide)
+        - "Contact Support" button (outlined blue, 382px wide)
+        - Side-by-side layout with gap
+    - **Right Column** (4 cols):
+      - **Booking Summary Card**: Standard summary (service, rating, cost breakdown, total)
+      - **Need Help Card**: Standard help card
+- **Key Differences from Other Booking Types**:
+  - **No status badge** (not shown for disputed bookings)
+  - **No completion date/location** (focus is on dispute resolution)
+  - **NEW: Customer's complaint section** with reason, description, and evidence photo
+  - **NEW: Provider's evidence section** showing before/after photos already submitted
+  - **NEW: Customer info card** showing who filed the dispute
+  - **NEW: Response textarea** for provider to explain their side
+  - **NEW: Trust strip** explaining the review process and payment hold
+  - **NEW: Dispute-specific action buttons** (Submit Response, Contact Support)
+  - No checklist, no rating/feedback, no reorder button
+  - Layout focused on dispute resolution workflow
+- **Functionality**:
+  - Copy booking ID to clipboard (with visual feedback)
+  - View customer's complaint details and evidence
+  - View own submitted evidence (before/after photos)
+  - Write and submit response to dispute
+  - Contact support for assistance
+  - Form validation for response textarea
+  - Call Now for support
+- **Mock Data**:
+  - Booking ID: KASA-AC-30926
+  - Service: Foam-Jet AC Service
+  - Customer: Ama Owusu (with avatar)
+  - Complaint reason: Incomplete work
+  - Complaint: "The wiring issue wasn't fully fixed, and it stopped working again the next day."
+  - Dispute submitted: 2 days ago
+  - Total: ₵544
+- **Assets**:
+  - `/images/evidence-thumbnail.png` - Customer's evidence photo thumbnail (NEW)
+  - `/images/customer-avatar.png` - Customer avatar photo (NEW)
+  - `/images/icons/info-icon.svg` - Info icon for trust strip (NEW)
+  - `/images/before-after-photo.png` - Provider's before/after photos (reused)
+  - Reused assets from other booking pages:
+    - `/images/icons/copy-booking-id.svg`
+    - `/images/booking-service-image.png`
+    - `/images/icons/help-support-booking-icon.svg`
+
+### 0t. My Booking Page (Disputed Bookings List)
+- **URL**: `/bookings/my-booking` or `http://localhost:3000/bookings/my-booking`
+- **File**: `app/bookings/my-booking/page.tsx`
+- **Layout**: Header + Content + Footer
+- **For**: Users to view and manage their disputed bookings with tab navigation
+- **Sections**:
+  - **Page Header**:
+    - Title: "My Booking" (40px Roboto Condensed medium)
+    - Subtitle: "Check your service details before proceeding to payment." (18px Poppins, #424655)
+    - Max-width: 780px for subtitle
+  - **Tab Navigation** (NEW):
+    - 6 filter tabs: All, Upcoming, Ongoing, Completed, Cancelled, **Disputed**
+    - Horizontally scrollable on mobile
+    - Each tab: 128px min-width, rounded-full, 16px Poppins
+    - Active tab (Disputed): Blue background (#02368c), white text, shadow
+    - Inactive tabs: White background, grey text (#424655), border, shadow
+    - Clickable to filter bookings by status
+  - **Two-Column Layout**:
+    - **Left Column** (8 cols):
+      - **Disputed Booking Cards** (list of 2+ cards):
+        - White background with border
+        - Horizontal layout: Details (left) + Image (right)
+        - **Booking Details**:
+          - Service name (20px medium Poppins, #111)
+          - Booking ID: "#BK-8924" (16px Inter, #111)
+          - Submission date: "Submitted 2 days ago" (14px Inter, #777)
+        - **Disputed Details Box** (NEW):
+          - Background: rgba(207,157,0,0.05) - light yellow
+          - Border: #ffcc00 - yellow
+          - Max-width: 550px
+          - Contents:
+            - "Issue Reported:" label (14px medium Poppins, tracking 0.24px)
+            - Issue description (12px Roboto Flex, #777)
+            - "Status: Under Review" (12px Roboto Flex, #cf9d00 - dark yellow)
+          - Rounded corners (8px)
+        - **Action Buttons** (NEW):
+          - "View Details" button (outlined blue, links to disputed detail page)
+          - "Contact Support" button (filled blue #02368c)
+          - Side-by-side, max-width 382px total
+          - Small size (text-xs, py-3)
+        - Service image: 154px × 116px, rounded-lg, on right
+    - **Right Column** (4 cols):
+      - **Booking Activity Widget**: Same as other booking pages (3 colored stats)
+      - **Need Help Card**: Same as other booking pages
+- **Key Features**:
+  - Tab-based filtering system (6 status filters)
+  - Currently shows "Disputed" filter active
+  - Each disputed booking shows issue details inline
+  - Quick actions: View Details or Contact Support
+  - Can be expanded to show other booking types by changing active filter
+- **Functionality**:
+  - Click tab to filter bookings by status
+  - Click "View Details" to navigate to disputed booking detail page
+  - Click "Contact Support" to get help
+  - Call Now button for support
+- **Mock Data**:
+  - 2 disputed bookings shown
+  - Both AC Servicing with booking ID #BK-8924
+  - Issue: "The wiring issue wasn't fully fixed..."
+  - Status: Under Review
+  - Activity stats: 1 Upcoming, 1 Ongoing, 1 Completed
+- **Assets**:
+  - All assets reused from other booking pages:
+    - `/images/booking-service-image.png`
+    - `/images/icons/help-support-booking-icon.svg`
+
+## Account Page Modals
+
+### Delete Account Modal
+- **Component**: `src/components/modals/DeleteAccountModal.tsx`
+- **Triggered From**: Account pages when user clicks "Delete Account" button
+- **Sections**:
+  - **Header**:
+    - "Delete Account" title
+    - Close button (X) in top right
+  - **Content**:
+    - "We're sorry to see you go" heading
+    - Description: "Deleting your account is permanent and cannot be undone."
+    - **Warning Card** (light red/pink background):
+      - "What happens when you delete your account" heading
+      - 4 bulleted consequences:
+        - Profile and personal information permanently removed
+        - Booking history no longer accessible
+        - Saved addresses and payment methods deleted
+        - Loss of active rewards or discounts
+    - **Reason Textarea** (optional):
+      - Label: "Why are you leaving? (optional)"
+      - Placeholder: "Tell us how we can improve..."
+      - Height: 138px
+    - **Confirmation Checkbox**:
+      - Text: "I understand that my account data will be permanently deleted and cannot be recovered."
+      - Must be checked to enable delete button
+  - **Action Buttons**:
+    - "Delete Account" button (blue, disabled until checkbox checked)
+    - "Keep My Account" text button
+- **Functionality**:
+  - Modal overlay with backdrop
+  - Close on backdrop click or X button
+  - Checkbox required to enable delete button
+  - Optional reason textarea
+  - Calls onConfirm callback with reason when confirmed
+- **Props**:
+  - `isOpen: boolean` - Controls modal visibility
+  - `onClose: () => void` - Called when modal should close
+  - `onConfirm: (reason?: string) => void` - Called when user confirms deletion
+- **Assets**:
+  - `/images/icons/close-modal-icon.svg` - Close button icon
+
+### Logout Modal
+- **Component**: `src/components/modals/LogoutModal.tsx`
+- **Triggered From**: Account pages when user clicks "Log Out" button
+- **Sections**:
+  - **Header**:
+    - Close button (X) in top right corner only
+  - **Content**:
+    - Large red logout icon in circular light red background (94px)
+    - "Log out of Kasazon?" heading (centered)
+    - Description: "You'll need to verify your phone number again to log back in." (centered)
+  - **Action Buttons**:
+    - "Logout" button (blue, full width)
+    - "Cancel" text button
+- **Functionality**:
+  - Modal overlay with backdrop
+  - Close on backdrop click or X button
+  - Calls onConfirm callback when user confirms logout
+  - Simpler than delete modal (no checkbox or form)
+- **Props**:
+  - `isOpen: boolean` - Controls modal visibility
+  - `onClose: () => void` - Called when modal should close
+  - `onConfirm: () => void` - Called when user confirms logout
+- **Assets**:
+  - `/images/icons/close-modal-icon.svg` - Close button icon
+  - `/images/icons/logout-modal-icon.svg` - Logout icon (red power symbol)
+
+### Cancel Booking Modal
+- **Component**: `src/components/modals/CancelBookingModal.tsx`
+- **Triggered From**: Booking detail page when user clicks "Cancel Booking" button
+- **Sections**:
+  - **Header**:
+    - "Are you sure you want to cancel?" title
+    - Close button (X) in top right
+  - **Content**:
+    - Description text about canceling the service booking
+    - **Cancellation Reason Selection**:
+      - "Why are you cancelling?" label with subtitle
+      - Radio button options (5 choices):
+        - My plans have changed (default selected)
+        - I selected the wrong date/time
+        - I found another service provider
+        - Service is no longer required
+        - Other reason
+      - Optional textarea: "Tell us more (optional)..."
+    - **Payment Summary Card** (gray background):
+      - Amount paid: ₵150
+      - Cancellation fee: -₵15 (red text)
+      - Divider line
+      - Refund amount: ₵135 (bold)
+      - Refund processing details (3-5 business days)
+  - **Action Buttons**:
+    - "Confirm Cancellation" button (blue primary)
+    - "Keep Booking" text button
+- **Functionality**:
+  - Modal overlay with backdrop
+  - Close on backdrop click or X button
+  - Radio button selection for cancellation reason
+  - Optional additional details textarea
+  - Calculates refund amount (paid - fee)
+  - Shows payment method for refund
+  - Calls onConfirm callback with reason and optional details
+- **Props**:
+  - `isOpen: boolean` - Controls modal visibility
+  - `onClose: () => void` - Called when modal should close
+  - `onConfirm: (reason: string, additionalDetails?: string) => void` - Called when user confirms cancellation
+  - `serviceName: string` - Service being canceled
+  - `amountPaid: number` - Original amount paid
+  - `cancellationFee: number` - Fee for canceling
+  - `paymentMethod: string` - Payment method for refund display
+- **Assets**:
+  - `/images/icons/close-modal-icon.svg` - Close button icon (reused)
+  - `/images/icons/radio-check-icon.svg` - Radio button check mark
+
+## Landing & Service Pages
+
+### 1. Landing Page
+- **URL**: `/` or `http://localhost:3000`
+- **File**: `app/page.tsx`
+- **Sections**:
+  - Header (with navigation and login button)
+  - Hero
+  - Features Bar
+  - Services
+  - Promo Banner
+  - Popular Services
+  - Service Types
+  - How It Works
+  - Become Provider
+  - Testimonials
+  - FAQ
+  - CTA Banner
+  - Footer
+
+### 2. Service Category Page
+- **URL**: `/services/ac-servicing` (example)
+- **File**: `app/services/[category]/page.tsx`
+- **Dynamic Route**: `/services/[category]`
+- **Sections**:
+  - Header
+  - Service Hero
+  - Service Category Navigation (horizontal scrollable pills)
+  - Filter & Sort Bar
+  - Service Listings (grid of service cards)
+  - Footer
+
+### 3. Service Detail Page
+- **URL**: `/services/ac-servicing/foam-jet-2-acs` (example)
+- **File**: `app/services/[category]/[serviceId]/page.tsx`
+- **Dynamic Route**: `/services/[category]/[serviceId]`
+- **Sections**:
+  - Header
+  - Service Detail Hero (with image, rating, badges, Add/Book buttons)
+  - Service Details Content (package selection, what's included, how it works)
+  - Booking Cart (sticky sidebar)
+  - Most Booked (related services)
+  - Service Testimonials
+  - Footer
+
+### 4. Issues Page
+- **URL**: `/issues` or `http://localhost:3000/issues`
+- **File**: `app/issues/page.tsx`
+- **Sections**:
+  - Header
+  - Issues Page Header ("Tell Us What's Going On")
+  - Issues Page Content:
+    - Left: Issue Accordion (expandable service cards with issue form)
+    - Right: Booking Summary (sticky sidebar)
+  - Footer
+
+### 5. Time Slots Page
+- **URL**: `/time-slots` or `http://localhost:3000/time-slots`
+- **File**: `app/time-slots/page.tsx`
+- **Sections**:
+  - Header
+  - Time Slot Page Header ("Choose Your Service Time")
+  - Time Slot Page Content:
+    - Left: Scheduling card with:
+      - Express Match banner
+      - Date selection carousel (7 days)
+      - Time slot selection by daypart (Morning/Afternoon/Evening)
+    - Right: Booking Summary (sticky sidebar)
+  - Footer
+
+### 6. Address Page
+- **URL**: `/address` or `http://localhost:3000/address`
+- **File**: `app/address/page.tsx`
+- **Sections**:
+  - Header
+  - Address Page Header ("Where should we provide the service?")
+  - Address Page Content:
+    - Left: Address selection with:
+      - Saved address cards (Home, Work) - selectable
+      - "Add New Address" expandable form with:
+        - Map preview
+        - "Use My Current Location" button
+        - Address fields (Line 1, Line 2, Country, State, City, Zip Code, Landmark)
+        - Address type selector (Home/Work/Other)
+        - "Save as default" checkbox
+    - Right: Booking Summary (sticky sidebar with disabled checkout button)
+  - Footer
+
+### 7. Register Page (Step 1: Account Type)
+- **URL**: `/register` or `http://localhost:3000/register`
+- **File**: `app/register/page.tsx`
+- **Layout**: Header + Content + Footer
+- **Account Type Tracking**: Passes selected type via URL query (`?type=customer` or `?type=professional`)
+- **Sections**:
+  - Welcome to Kasazon header
+  - Progress indicator (3 steps, first step active - blue)
+  - Description text
+  - Account type selection:
+    - "I'm a Customer" card (selected by default with blue border, house icon)
+    - "I'm a Professional" card (unselected with gray border, briefcase icon)
+  - "Continue as Customer/Professional" button (text changes based on selection)
+  - "Already have an account? Log in here" link
+  - Footer with legal/terms text
+
+### 8. Register Details Page (Step 2: Basic Details)
+- **URL**: `/register/details` or `http://localhost:3000/register/details`
+- **File**: `app/register/details/page.tsx`
+- **Layout**: Header + Content + Footer
+- **Sections**:
+  - Welcome to Kasazon header
+  - Progress indicator (3 steps, second step active - blue)
+  - Description: "Let's Get Started with the basic details"
+  - Form fields:
+    - Email* input with "Verify" button → Opens OTP modal
+    - Mobile Number* with country code dropdown (Ghana, Nigeria, US, UK, India) and "Verify" button → Opens OTP modal
+    - Green checkmark shown when verified
+    - Error states with red border, error icon, and error message
+  - **OTP Verification Modal**:
+    - 6-digit OTP input fields
+    - Auto-focus and auto-advance
+    - Paste support for full OTP
+    - Mock OTP for testing: 123456
+    - Resend OTP option
+    - Real-time validation
+  - "Continue" button (requires both email and mobile to be verified)
+  - "Already have an account? Log in here" link
+  - Footer with legal/terms text
+
+### 9a. Register Complete Page - Customer (Step 3: Location & Identity)
+- **URL**: `/register/complete?type=customer` or `http://localhost:3000/register/complete?type=customer`
+- **File**: `app/register/complete/page.tsx`
+- **Layout**: Header + Content + Footer
+- **For**: Customer accounts only
+- **Sections**:
+  - Welcome to Kasazon header
+  - Progress indicator (3 steps, third step active - blue)
+  - Description: "Please fill the details so we get to know you better"
+  - **LOCATION Section**:
+    - **Real Location Search** (OpenStreetMap Nominatim API):
+      - Live search with suggestions dropdown
+      - Debounced search (500ms)
+      - Shows loading spinner while searching
+      - Displays location icon with each result
+      - Auto-fills all address fields when location selected
+    - **"Use My Current Location"** button:
+      - Requests browser geolocation permission
+      - Reverse geocodes current position
+      - Auto-fills address fields with real data
+    - Address Line 1* (textarea) - auto-filled from location search
+    - Address Line 2 (textarea) - auto-filled from location search
+    - Country dropdown (cascading) - auto-selected from location
+    - State dropdown (cascading, filtered by country) - auto-selected
+    - City dropdown (cascading, filtered by state) - auto-selected
+    - Zip* input - auto-filled from location search
+    - Address Type tags: Home (selected), Work, Other
+    - "Save as my default address" checkbox
+  - **IDENTITY VERIFICATION Section**:
+    - "Take a quick selfie" button with camera icon (large circular button)
+    - Identity Verification Document Type dropdown
+    - Upload document area (dashed border):
+      - Upload icon and text
+      - Supported formats: PDF, DOC, DOCX, JPG, JPEG, PNG, GIF, WEBP
+      - Shows selected file name
+      - File input (hidden)
+  - "Submit" button
+  - "Already have an account? Log in here" link
+  - Footer with legal/terms text
+
+### 9b. Register Complete Page - Professional (Step 3: Professional Verification)
+- **URL**: `/register/complete/professional?type=professional` or `http://localhost:3000/register/complete/professional?type=professional`
+- **File**: `app/register/complete/professional/page.tsx`
+- **Layout**: Header + Content + Footer
+- **For**: Professional/Service Provider accounts only
+- **Automatic Redirect**: Professionals are automatically redirected here from `/register/complete`
+- **Sections**:
+  - **IDENTITY & LOCATION VERIFICATION Section**:
+    - Take selfie (camera button)
+    - Upload Identity Verification Document
+    - Full Name input
+    - Email input
+    - Date of Birth input (DD/MM/YYYY)
+    - Service Category dropdown (Plumbing, Electrical, Carpentry, Painting, AC Servicing, Cleaning, Appliance Repair, Masonry)
+    - Gender dropdown (Male, Female, Other, Prefer not to say)
+    - Country dropdown (cascading)
+    - City input
+    - Upload Proof of Address Document
+  - **BACKGROUND CHECK Section**:
+    - Upload Trade Certificate (with helper text)
+    - Institution input
+    - Certificate Number input (optional)
+    - Expiry Date input (optional, DD/MM/YYYY)
+    - Upload Police Clearance Certificate (with helper text)
+    - Info banner: "Don't have a police clearance certificate?" with "Learn how to apply" link
+  - **ADD GUARANTEER Section**:
+    - Full Name of Guaranteer* input
+    - Relationship to you* dropdown (Family Member, Friend, Employer, Colleague, Community Leader, Other)
+    - Mobile Number* with country code dropdown
+    - Occupation* input
+    - ID Number* input
+    - Info banner: "Why do we need this?" explaining guarantor purpose
+  - Submit button (redirects to success page)
+  - "Already have an account? Log in here" link
+  - Legal footer text
+
+### 9c. Professional Application Success Page
+- **URL**: `/register/complete/professional/success` or `http://localhost:3000/register/complete/professional/success`
+- **File**: `app/register/complete/professional/success/page.tsx`
+- **Layout**: Header + Content + Footer
+- **Shown After**: Professional completes registration and clicks Submit
+- **Sections**:
+  - Success icon (clock with refresh arrows)
+  - "Application Submitted!" heading
+  - Description: "We're reviewing your documents. This typically takes 24-48 hours..."
+  - "Under Review" status badge (yellow/orange color)
+  - Verification card listing what will be verified:
+    - Your identity and documents ✓
+    - Your background check ✓
+    - Your guarantor details ✓
+  - Info message: "You'll get a notification the moment you're approved"
+  - Action buttons:
+    - "Back to Home" (primary blue button)
+    - "View Dashboard" (outline button)
+
+### 10. Review Page
+- **URL**: `/review` or `http://localhost:3000/review`
+- **File**: `app/review/page.tsx`
+- **Sections**:
+  - Header
+  - Review Page Header ("Review Your Booking")
+  - Review Page Content:
+    - Left: Service review cards with:
+      - Service title with Edit button
+      - Date/time with calendar icon
+      - Location with pin icon
+      - Issue Description
+      - Issue photo thumbnails (4 photos)
+      - Payment options:
+        - Credit/Debit Card (selected with filled radio)
+        - Mobile Money (MTN) with masked number
+    - Right: Booking Summary with "Pay" button (active, not disabled)
+  - Most Booked section (4 service cards)
+  - Footer
+- **Modal/Popup**:
+  - Booking Confirmation Modal (appears after clicking "Pay"):
+    - Green success icon with checkmark
+    - "Your Booking is Confirmed! 🎉" heading
+    - Provider details (avatar, name, rating, specialty, distance)
+    - Call and Chat buttons
+    - Schedule (date/time with calendar icon)
+    - Location (address with pin icon)
+    - "Track Your Booking" button
+    - "Back To Home" and "View Booking" buttons
+    - Close button (X) in top right
+
+## Testing Instructions
+
+1. Start the dev server:
+   ```bash
+   cd web
+   bun run dev
+   ```
+
+2. Visit the pages in your browser:
+   - Landing: http://localhost:3000
+   - AC Servicing Category: http://localhost:3000/services/ac-servicing
+   - AC Service Detail: http://localhost:3000/services/ac-servicing/foam-jet-2-acs
+   - Issues: http://localhost:3000/issues
+   - Time Slots: http://localhost:3000/time-slots
+   - Address: http://localhost:3000/address
+   - Review: http://localhost:3000/review
+   - Register Step 1: http://localhost:3000/register
+   - Register Step 2: http://localhost:3000/register/details
+   - Register Step 3: http://localhost:3000/register/complete
+
+## Navigation Flow
+
+The typical user flow through the pages:
+1. **Landing Page** → Click on a service
+2. **Service Category Page** → Browse services, click on one
+3. **Service Detail Page** → Select package, click "Book Now"
+4. **Issues Page** → Describe issue, click "Continue"
+5. **Time Slots Page** → Select date & time, click "Continue"
+6. **Address Page** → Select/add address, click "Save"
+7. **Review Page** → Review details, select payment, click "Pay"
+8. (Next: Payment/Confirmation - not yet built)
+
+## Notes
+
+- All pages are fully responsive (mobile, tablet, desktop)
+- Mock data is used throughout
+- All assets (icons, images) downloaded from Figma
+- Design matches Figma pixel-perfect
+- All pages have sticky sidebar on desktop for booking summary (where applicable)
+- Address page has disabled checkout button (grayed out) until address is confirmed
+- Add New Address form is expandable/collapsible accordion
+- Review page shows success modal/popup after payment with provider details and action buttons
+- Modal has backdrop overlay and can be closed via X button or clicking outside
