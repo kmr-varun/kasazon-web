@@ -21,12 +21,12 @@ export default function ReviewPage() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
 
-  // Redirect if booking state is invalid
+  // Redirect if booking state is invalid (but not if processing)
   useEffect(() => {
-    if (!canProceedToReview) {
+    if (!canProceedToReview && !isProcessing) {
       router.push('/services');
     }
-  }, [canProceedToReview, router]);
+  }, [canProceedToReview, isProcessing, router]);
 
   // Check authentication
   useEffect(() => {
@@ -106,11 +106,11 @@ export default function ReviewPage() {
         }
       }
 
-      setCreatedBooking(newBooking);
-      setShowConfirmation(true);
-
-      // Clear booking context
+      // Clear booking context before redirect
       clearBooking();
+
+      // Redirect to booking details page
+      router.push(`/bookings/${newBooking.id}`);
     } catch (err) {
       console.error('Error creating booking:', err);
       alert(err instanceof Error ? err.message : 'Failed to create booking');
