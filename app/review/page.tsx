@@ -77,14 +77,24 @@ export default function ReviewPage() {
 
     try {
       // Create booking
-      const newBooking = await api.bookings.create({
+      const bookingData: any = {
         serviceId: booking.service.id,
-        packageId: booking.selectedPackage?.id,
         addressId: booking.selectedAddress.id,
         scheduledDate: booking.selectedDate,
         scheduledTimeStart: booking.selectedTime, // Already in HH:mm format
-        issueDescription: booking.notes || undefined,
-      });
+      };
+
+      // Only add packageId if it exists and looks like a UUID
+      if (booking.selectedPackage?.id && booking.selectedPackage.id.length > 10) {
+        bookingData.packageId = booking.selectedPackage.id;
+      }
+
+      // Only add issueDescription if notes exist
+      if (booking.notes) {
+        bookingData.issueDescription = booking.notes;
+      }
+
+      const newBooking = await api.bookings.create(bookingData);
 
       // If payment method selected, process payment
       if (selectedPaymentMethod) {
