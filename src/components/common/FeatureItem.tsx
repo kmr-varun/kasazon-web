@@ -8,9 +8,9 @@ export interface FeatureItemProps {
 
 export function FeatureItem({ icon, text, className = '' }: FeatureItemProps) {
   return (
-    <div className={`flex items-center justify-center gap-3 ${className}`}>
+    <div className={`flex items-center justify-center gap-2.5 ${className}`}>
       {/* Icon */}
-      <div className="relative w-8 h-8 flex-shrink-0">
+      <div className="relative w-6 h-6 flex-shrink-0">
         <Image
           src={icon}
           alt={text}
@@ -22,8 +22,8 @@ export function FeatureItem({ icon, text, className = '' }: FeatureItemProps) {
       {/* Text */}
       <p className="
         font-poppins font-semibold text-white uppercase
-        text-lg sm:text-xl lg:text-2xl
-        tracking-[0.075em]
+        text-sm sm:text-base lg:text-lg
+        tracking-[0.05em]
         whitespace-nowrap
       ">
         {text}
