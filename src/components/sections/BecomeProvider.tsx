@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '../common/Button';
 
@@ -15,14 +16,16 @@ const benefits = [
 ];
 
 export function BecomeProvider({ className = '' }: BecomeProviderProps) {
+  const router = useRouter();
+
   const handleBecomeProvider = () => {
-    console.log('Become a provider clicked');
-    // TODO: Navigate to provider signup
+    router.push('/register/complete/professional');
   };
 
   const handleLearnMore = () => {
-    console.log('Learn more clicked');
-    // TODO: Navigate to provider info page
+    // For now, navigate to the professional registration page
+    // Later this can be changed to a dedicated info page
+    router.push('/register/complete/professional');
   };
 
   return (

@@ -24,11 +24,22 @@ export default function ServiceCategoryPage() {
         setError(null);
 
         const categoryDetails = await api.services.getCategory(category);
-        setCategoryData(categoryDetails as ServiceCategory);
 
-        // For now, services are not returned with category, so we'll show placeholder
-        // In production, you'd have an API endpoint that returns services by category
-        setServices([]);
+        // Extract category info
+        setCategoryData({
+          id: categoryDetails.id,
+          name: categoryDetails.name,
+          slug: categoryDetails.slug,
+          description: categoryDetails.description ?? null,
+          iconUrl: categoryDetails.iconUrl ?? null,
+          imageUrl: categoryDetails.imageUrl ?? null,
+          displayOrder: categoryDetails.displayOrder,
+          isActive: true,
+        } as ServiceCategory);
+
+        // Extract services from the response
+        const servicesData = (categoryDetails as any).services || [];
+        setServices(servicesData);
       } catch (err) {
         console.error('Error fetching category:', err);
         setError(err instanceof Error ? err.message : 'Failed to load category');

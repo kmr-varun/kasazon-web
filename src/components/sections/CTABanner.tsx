@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '../common/Button';
 
@@ -8,14 +9,14 @@ export interface CTABannerProps {
 }
 
 export function CTABanner({ className = '' }: CTABannerProps) {
+  const router = useRouter();
+
   const handleFindService = () => {
-    console.log('Find a Service clicked');
-    // TODO: Navigate to search/services page
+    router.push('/services');
   };
 
   const handleExploreServices = () => {
-    console.log('Explore Services clicked');
-    // TODO: Navigate to services catalog
+    router.push('/services');
   };
 
   return (

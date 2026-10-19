@@ -1,3 +1,6 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
 import { Header, Footer } from "@/src/components/layout";
 import { Hero } from "@/src/components/sections/Hero";
 import { FeaturesBar } from "@/src/components/sections/FeaturesBar";
@@ -12,6 +15,8 @@ import { FAQ } from "@/src/components/sections/FAQ";
 import { CTABanner } from "@/src/components/sections/CTABanner";
 
 export default function Home() {
+  const router = useRouter();
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -24,6 +29,7 @@ export default function Home() {
           description="Pamper yourself at home with professional facial, skincare, and beauty treatments."
           buttonText="Book Now"
           backgroundImage="/images/beauty-promo-bg.png"
+          onButtonClick={() => router.push('/services/cleaning')}
         />
         <PopularServices />
         <ServiceTypes />

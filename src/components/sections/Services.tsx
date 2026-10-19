@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ServiceCard } from '../common/ServiceCard';
@@ -12,33 +13,40 @@ const services = [
   {
     image: '/images/services/electrician.png',
     title: 'Electrician',
+    slug: 'electrical',
   },
   {
     image: '/images/services/plumber.png',
     title: 'Plumber',
+    slug: 'plumbing',
   },
   {
     image: '/images/services/carpenter.png',
     title: 'Carpenter',
+    slug: 'carpentry',
   },
   {
     image: '/images/services/ac-repair.png',
     title: 'AC Repair',
+    slug: 'ac-servicing',
   },
   {
     image: '/images/services/painter.png',
     title: 'Painter',
+    slug: 'painting',
   },
   {
     image: '/images/services/beauty.png',
     title: 'Beauty',
+    slug: 'cleaning',
   },
 ];
 
 export function Services({ className = '' }: ServicesProps) {
-  const handleServiceClick = (title: string) => {
-    console.log('Service clicked:', title);
-    // TODO: Navigate to service detail page
+  const router = useRouter();
+
+  const handleServiceClick = (slug: string) => {
+    router.push(`/services/${slug}`);
   };
 
   return (
@@ -95,7 +103,7 @@ export function Services({ className = '' }: ServicesProps) {
               key={index}
               image={service.image}
               title={service.title}
-              onClick={() => handleServiceClick(service.title)}
+              onClick={() => handleServiceClick(service.slug)}
             />
           ))}
         </div>

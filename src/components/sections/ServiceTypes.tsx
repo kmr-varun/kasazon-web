@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { InfoCard } from '../common/InfoCard';
 
 export interface ServiceTypesProps {
@@ -7,6 +8,8 @@ export interface ServiceTypesProps {
 }
 
 export function ServiceTypes({ className = '' }: ServiceTypesProps) {
+  const router = useRouter();
+
   return (
     <section className={`bg-[#f2f3f9] ${className}`}>
       <div className="w-full px-6 sm:px-12 lg:px-24 py-16 lg:py-24">
@@ -21,6 +24,7 @@ export function ServiceTypes({ className = '' }: ServiceTypesProps) {
             title="Need a Job Done Today?"
             description="Book trusted professionals for everyday services like cleaning, plumbing, electrical repairs, AC servicing, and more."
             buttonText="Explore Quick Services"
+            onButtonClick={() => router.push('/services')}
           />
 
           {/* Projects & Contracts Card */}
@@ -29,6 +33,7 @@ export function ServiceTypes({ className = '' }: ServiceTypesProps) {
             title="Projects & Contracts"
             description="Manage painting, renovation, maintenance, installation, and other multi-day projects with ease."
             buttonText="Explore Projects"
+            onButtonClick={() => router.push('/services')}
           />
         </div>
       </div>

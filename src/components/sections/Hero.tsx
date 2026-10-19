@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { SearchBar } from '../common/SearchBar';
 import { Badge } from '../common/Badge';
@@ -28,9 +29,12 @@ const valueBadges = [
 ];
 
 export function Hero({ className = '' }: HeroProps) {
+  const router = useRouter();
+
   const handleSearch = (query: string) => {
-    console.log('Search query:', query);
-    // TODO: Implement search functionality
+    if (query.trim()) {
+      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+    }
   };
 
   return (

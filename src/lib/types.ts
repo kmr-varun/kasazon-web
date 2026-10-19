@@ -47,7 +47,7 @@ export interface ServiceCategory {
 
 export interface ServiceCategoryDetail extends ServiceCategory {
   services: Service[];
-  subcategories: ServiceSubcategory[];
+  subcategories?: ServiceSubcategory[];
 }
 
 export interface ServiceSubcategory {
@@ -55,6 +55,17 @@ export interface ServiceSubcategory {
   name: string;
   slug: string;
   categoryId: string;
+}
+
+export interface CategoryWithServices {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  iconUrl: string | null;
+  imageUrl: string | null;
+  displayOrder: number;
+  services: Service[];
 }
 
 export interface ServicePackageItem {
