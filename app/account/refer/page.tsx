@@ -1,17 +1,58 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Header } from '@/src/components/layout/Header';
 import { Footer } from '@/src/components/layout/Footer';
+import { useAuth } from '@/src/lib/auth-context';
 
 export default function ReferEarnPage() {
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  const referralCode = 'KASAZON-AMA24';
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/login?redirect=/account/refer');
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  // Get referral code from user data (placeholder if not available)
+  const referralCode = user?.email ? `KASAZON-${user.email.substring(0, 6).toUpperCase()}` : 'KASAZON-USER';
   const referralLink = `https://kasazon.com/join/${referralCode}`;
+
+  const getUserInitials = () => {
+    if (!user?.fullName) return '?';
+    const names = user.fullName.trim().split(' ');
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[1][0]}`.toUpperCase();
+    }
+    return names[0][0].toUpperCase();
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/');
+  };
+
+  if (isLoading) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#02368c] border-t-transparent" />
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return null;
+  }
 
   const copyCode = () => {
     navigator.clipboard.writeText(referralCode);
@@ -49,33 +90,39 @@ export default function ReferEarnPage() {
                 {/* Avatar */}
                 <div className="flex flex-col items-center pb-4">
                   <div className="w-20 h-20 rounded-full bg-[#02368c] flex items-center justify-center mb-2 shadow-[inset_0px_2px_4px_0px_rgba(0,0,0,0.05)]">
-                    <span className="font-bold text-2xl text-white leading-8">LB</span>
+                    <span className="font-bold text-2xl text-white leading-8">{getUserInitials()}</span>
                   </div>
                   <h2 className="font-poppins font-medium text-xl text-[#111] leading-7 tracking-[-0.2px] text-center">
-                    Leo Boateng
+                    {user.fullName || 'User'}
                   </h2>
                   <div className="flex flex-col items-center gap-0.5 mt-2">
-                    <p className="font-poppins text-sm text-[#424655] leading-normal text-center">
-                      leo.boateng@.com
-                    </p>
-                    <div className="flex items-center gap-1.5">
-                      <Image
-                        src="/images/icons/phone-icon.svg"
-                        alt=""
-                        width={11}
-                        height={11}
-                      />
-                      <p className="font-poppins text-sm text-[#424655] leading-normal">
-                        +233 8986547436
+                    {user.email && (
+                      <p className="font-poppins text-sm text-[#424655] leading-normal text-center">
+                        {user.email}
                       </p>
-                    </div>
+                    )}
+                    {user.phone && (
+                      <div className="flex items-center gap-1.5">
+                        <Image
+                          src="/images/icons/phone-icon.svg"
+                          alt=""
+                          width={11}
+                          height={11}
+                        />
+                        <p className="font-poppins text-sm text-[#424655] leading-normal">
+                          {user.phone}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Edit Profile Button */}
-                <button className="w-full bg-[#02368c] h-10 rounded-md font-roboto-condensed font-medium text-base text-white leading-6 hover:bg-[#024189] transition-colors">
-                  Edit Profile
-                </button>
+                <Link href="/account/edit">
+                  <button className="w-full bg-[#02368c] h-10 rounded-md font-roboto-condensed font-medium text-base text-white leading-6 hover:bg-[#024189] transition-colors">
+                    Edit Profile
+                  </button>
+                </Link>
               </div>
 
               {/* Navigation Menu */}
@@ -176,11 +223,7 @@ export default function ReferEarnPage() {
                     <span className="font-medium text-sm text-[#727787] leading-normal">SYSTEM</span>
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    <button className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left">
-                      <Image src="/images/icons/delete-account-icon.svg" alt="" width={13} height={15} />
-                      <span className="font-poppins text-base text-[#ba1a1a] leading-normal">Delete Account</span>
-                    </button>
-                    <button className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left">
+                    <button onClick={handleLogout} className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left">
                       <Image src="/images/icons/logout-icon.svg" alt="" width={15} height={15} />
                       <span className="font-poppins text-base text-[#424655] leading-normal">Log Out</span>
                     </button>
