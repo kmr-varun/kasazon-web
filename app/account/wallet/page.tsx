@@ -17,7 +17,7 @@ export default function WalletPage() {
   const [isLoadingWallet, setIsLoadingWallet] = useState(true);
   const [selectedAmount, setSelectedAmount] = useState(500);
   const [customAmount, setCustomAmount] = useState('');
-  const [isTopping Up, setIsToppingUp] = useState(false);
+  const [isToppingUp, setIsToppingUp] = useState(false);
 
   const recommendedAmounts = [100, 250, 500, 1000];
 
