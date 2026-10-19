@@ -3,12 +3,12 @@
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { BookingSummary } from './BookingSummary';
-import { useBooking } from '@/src/lib/booking-context';
-import type { Service, ServicePackageItem } from '@/src/lib/types';
+import { useBooking, type ServicePackage } from '@/src/lib/booking-context';
+import type { Service } from '@/src/lib/types';
 
 export interface TimeSlotPageContentProps {
   service: Service;
-  selectedPackage: ServicePackageItem | null;
+  selectedPackage: ServicePackage | null;
   onContinue: () => void;
   onCheckout: () => void;
   className?: string;

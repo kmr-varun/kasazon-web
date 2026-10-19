@@ -312,6 +312,15 @@ class ApiClient {
      * Get wallet balance
      */
     getWallet: () => this.request<WalletBalance>('/payments/wallet'),
+
+    /**
+     * Top up wallet
+     */
+    topupWallet: (amount: number) =>
+      this.request<WalletBalance>('/payments/wallet/topup', {
+        method: 'POST',
+        body: JSON.stringify({ amount }),
+      }),
   };
 
   // ==========================================

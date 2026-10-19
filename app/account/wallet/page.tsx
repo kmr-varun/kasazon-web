@@ -55,7 +55,7 @@ export default function WalletPage() {
 
     setIsToppingUp(true);
     try {
-      await api.users.topupWallet(amount);
+      await api.payments.topupWallet(amount);
 
       // Refresh wallet info
       const wallet = await api.users.getWallet();

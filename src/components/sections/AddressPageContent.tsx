@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { BookingSummary } from './BookingSummary';
-import type { Address, Service, ServicePackageItem } from '@/src/lib/types';
-import type { BookingState } from '@/src/lib/booking-context';
+import type { Address, Service } from '@/src/lib/types';
+import type { BookingState, ServicePackage } from '@/src/lib/booking-context';
 
 export interface AddressPageContentProps {
   addresses: Address[];
   selectedAddress: Address | null;
   service: Service | null;
-  selectedPackage: ServicePackageItem | null;
+  selectedPackage: ServicePackage | null;
   booking: BookingState;
   onAddressSelect: (address: Address) => void;
   onAddAddress: (address: Omit<Address, 'id'>) => void;

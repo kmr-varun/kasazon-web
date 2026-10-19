@@ -67,6 +67,7 @@ export default function AddressPage() {
         ...newAddress,
         latitude: newAddress.latitude ?? undefined,
         longitude: newAddress.longitude ?? undefined,
+        additionalInfo: newAddress.additionalInfo ?? undefined,
       };
       const createdAddress = await api.addresses.create(addressData);
       setAddresses(prev => [...prev, createdAddress]);
