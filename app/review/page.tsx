@@ -79,12 +79,11 @@ export default function ReviewPage() {
       // Create booking
       const newBooking = await api.bookings.create({
         serviceId: booking.service.id,
-        vendorId: 'auto', // Backend will auto-assign vendor
-        scheduledDate: booking.selectedDate,
-        scheduledTime: booking.selectedTime,
+        packageId: booking.selectedPackage?.id,
         addressId: booking.selectedAddress.id,
-        notes: booking.notes,
-        paymentMethodId: selectedPaymentMethod || undefined,
+        scheduledDate: booking.selectedDate,
+        scheduledTimeStart: booking.selectedTime, // Already in HH:mm format
+        issueDescription: booking.notes || undefined,
       });
 
       // If payment method selected, process payment

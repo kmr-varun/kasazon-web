@@ -184,12 +184,13 @@ export interface BookingDetail extends Booking {
 
 export interface CreateBookingData {
   serviceId: string;
-  vendorId: string;
-  scheduledDate: string;
-  scheduledTime: string;
+  packageId?: string;
   addressId: string;
-  notes?: string;
-  paymentMethodId?: string;
+  scheduledDate: string;
+  scheduledTimeStart: string; // HH:mm format
+  scheduledTimeEnd?: string; // HH:mm format
+  issueDescription?: string;
+  issuePhotos?: string[];
 }
 
 export interface CustomerSummary {
