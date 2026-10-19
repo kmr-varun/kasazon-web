@@ -48,7 +48,7 @@ export function Footer({ className = '' }: FooterProps) {
           </p>
 
           {/* Newsletter Form */}
-          <form onSubmit={handleSubscribe} className="relative max-w-md">
+          <form onSubmit={handleSubscribe} className="flex items-center gap-3 max-w-2xl">
             <input
               type="email"
               value={email}
@@ -56,9 +56,9 @@ export function Footer({ className = '' }: FooterProps) {
               placeholder="Your email address"
               required
               className="
-                w-full h-14 rounded-full
+                flex-1 h-14 rounded-full
                 bg-[rgba(255,248,240,0.06)] border border-[rgba(255,248,240,0.2)]
-                px-6 pr-48
+                px-6
                 text-white placeholder:text-[rgba(255,248,240,0.4)]
                 font-poppins text-base
                 focus:outline-none focus:border-[rgba(255,248,240,0.4)]
@@ -68,12 +68,11 @@ export function Footer({ className = '' }: FooterProps) {
             <button
               type="submit"
               className="
-                absolute right-2.5 top-1/2 -translate-y-1/2
                 bg-white text-[#02368c]
                 font-roboto-condensed font-medium uppercase tracking-[0.22em]
-                h-11 px-6 rounded-xl
+                h-14 px-8 rounded-xl
                 hover:opacity-90 transition-opacity duration-200
-                text-sm
+                text-sm flex-shrink-0
               "
             >
               Send
