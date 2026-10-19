@@ -162,7 +162,8 @@ export interface Booking {
   customerId: string;
   status: BookingStatus;
   scheduledDate: string;
-  scheduledTime: string;
+  scheduledTimeStart: string; // HH:mm format
+  scheduledTimeEnd?: string; // HH:mm format
   duration: number;
   totalAmount: number;
   currency: string;

@@ -281,7 +281,7 @@ export default function OngoingBookingDetailPage() {
                 <div className="flex items-start gap-3">
                   <Image src="/images/icons/calendar-time-icon.svg" alt="" width={18} height={22} />
                   <span className="font-poppins font-medium text-base text-[#111] leading-normal">
-                    {formatScheduleDate(booking.scheduledDate, booking.scheduledTime)}
+                    {formatScheduleDate(booking.scheduledDate, booking.scheduledTimeStart)}
                   </span>
                 </div>
                 <div className="border-t border-[#f0eded]" />

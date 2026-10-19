@@ -186,7 +186,7 @@ export default function MyBookingsPage() {
                                 height={13}
                               />
                               <span className="font-poppins text-sm text-[#777] leading-normal">
-                                {formatDateTime(booking.scheduledDate, booking.scheduledTime)}
+                                {formatDateTime(booking.scheduledDate, booking.scheduledTimeStart)}
                               </span>
                             </div>
                           </div>

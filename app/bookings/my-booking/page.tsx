@@ -208,7 +208,7 @@ export default function MyBookingPage() {
 
                             {/* Date/Time */}
                             <p className="font-inter text-sm text-[#777] leading-[22px]">
-                              {formatDateTime(booking.scheduledDate, booking.scheduledTime)}
+                              {formatDateTime(booking.scheduledDate, booking.scheduledTimeStart)}
                             </p>
                           </div>
 
