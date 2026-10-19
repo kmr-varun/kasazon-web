@@ -48,7 +48,7 @@ export function Footer({ className = '' }: FooterProps) {
           </p>
 
           {/* Newsletter Form */}
-          <form onSubmit={handleSubscribe} className="relative max-w-xl">
+          <form onSubmit={handleSubscribe} className="relative max-w-md">
             <input
               type="email"
               value={email}
