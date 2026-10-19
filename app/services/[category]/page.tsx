@@ -132,6 +132,7 @@ export default function ServiceCategoryPage() {
               <ServiceListings
                 sectionTitle={`${categoryData.name} Services`}
                 sectionDescription={`Browse all available ${categoryData.name.toLowerCase()} services`}
+                categorySlug={category}
                 services={services.map(service => ({
                   id: service.id,
                   title: service.name,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ServiceListingCard } from '../common/ServiceListingCard';
 import { BookingCart } from '../common/BookingCart';
 
@@ -19,6 +19,7 @@ export interface ServiceListingsProps {
   sectionTitle: string;
   sectionDescription: string;
   services: Service[];
+  categorySlug: string;
   className?: string;
 }
 
@@ -26,19 +27,19 @@ export function ServiceListings({
   sectionTitle,
   sectionDescription,
   services,
+  categorySlug,
   className = '',
 }: ServiceListingsProps) {
-  const [cartItems, setCartItems] = useState<string[]>([]);
+  const router = useRouter();
 
   const handleAddService = (serviceId: string) => {
-    if (!cartItems.includes(serviceId)) {
-      setCartItems([...cartItems, serviceId]);
-    }
+    // Navigate to service detail page to see packages and start booking
+    router.push(`/services/${categorySlug}/${serviceId}`);
   };
 
   const handleCheckout = () => {
-    console.log('Checkout clicked', cartItems);
-    // TODO: Navigate to checkout
+    // This shouldn't be used in this context - booking starts from service detail
+    router.push(`/services/${categorySlug}`);
   };
 
   return (
@@ -87,7 +88,7 @@ export function ServiceListings({
             <div className="lg:w-[460px] flex-shrink-0">
               <div className="lg:sticky lg:top-24">
                 <BookingCart
-                  itemCount={cartItems.length}
+                  itemCount={0}
                   onCheckout={handleCheckout}
                 />
               </div>
