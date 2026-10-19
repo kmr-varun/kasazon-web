@@ -84,6 +84,7 @@ export interface Service {
   rating: number;
   reviewCount: number;
   isPopular: boolean;
+  isFavorite?: boolean; // Whether the service is favorited by the current user
   packages?: ServicePackageItem[]; // Service packages with different pricing tiers
   includes?: string[]; // What's included in the service
 }

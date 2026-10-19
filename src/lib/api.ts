@@ -409,6 +409,27 @@ class ApiClient {
      * Get current user's wallet info with transactions
      */
     getWallet: () => this.request<WalletInfo>('/users/me/wallet'),
+
+    /**
+     * Get favorite services
+     */
+    getFavorites: () => this.request<Service[]>('/users/me/favorites'),
+
+    /**
+     * Add service to favorites
+     */
+    addFavorite: (serviceId: string) =>
+      this.request<{ message: string }>(`/users/me/favorites/${serviceId}`, {
+        method: 'PATCH',
+      }),
+
+    /**
+     * Remove service from favorites
+     */
+    removeFavorite: (serviceId: string) =>
+      this.request<void>(`/users/me/favorites/${serviceId}`, {
+        method: 'DELETE',
+      }),
   };
 
   // ==========================================
