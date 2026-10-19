@@ -11,7 +11,6 @@ export interface ServiceDetailHeroProps {
   duration: string;
   warrantyText: string;
   onBookNow: () => void;
-  onAddToCart: () => void;
   className?: string;
 }
 
@@ -24,7 +23,6 @@ export function ServiceDetailHero({
   duration,
   warrantyText,
   onBookNow,
-  onAddToCart,
   className = '',
 }: ServiceDetailHeroProps) {
   const handleShare = () => {
@@ -181,23 +179,6 @@ export function ServiceDetailHero({
                   >
                     Book Now
                   </button>
-
-                  <button
-                    onClick={onAddToCart}
-                    className="
-                      bg-[#02368c]
-                      h-[51px] w-[222px]
-                      rounded-xl
-                      font-roboto-condensed font-medium text-xs uppercase tracking-[2.816px]
-                      text-white
-                      hover:bg-[#024189] transition-colors
-                    "
-                  >
-                    Add To Cart
-                  </button>
-
-                  {/* Divider */}
-                  <div className="w-px h-8 bg-[rgba(194,198,216,0.4)]" />
                 </div>
               </div>
             </div>

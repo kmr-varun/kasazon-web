@@ -85,12 +85,6 @@ export default function ServiceDetailPage() {
     router.push(`/time-slots?serviceId=${service.id}`);
   };
 
-  const handleAddToCart = () => {
-    console.log('Add to Cart clicked');
-    // TODO: Implement cart functionality
-    alert('Cart functionality coming soon!');
-  };
-
   const handleAddMostBookedService = (serviceId: string) => {
     router.push(`/services/${category}/${serviceId}`);
   };
@@ -162,7 +156,6 @@ export default function ServiceDetailPage() {
           duration={`Approx. ${Math.floor(service.duration / 60)} hr${service.duration >= 120 ? 's' : ''}`}
           warrantyText="30-Day Kasazon Warranty"
           onBookNow={handleBookNow}
-          onAddToCart={handleAddToCart}
         />
         <ServiceDetailsContent
           packages={mappedPackages}
