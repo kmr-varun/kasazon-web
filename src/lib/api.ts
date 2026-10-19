@@ -13,6 +13,7 @@ import type {
   Address,
   CreateAddressData,
   PaymentMethod,
+  PaymentMethodListResponse,
   AddPaymentMethodData,
   CheckoutResponse,
   WalletBalance,
@@ -276,7 +277,7 @@ class ApiClient {
     /**
      * Get user's payment methods
      */
-    getMethods: () => this.request<PaymentMethod[]>('/payments/methods'),
+    getMethods: () => this.request<PaymentMethodListResponse>('/payments/methods'),
 
     /**
      * Add a new payment method

@@ -36,7 +36,8 @@ export default function AccountPage() {
 
       try {
         setIsLoadingMethods(true);
-        const methods = await api.payments.getMethods();
+        const response = await api.payments.getMethods();
+        const methods = Array.isArray(response) ? response : response.paymentMethods || [];
         setPaymentMethods(methods);
       } catch (err) {
         console.error('Error fetching payment methods:', err);

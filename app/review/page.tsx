@@ -42,7 +42,8 @@ export default function ReviewPage() {
       if (!isAuthenticated) return;
 
       try {
-        const methods = await api.payments.getMethods();
+        const response = await api.payments.getMethods();
+        const methods = Array.isArray(response) ? response : response.paymentMethods || [];
         setPaymentMethods(methods);
 
         // Auto-select default payment method

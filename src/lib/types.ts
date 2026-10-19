@@ -252,12 +252,23 @@ export type PaymentMethodType = 'CARD' | 'BANK_ACCOUNT' | 'MOBILE_MONEY' | 'WALL
 export interface PaymentMethod {
   id: string;
   type: PaymentMethodType;
-  last4: string;
-  brand: string | null; // For cards
-  expiryMonth: number | null;
-  expiryYear: number | null;
+  provider?: string | null;
+  lastFour?: string | null;
+  last4?: string; // Deprecated, use lastFour
+  accountName?: string | null;
+  maskedPhone?: string | null;
+  displayName?: string;
+  brand?: string | null; // For cards
+  expiryMonth?: number | null;
+  expiryYear?: number | null;
   isDefault: boolean;
-  name: string;
+  name?: string;
+  createdAt?: Date;
+}
+
+export interface PaymentMethodListResponse {
+  paymentMethods: PaymentMethod[];
+  defaultMethodId: string | null;
 }
 
 export interface AddPaymentMethodData {
