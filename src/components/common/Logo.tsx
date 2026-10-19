@@ -12,7 +12,7 @@ export function Logo({ className = '', showText = true }: LogoProps) {
       {/* Logo Icon */}
       <div className="relative w-[30px] h-[29px]">
         <Image
-          src="/images/icons/logo.svg"
+          src="/images/icons/logo.png"
           alt="Kasazon Logo"
           fill
           className="object-contain"
