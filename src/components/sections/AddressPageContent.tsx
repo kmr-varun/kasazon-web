@@ -34,14 +34,16 @@ export function AddressPageContent({
 
   // Form state
   const [formData, setFormData] = useState({
+    type: 'HOME' as 'HOME' | 'WORK' | 'OTHER',
     label: '',
-    street: '',
+    addressLine1: '',
+    addressLine2: '',
     city: '',
     state: '',
     postalCode: '',
     country: 'Ghana',
+    landmark: '',
     isDefault: false,
-    additionalInfo: '',
   });
 
   const handleFormChange = (field: string, value: string | boolean) => {
@@ -50,29 +52,43 @@ export function AddressPageContent({
 
   const handleSubmitNewAddress = async () => {
     // Validation
-    if (!formData.label || !formData.street || !formData.city || !formData.state || !formData.postalCode) {
-      alert('Please fill in all required fields');
+    if (!formData.addressLine1 || !formData.city || !formData.state) {
+      alert('Please fill in all required fields (Address, City, State)');
+      return;
+    }
+
+    if (formData.addressLine1.length < 5) {
+      alert('Address must be at least 5 characters long');
       return;
     }
 
     setIsSubmitting(true);
     try {
       await onAddAddress({
-        ...formData,
-        latitude: null,
-        longitude: null,
+        type: formData.type,
+        label: formData.label || undefined,
+        addressLine1: formData.addressLine1,
+        addressLine2: formData.addressLine2 || undefined,
+        city: formData.city,
+        state: formData.state,
+        postalCode: formData.postalCode || undefined,
+        country: formData.country || 'Ghana',
+        landmark: formData.landmark || undefined,
+        isDefault: formData.isDefault,
       });
 
       // Reset form
       setFormData({
+        type: 'HOME',
         label: '',
-        street: '',
+        addressLine1: '',
+        addressLine2: '',
         city: '',
         state: '',
         postalCode: '',
         country: 'Ghana',
+        landmark: '',
         isDefault: false,
-        additionalInfo: '',
       });
       setIsFormExpanded(false);
     } catch (err) {
@@ -86,10 +102,13 @@ export function AddressPageContent({
     console.log('Change step:', stepIndex);
   };
 
-  const getAddressIcon = (label: string): string => {
-    const lowerLabel = label.toLowerCase();
-    if (lowerLabel.includes('home')) return '/images/icons/home-icon.svg';
-    if (lowerLabel.includes('work')) return '/images/icons/work-icon.svg';
+  const getAddressIcon = (label: string | undefined, type: string): string => {
+    if (type === 'HOME' || (label && label.toLowerCase().includes('home'))) {
+      return '/images/icons/home-icon.svg';
+    }
+    if (type === 'WORK' || (label && label.toLowerCase().includes('work'))) {
+      return '/images/icons/work-icon.svg';
+    }
     return '/images/icons/location-pin.svg';
   };
 
@@ -152,7 +171,7 @@ export function AddressPageContent({
                       `}>
                         <div className="relative w-5 h-5">
                           <Image
-                            src={getAddressIcon(address.label)}
+                            src={getAddressIcon(address.label, address.type)}
                             alt=""
                             fill
                             className="object-contain"
@@ -166,27 +185,35 @@ export function AddressPageContent({
                           text-[#111]
                           leading-normal
                         ">
-                          {address.label}
+                          {address.label || address.type}
                         </h3>
                         <div className="flex flex-col gap-0.5 mt-1.5">
                           <p className="
                             font-poppins text-lg text-[#111]
                             leading-normal
                           ">
-                            {address.street}
+                            {address.addressLine1}
                           </p>
+                          {address.addressLine2 && (
+                            <p className="
+                              font-poppins text-lg text-[#111]
+                              leading-normal
+                            ">
+                              {address.addressLine2}
+                            </p>
+                          )}
                           <p className="
                             font-poppins text-sm text-[#777]
                             leading-normal
                           ">
-                            {address.city}, {address.state} {address.postalCode}
+                            {address.city}, {address.state} {address.postalCode || ''}
                           </p>
-                          {address.additionalInfo && (
+                          {address.landmark && (
                             <p className="
                               font-poppins text-sm text-[#777]
                               leading-normal
                             ">
-                              {address.additionalInfo}
+                              {address.landmark}
                             </p>
                           )}
                         </div>
@@ -272,16 +299,38 @@ export function AddressPageContent({
                 {isFormExpanded && (
                   <div className="px-6 pb-6 pt-1">
                     <div className="flex flex-col gap-6">
+                      {/* Address Type */}
+                      <div className="flex flex-col gap-2">
+                        <label className="font-poppins text-sm text-[#111] leading-normal">
+                          Address Type *
+                        </label>
+                        <select
+                          value={formData.type}
+                          onChange={(e) => handleFormChange('type', e.target.value)}
+                          className="
+                            border border-[rgba(0,0,0,0.12)]
+                            rounded-lg px-5 py-3 h-11 w-full
+                            font-roboto-condensed text-xs
+                            focus:outline-none focus:border-[#02368c]
+                            bg-white
+                          "
+                        >
+                          <option value="HOME">Home</option>
+                          <option value="WORK">Work</option>
+                          <option value="OTHER">Other</option>
+                        </select>
+                      </div>
+
                       {/* Address Label */}
                       <div className="flex flex-col gap-2">
                         <label className="font-poppins text-sm text-[#111] leading-normal">
-                          Address Label (Home, Work, etc.)
+                          Address Label (optional)
                         </label>
                         <input
                           type="text"
                           value={formData.label}
                           onChange={(e) => handleFormChange('label', e.target.value)}
-                          placeholder="e.g. Home, Work, Apartment"
+                          placeholder="e.g. My Home, Main Office"
                           className="
                             border border-[rgba(0,0,0,0.12)]
                             rounded-lg px-5 py-3 h-11 w-full
@@ -291,16 +340,35 @@ export function AddressPageContent({
                         />
                       </div>
 
-                      {/* Street Address */}
+                      {/* Street Address Line 1 */}
                       <div className="flex flex-col gap-2">
                         <label className="font-poppins text-sm text-[#111] leading-normal">
-                          Street Address
+                          Street Address *
                         </label>
                         <input
                           type="text"
-                          value={formData.street}
-                          onChange={(e) => handleFormChange('street', e.target.value)}
-                          placeholder="House number, street name"
+                          value={formData.addressLine1}
+                          onChange={(e) => handleFormChange('addressLine1', e.target.value)}
+                          placeholder="House number, street name (min 5 characters)"
+                          className="
+                            border border-[rgba(0,0,0,0.12)]
+                            rounded-lg px-5 py-3 h-11 w-full
+                            font-roboto-condensed text-xs
+                            focus:outline-none focus:border-[#02368c]
+                          "
+                        />
+                      </div>
+
+                      {/* Street Address Line 2 */}
+                      <div className="flex flex-col gap-2">
+                        <label className="font-poppins text-sm text-[#111] leading-normal">
+                          Apartment, Suite, etc. (optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.addressLine2}
+                          onChange={(e) => handleFormChange('addressLine2', e.target.value)}
+                          placeholder="Apt 4B, Floor 2, etc."
                           className="
                             border border-[rgba(0,0,0,0.12)]
                             rounded-lg px-5 py-3 h-11 w-full
@@ -353,7 +421,7 @@ export function AddressPageContent({
                       <div className="flex flex-col sm:flex-row gap-6">
                         <div className="flex-1 flex flex-col gap-2">
                           <label className="font-poppins text-sm text-[#111] leading-normal">
-                            Postal Code
+                            Postal Code (optional)
                           </label>
                           <input
                             type="text"
@@ -388,15 +456,15 @@ export function AddressPageContent({
                         </div>
                       </div>
 
-                      {/* Landmark/Additional Info */}
+                      {/* Landmark */}
                       <div className="flex flex-col gap-2">
                         <label className="font-poppins text-sm text-[#111] leading-normal">
                           Landmark / Additional Info (optional)
                         </label>
                         <input
                           type="text"
-                          value={formData.additionalInfo}
-                          onChange={(e) => handleFormChange('additionalInfo', e.target.value)}
+                          value={formData.landmark}
+                          onChange={(e) => handleFormChange('landmark', e.target.value)}
                           placeholder="e.g. Near Shell Station, blue gate"
                           className="
                             border border-[rgba(0,0,0,0.12)]

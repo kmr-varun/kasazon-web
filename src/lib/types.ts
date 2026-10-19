@@ -203,38 +203,44 @@ export interface CustomerSummary {
 // Address Types
 // ============================================
 
+export type AddressType = 'HOME' | 'WORK' | 'OTHER';
+
 export interface Address {
   id: string;
-  label: string;
-  street: string;
+  type: AddressType;
+  label?: string;
+  addressLine1: string;
+  addressLine2?: string;
   city: string;
   state: string;
-  postalCode: string;
+  postalCode?: string;
   country: string;
+  landmark?: string;
   isDefault: boolean;
-  latitude: number | null;
-  longitude: number | null;
-  additionalInfo: string | null;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface AddressSummary {
   id: string;
-  label: string;
-  street: string;
+  label?: string;
+  addressLine1: string;
   city: string;
 }
 
 export interface CreateAddressData {
-  label: string;
-  street: string;
+  type: AddressType;
+  label?: string;
+  addressLine1: string;
+  addressLine2?: string;
   city: string;
   state: string;
-  postalCode: string;
-  country: string;
+  postalCode?: string;
+  country?: string;
+  landmark?: string;
   isDefault?: boolean;
   latitude?: number;
   longitude?: number;
-  additionalInfo?: string;
 }
 
 // ============================================

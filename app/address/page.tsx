@@ -61,15 +61,9 @@ export default function AddressPage() {
     router.push('/review');
   };
 
-  const handleAddAddress = async (newAddress: Omit<Address, 'id'>) => {
+  const handleAddAddress = async (newAddress: Omit<Address, 'id' | 'isDefault'> & { isDefault?: boolean }) => {
     try {
-      const addressData = {
-        ...newAddress,
-        latitude: newAddress.latitude ?? undefined,
-        longitude: newAddress.longitude ?? undefined,
-        additionalInfo: newAddress.additionalInfo ?? undefined,
-      };
-      const createdAddress = await api.addresses.create(addressData);
+      const createdAddress = await api.addresses.create(newAddress as any);
       setAddresses(prev => [...prev, createdAddress]);
 
       // Auto-select the newly created address
