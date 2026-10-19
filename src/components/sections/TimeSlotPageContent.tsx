@@ -1,24 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { BookingSummary } from './BookingSummary';
+import { useBooking } from '@/src/lib/booking-context';
+import type { Service, ServicePackageItem } from '@/src/lib/types';
 
 export interface TimeSlotPageContentProps {
+  service: Service;
+  selectedPackage: ServicePackageItem | null;
   onContinue: () => void;
   onCheckout: () => void;
   className?: string;
 }
 
 interface DateOption {
-  date: number;
+  date: Date;
+  dateNum: number;
   month: string;
   day: string;
+  isoDate: string;
 }
 
 interface TimeSlot {
   id: string;
   label: string;
+  time: string; // HH:mm format
 }
 
 interface Daypart {
@@ -29,36 +36,46 @@ interface Daypart {
 }
 
 export function TimeSlotPageContent({
+  service,
+  selectedPackage,
   onContinue,
   onCheckout,
   className = '',
 }: TimeSlotPageContentProps) {
-  const [selectedDate, setSelectedDate] = useState<number | null>(1);
+  const { setTimeSlot, booking } = useBooking();
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
-  const handleChangeStep = (stepIndex: number) => {
-    console.log('Change step:', stepIndex);
-    // TODO: Navigate to respective step
-  };
+  // Generate next 7 days
+  const dateOptions: DateOption[] = useMemo(() => {
+    const options: DateOption[] = [];
+    const today = new Date();
 
-  // Mock date options
-  const dateOptions: DateOption[] = [
-    { date: 1, month: 'Nov', day: 'FRI' },
-    { date: 2, month: 'Nov', day: 'SAT' },
-    { date: 3, month: 'Nov', day: 'SUN' },
-    { date: 4, month: 'Nov', day: 'MON' },
-    { date: 5, month: 'Nov', day: 'TUE' },
-  ];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
 
-  // Mock dayparts with time slots
-  const dayparts: Daypart[] = [
+      options.push({
+        date,
+        dateNum: date.getDate(),
+        month: date.toLocaleDateString('en-US', { month: 'short' }),
+        day: date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(),
+        isoDate: date.toISOString().split('T')[0], // YYYY-MM-DD
+      });
+    }
+
+    return options;
+  }, []);
+
+  // Generate time slots for each daypart
+  const dayparts: Daypart[] = useMemo(() => [
     {
       id: 'morning',
       icon: '/images/icons/sun-morning.svg',
-      label: 'Morning',
+      label: 'Morning (8:00 AM – 12:00 PM)',
       slots: [
-        { id: 'morning-1', label: '8:00 AM – 10:00 AM' },
-        { id: 'morning-2', label: '10:00 AM – 12:00 PM' },
+        { id: 'morning-1', label: '8:00 AM – 10:00 AM', time: '08:00' },
+        { id: 'morning-2', label: '10:00 AM – 12:00 PM', time: '10:00' },
       ],
     },
     {
@@ -66,8 +83,8 @@ export function TimeSlotPageContent({
       icon: '/images/icons/sun-afternoon.svg',
       label: 'Afternoon (12:00 PM – 4:00 PM)',
       slots: [
-        { id: 'afternoon-1', label: '8:00 AM – 10:00 AM' },
-        { id: 'afternoon-2', label: '10:00 AM – 12:00 PM' },
+        { id: 'afternoon-1', label: '12:00 PM – 2:00 PM', time: '12:00' },
+        { id: 'afternoon-2', label: '2:00 PM – 4:00 PM', time: '14:00' },
       ],
     },
     {
@@ -75,35 +92,57 @@ export function TimeSlotPageContent({
       icon: '/images/icons/sun-evening.svg',
       label: 'Evening (4:00 PM – 8:00 PM)',
       slots: [
-        { id: 'evening-1', label: '8:00 AM – 10:00 AM' },
-        { id: 'evening-2', label: '10:00 AM – 12:00 PM' },
+        { id: 'evening-1', label: '4:00 PM – 6:00 PM', time: '16:00' },
+        { id: 'evening-2', label: '6:00 PM – 8:00 PM', time: '18:00' },
       ],
     },
-  ];
+  ], []);
 
-  const service = {
-    id: 'foam-jet',
-    title: 'Foam-Jet AC Service',
-    price: 499,
-    duration: '60–90 min service',
+  const handleDateSelect = (isoDate: string) => {
+    setSelectedDate(isoDate);
+    // Reset time slot when date changes
+    setSelectedSlot(null);
   };
+
+  const handleSlotSelect = (slotId: string, time: string) => {
+    setSelectedSlot(slotId);
+
+    if (selectedDate) {
+      // Save to booking context
+      setTimeSlot(selectedDate, time);
+    }
+  };
+
+  const handleContinue = () => {
+    if (!selectedDate || !selectedSlot) {
+      alert('Please select both date and time slot');
+      return;
+    }
+    onContinue();
+  };
+
+  const handleChangeStep = (stepIndex: number) => {
+    // Navigate to different steps
+    // 0: Service selection
+    // 1: Time slots
+    // 2: Address selection
+    console.log('Change step:', stepIndex);
+  };
+
+  const selectedDateOption = dateOptions.find(d => d.isoDate === selectedDate);
 
   const reviewSteps = [
     {
       icon: '/images/icons/checkmark-circle.svg',
-      title: 'Reported Issue',
-      value: 'No cooling, water leaking',
-    },
-    {
-      icon: '/images/icons/location-pin.svg',
-      title: 'Service Location',
-      value: '8-A Light Industrial Area, ITI Rd',
-      subtext: 'Jodhpur, RJ · 342003',
+      title: 'Selected Service',
+      value: service.name,
     },
     {
       icon: '/images/icons/calendar.svg',
       title: 'Scheduled Slot',
-      value: 'Select at Review step',
+      value: selectedDateOption
+        ? `${selectedDateOption.day}, ${selectedDateOption.month} ${selectedDateOption.dateNum}`
+        : 'Select date and time',
     },
   ];
 
@@ -135,81 +174,8 @@ export function TimeSlotPageContent({
                     font-poppins text-sm text-[#424655]
                     leading-normal
                   ">
-                    Technicians follow stringent Kasazon sanitization & diagnostic protocols.
+                    Professionals follow stringent Kasazon quality & safety protocols.
                   </p>
-                </div>
-
-                {/* Express Match Banner */}
-                <div className="
-                  bg-[#eff4ff]
-                  rounded-xl
-                  p-4
-                  shadow-[0px_1px_1px_rgba(0,0,0,0.05)]
-                  flex items-center justify-between gap-4
-                  flex-col sm:flex-row
-                ">
-                  <div className="flex gap-4 flex-1">
-                    <div className="
-                      bg-[rgba(0,87,205,0.1)]
-                      rounded-xl
-                      w-12 h-12
-                      flex items-center justify-center
-                      flex-shrink-0
-                    ">
-                      <div className="relative w-[19px] h-[23px]">
-                        <Image
-                          src="/images/icons/lightning-bolt.svg"
-                          alt=""
-                          fill
-                          className="object-contain"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <div className="flex items-center gap-1 flex-wrap">
-                        <span className="
-                          font-roboto-condensed font-medium text-sm
-                          text-[#0b1c30]
-                          leading-normal
-                        ">
-                          As soon as possible (Express Match)
-                        </span>
-                        <div className="
-                          bg-[rgba(0,108,73,0.15)]
-                          px-2 h-5
-                          rounded-full
-                          flex items-center justify-center
-                        ">
-                          <span className="
-                            font-poppins font-medium text-xs
-                            text-[#006c49]
-                            tracking-[0.3px] leading-[14.4px]
-                          ">
-                            ~60-90 mins
-                          </span>
-                        </div>
-                      </div>
-                      <p className="
-                        font-poppins text-sm text-[#424655]
-                        leading-normal
-                      ">
-                        Automatically allocate the top-rated specialist currently available in Koramangala.
-                      </p>
-                    </div>
-                  </div>
-                  <button className="
-                    bg-[#02368c]
-                    px-6 py-3
-                    rounded-xl
-                    font-roboto-condensed font-medium text-xs uppercase
-                    text-white text-center
-                    tracking-[2.816px] leading-[19.2px]
-                    hover:bg-[#024189] transition-colors
-                    w-full sm:w-auto
-                    min-w-[222px]
-                  ">
-                    Select
-                  </button>
                 </div>
 
                 {/* Divider with Text */}
@@ -222,7 +188,7 @@ export function TimeSlotPageContent({
                       font-roboto-condensed text-xs text-[#424655]
                       leading-normal
                     ">
-                      OR PICK A SCHEDULED DATE & TIME
+                      PICK A SCHEDULED DATE & TIME
                     </span>
                   </div>
                 </div>
@@ -245,56 +211,14 @@ export function TimeSlotPageContent({
                         Available appointments for the next 7 days
                       </p>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <span className="
-                        font-inter font-semibold text-sm
-                        text-[#0b1c30]
-                        tracking-[0.14px] leading-[17.5px]
-                        pr-1
-                      ">
-                        October / November 2026
-                      </span>
-                      <button className="
-                        bg-[#e5eeff]
-                        w-8 h-8
-                        rounded-lg
-                        flex items-center justify-center
-                        hover:bg-[#d3e4fe] transition-colors
-                      ">
-                        <div className="relative w-[6px] h-[9px]">
-                          <Image
-                            src="/images/icons/chevron-left.svg"
-                            alt="Previous week"
-                            fill
-                            className="object-contain"
-                          />
-                        </div>
-                      </button>
-                      <button className="
-                        bg-[#e5eeff]
-                        w-8 h-8
-                        rounded-lg
-                        flex items-center justify-center
-                        hover:bg-[#d3e4fe] transition-colors
-                      ">
-                        <div className="relative w-[6px] h-[9px]">
-                          <Image
-                            src="/images/icons/chevron-right.svg"
-                            alt="Next week"
-                            fill
-                            className="object-contain"
-                          />
-                        </div>
-                      </button>
-                    </div>
                   </div>
 
                   {/* Date Carousel */}
-                  <div className="flex gap-2 overflow-x-auto">
-                    {dateOptions.map((date) => (
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    {dateOptions.map((dateOption) => (
                       <button
-                        key={date.date}
-                        onClick={() => setSelectedDate(date.date)}
+                        key={dateOption.isoDate}
+                        onClick={() => handleDateSelect(dateOption.isoDate)}
                         className={`
                           flex flex-col items-center justify-between
                           min-h-[96px]
@@ -303,9 +227,9 @@ export function TimeSlotPageContent({
                           rounded-xl
                           transition-colors
                           ${
-                            selectedDate === date.date
-                              ? 'bg-[#eff4ff]'
-                              : 'bg-[#f8f9fa] hover:bg-[#eff4ff]'
+                            selectedDate === dateOption.isoDate
+                              ? 'bg-[#eff4ff] border-2 border-[#02368c]'
+                              : 'bg-[#f8f9fa] hover:bg-[#eff4ff] border-2 border-transparent'
                           }
                         `}
                       >
@@ -313,7 +237,7 @@ export function TimeSlotPageContent({
                           font-roboto-condensed text-xs text-[#424655]
                           leading-normal
                         ">
-                          {date.month}
+                          {dateOption.month}
                         </span>
                         <div className="flex flex-col gap-0.5 py-1">
                           <span className="
@@ -322,7 +246,7 @@ export function TimeSlotPageContent({
                             tracking-[-0.42px] leading-[28px]
                             text-center
                           ">
-                            {String(date.date).padStart(2, '0')}
+                            {String(dateOption.dateNum).padStart(2, '0')}
                           </span>
                           <span className="
                             font-inter font-semibold text-xs uppercase
@@ -330,7 +254,7 @@ export function TimeSlotPageContent({
                             tracking-[0.3px] leading-[14.4px]
                             text-center
                           ">
-                            {date.day}
+                            {dateOption.day}
                           </span>
                         </div>
                       </button>
@@ -339,85 +263,91 @@ export function TimeSlotPageContent({
                 </div>
 
                 {/* Time Selection */}
-                <div className="flex flex-col gap-6">
-                  <div>
-                    <h3 className="
-                      font-poppins font-semibold text-lg
-                      text-[#0b1c30]
-                      leading-[28.8px]
-                    ">
-                      Select Time Window
-                    </h3>
-                    <p className="
-                      font-poppins text-sm
-                      leading-normal
-                    ">
-                      <span className="text-[#424655]">Slots calibrated for </span>
-                      <span className="text-[#0b1c30]">Thursday, 01 Nov</span>
-                    </p>
-                  </div>
-
-                  {/* Dayparts */}
-                  {dayparts.map((daypart) => (
-                    <div key={daypart.id} className="flex flex-col gap-3">
-                      <div className="flex items-center gap-1">
-                        <div className="relative w-[18px] h-[18px]">
-                          <Image
-                            src={daypart.icon}
-                            alt=""
-                            fill
-                            className="object-contain"
-                          />
-                        </div>
-                        <span className="
-                          font-roboto-condensed font-medium text-sm
-                          text-[#0b1c30]
-                          leading-normal
-                        ">
-                          {daypart.label}
+                {selectedDate && (
+                  <div className="flex flex-col gap-6">
+                    <div>
+                      <h3 className="
+                        font-poppins font-semibold text-lg
+                        text-[#0b1c30]
+                        leading-[28.8px]
+                      ">
+                        Select Time Window
+                      </h3>
+                      <p className="
+                        font-poppins text-sm
+                        leading-normal
+                      ">
+                        <span className="text-[#424655]">Slots available for </span>
+                        <span className="text-[#0b1c30]">
+                          {selectedDateOption &&
+                            `${selectedDateOption.day}, ${selectedDateOption.month} ${selectedDateOption.dateNum}`
+                          }
                         </span>
-                      </div>
-
-                      <div className="flex gap-4 flex-wrap">
-                        {daypart.slots.map((slot) => (
-                          <button
-                            key={slot.id}
-                            onClick={() => setSelectedSlot(slot.id)}
-                            className={`
-                              bg-white
-                              border border-[rgba(0,0,0,0.1)]
-                              rounded-xl
-                              px-4 py-4
-                              shadow-[0px_1px_1px_rgba(0,0,0,0.05)]
-                              transition-colors
-                              ${
-                                selectedSlot === slot.id
-                                  ? 'border-[#02368c] border-2'
-                                  : 'hover:border-[#424655]'
-                              }
-                            `}
-                          >
-                            <span className="
-                              font-poppins font-medium text-base
-                              text-[#0b1c30]
-                              leading-[24px]
-                              whitespace-nowrap
-                            ">
-                              {slot.label}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
+                      </p>
                     </div>
-                  ))}
-                </div>
+
+                    {/* Dayparts */}
+                    {dayparts.map((daypart) => (
+                      <div key={daypart.id} className="flex flex-col gap-3">
+                        <div className="flex items-center gap-1">
+                          <div className="relative w-[18px] h-[18px]">
+                            <Image
+                              src={daypart.icon}
+                              alt=""
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
+                          <span className="
+                            font-roboto-condensed font-medium text-sm
+                            text-[#0b1c30]
+                            leading-normal
+                          ">
+                            {daypart.label}
+                          </span>
+                        </div>
+
+                        <div className="flex gap-4 flex-wrap">
+                          {daypart.slots.map((slot) => (
+                            <button
+                              key={slot.id}
+                              onClick={() => handleSlotSelect(slot.id, slot.time)}
+                              className={`
+                                bg-white
+                                border
+                                rounded-xl
+                                px-4 py-4
+                                shadow-[0px_1px_1px_rgba(0,0,0,0.05)]
+                                transition-colors
+                                ${
+                                  selectedSlot === slot.id
+                                    ? 'border-[#02368c] border-2'
+                                    : 'border-[rgba(0,0,0,0.1)] hover:border-[#424655]'
+                                }
+                              `}
+                            >
+                              <span className="
+                                font-poppins font-medium text-base
+                                text-[#0b1c30]
+                                leading-[24px]
+                                whitespace-nowrap
+                              ">
+                                {slot.label}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Continue Button */}
               <button
-                onClick={onContinue}
-                className="
-                  bg-[#02368c]
+                onClick={handleContinue}
+                disabled={!selectedDate || !selectedSlot}
+                className={`
                   w-full max-w-[512px]
                   px-6 py-4
                   rounded-xl
@@ -425,8 +355,12 @@ export function TimeSlotPageContent({
                   font-roboto-condensed font-medium text-base
                   text-white text-center
                   leading-[24px]
-                  hover:bg-[#024189] transition-colors
-                "
+                  transition-colors
+                  ${selectedDate && selectedSlot
+                    ? 'bg-[#02368c] hover:bg-[#024189]'
+                    : 'bg-gray-300 cursor-not-allowed'
+                  }
+                `}
               >
                 Continue
               </button>
@@ -436,9 +370,14 @@ export function TimeSlotPageContent({
             <div className="lg:w-[420px] flex-shrink-0">
               <div className="lg:sticky lg:top-24">
                 <BookingSummary
-                  service={service}
+                  service={{
+                    id: service.id,
+                    title: service.name,
+                    price: selectedPackage?.price || service.basePrice,
+                    duration: selectedPackage?.durationEstimate || `${service.duration} min`,
+                  }}
                   reviewSteps={reviewSteps}
-                  platformFee={45}
+                  platformFee={booking.platformFee}
                   onCheckout={onCheckout}
                   onChangeStep={handleChangeStep}
                 />

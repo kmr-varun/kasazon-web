@@ -45,8 +45,8 @@ export interface VerifyOtpResponse {
     accessToken: string;
     refreshToken: string;
     expiresIn: number;
-  };
-  user: User;
+  } | null;
+  user: User | null;
   isNewUser: boolean;
 }
 
@@ -216,9 +216,15 @@ export async function verifyOtp(
     body: JSON.stringify(payload),
   });
 
-  // Store tokens and user on successful verification
-  setTokens(response.tokens.accessToken, response.tokens.refreshToken);
-  setStoredUser(response.user);
+  // Store tokens and user on successful verification (if tokens are provided)
+  // During REGISTRATION purpose, tokens might be null until registration is complete
+  if (response.tokens && response.tokens.accessToken) {
+    setTokens(response.tokens.accessToken, response.tokens.refreshToken);
+  }
+
+  if (response.user) {
+    setStoredUser(response.user);
+  }
 
   return response;
 }

@@ -57,6 +57,18 @@ export interface ServiceSubcategory {
   categoryId: string;
 }
 
+export interface ServicePackageItem {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  durationEstimate: string | null;
+  includes: string[] | null;
+  displayOrder: number;
+  isActive: boolean;
+  units?: number; // For packages like "2 AC", "3 AC"
+}
+
 export interface Service {
   id: string;
   name: string;
@@ -72,6 +84,8 @@ export interface Service {
   rating: number;
   reviewCount: number;
   isPopular: boolean;
+  packages?: ServicePackageItem[]; // Service packages with different pricing tiers
+  includes?: string[]; // What's included in the service
 }
 
 export interface ServiceDetail extends Service {

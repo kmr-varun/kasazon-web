@@ -1,49 +1,144 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Header, Footer } from "@/src/components/layout";
 import { ReviewPageHeader, ReviewPageContent, MostBooked } from "@/src/components/sections";
 import { BookingConfirmationModal } from "@/src/components/common/BookingConfirmationModal";
+import { useBooking } from '@/src/lib/booking-context';
+import { useAuth } from '@/src/lib/auth-context';
+import { api } from '@/src/lib/api';
+import type { Booking, PaymentMethod } from '@/src/lib/types';
 
 export default function ReviewPage() {
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const router = useRouter();
+  const { booking, canProceedToReview, clearBooking } = useBooking();
+  const { isAuthenticated } = useAuth();
 
-  const handlePay = () => {
-    console.log('Processing payment');
-    // TODO: Process payment
-    // Show confirmation modal after successful payment
-    setShowConfirmation(true);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [createdBooking, setCreatedBooking] = useState<Booking | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
+
+  // Redirect if booking state is invalid
+  useEffect(() => {
+    if (!canProceedToReview) {
+      router.push('/services');
+    }
+  }, [canProceedToReview, router]);
+
+  // Check authentication
+  useEffect(() => {
+    if (!isAuthenticated) {
+      sessionStorage.setItem('kasazon_redirect_after_login', '/review');
+      router.push('/login');
+    }
+  }, [isAuthenticated, router]);
+
+  // Fetch payment methods
+  useEffect(() => {
+    const fetchPaymentMethods = async () => {
+      if (!isAuthenticated) return;
+
+      try {
+        const methods = await api.payments.getMethods();
+        setPaymentMethods(methods);
+
+        // Auto-select default payment method
+        const defaultMethod = methods.find(m => m.isDefault);
+        if (defaultMethod) {
+          setSelectedPaymentMethod(defaultMethod.id);
+        } else if (methods.length > 0) {
+          setSelectedPaymentMethod(methods[0].id);
+        }
+      } catch (err) {
+        console.error('Error fetching payment methods:', err);
+      }
+    };
+
+    fetchPaymentMethods();
+  }, [isAuthenticated]);
+
+  const handlePay = async () => {
+    if (!booking.service || !booking.selectedDate || !booking.selectedTime || !booking.selectedAddress) {
+      alert('Booking information is incomplete');
+      return;
+    }
+
+    // For now, allow proceeding without payment method (can add later or use wallet)
+    // if (!selectedPaymentMethod) {
+    //   alert('Please select a payment method');
+    //   return;
+    // }
+
+    setIsProcessing(true);
+
+    try {
+      // Create booking
+      const newBooking = await api.bookings.create({
+        serviceId: booking.service.id,
+        vendorId: 'auto', // Backend will auto-assign vendor
+        scheduledDate: booking.selectedDate,
+        scheduledTime: booking.selectedTime,
+        addressId: booking.selectedAddress.id,
+        notes: booking.notes,
+        paymentMethodId: selectedPaymentMethod || undefined,
+      });
+
+      // If payment method selected, process payment
+      if (selectedPaymentMethod) {
+        try {
+          await api.payments.checkout(newBooking.id, selectedPaymentMethod);
+        } catch (err) {
+          console.error('Payment failed:', err);
+          alert('Booking created but payment failed. You can pay later from your bookings page.');
+        }
+      }
+
+      setCreatedBooking(newBooking);
+      setShowConfirmation(true);
+
+      // Clear booking context
+      clearBooking();
+    } catch (err) {
+      console.error('Error creating booking:', err);
+      alert(err instanceof Error ? err.message : 'Failed to create booking');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleAddService = (serviceId: string) => {
-    console.log('Add service:', serviceId);
-    // TODO: Add service to cart
+    router.push(`/services/${serviceId}`);
   };
 
   const handleCall = () => {
     console.log('Call provider');
-    // TODO: Initiate call
+    alert('Call functionality coming soon!');
   };
 
   const handleChat = () => {
     console.log('Open chat');
-    // TODO: Open chat with provider
+    alert('Chat functionality coming soon!');
   };
 
   const handleTrackBooking = () => {
-    console.log('Track booking');
-    // TODO: Navigate to tracking page
+    if (createdBooking) {
+      router.push(`/bookings/${createdBooking.id}`);
+    }
   };
 
   const handleBackToHome = () => {
-    console.log('Back to home');
-    // TODO: Navigate to home page
-    window.location.href = '/';
+    router.push('/');
   };
 
   const handleViewBooking = () => {
-    console.log('View booking');
-    // TODO: Navigate to booking details page
+    if (createdBooking) {
+      router.push(`/bookings/${createdBooking.id}`);
+    } else {
+      router.push('/bookings');
+    }
   };
 
   const mostBookedServices = [
@@ -81,6 +176,21 @@ export default function ReviewPage() {
     },
   ];
 
+  if (!booking.service) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-[#02368c] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="font-poppins text-lg text-[#64748b]">Loading...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -90,32 +200,39 @@ export default function ReviewPage() {
           description="Check your service details before proceeding to payment."
         />
         <ReviewPageContent
+          booking={booking}
+          paymentMethods={paymentMethods}
+          selectedPaymentMethod={selectedPaymentMethod}
+          onPaymentMethodSelect={setSelectedPaymentMethod}
           onPay={handlePay}
+          isProcessing={isProcessing}
         />
         <MostBooked services={mostBookedServices} onAddService={handleAddService} />
       </main>
       <Footer />
 
       {/* Booking Confirmation Modal */}
-      <BookingConfirmationModal
-        isOpen={showConfirmation}
-        onClose={() => setShowConfirmation(false)}
-        serviceTitle="Home Cleaning"
-        provider={{
-          name: "Yaw Boateng",
-          avatar: "/images/provider-avatar.png",
-          rating: 4.9,
-          specialty: "AC Servicing",
-          distance: "2.3 km away",
-        }}
-        dateTime="Today, 2:00 PM – 4:00 PM"
-        location="East Legon, Accra"
-        onCall={handleCall}
-        onChat={handleChat}
-        onTrackBooking={handleTrackBooking}
-        onBackToHome={handleBackToHome}
-        onViewBooking={handleViewBooking}
-      />
+      {createdBooking && (
+        <BookingConfirmationModal
+          isOpen={showConfirmation}
+          onClose={() => setShowConfirmation(false)}
+          serviceTitle={booking.service?.name || 'Service'}
+          provider={{
+            name: createdBooking.vendorName,
+            avatar: "/images/provider-avatar.png",
+            rating: 4.9,
+            specialty: booking.service?.categoryName || 'Professional',
+            distance: "Nearby",
+          }}
+          dateTime={`${new Date(booking.selectedDate!).toLocaleDateString()} at ${booking.selectedTime}`}
+          location={booking.selectedAddress?.label || 'Selected address'}
+          onCall={handleCall}
+          onChat={handleChat}
+          onTrackBooking={handleTrackBooking}
+          onBackToHome={handleBackToHome}
+          onViewBooking={handleViewBooking}
+        />
+      )}
     </div>
   );
 }

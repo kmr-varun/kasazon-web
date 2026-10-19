@@ -2,62 +2,38 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import type { BookingState } from '@/src/lib/booking-context';
+import type { PaymentMethod } from '@/src/lib/types';
 
 export interface ReviewPageContentProps {
+  booking: BookingState;
+  paymentMethods: PaymentMethod[];
+  selectedPaymentMethod: string | null;
+  onPaymentMethodSelect: (methodId: string) => void;
   onPay: () => void;
+  isProcessing: boolean;
   className?: string;
 }
 
-interface ServiceReview {
-  id: string;
-  title: string;
-  dateTime: string;
-  location: string;
-  issueDescription: string;
-  photos: string[];
-}
-
 export function ReviewPageContent({
+  booking,
+  paymentMethods,
+  selectedPaymentMethod,
+  onPaymentMethodSelect,
   onPay,
+  isProcessing,
   className = '',
 }: ReviewPageContentProps) {
-  const [selectedPayment, setSelectedPayment] = useState<'card' | 'mobile'>('card');
+  const [showAddPayment, setShowAddPayment] = useState(false);
 
-  // Mock service reviews
-  const serviceReviews: ServiceReview[] = [
-    {
-      id: '1',
-      title: 'AC Servicing',
-      dateTime: 'Today, 2:00 PM – 4:00 PM',
-      location: '8-A Light Industrial Area, ITI Rd',
-      issueDescription: 'AC not cooling properly, making noise',
-      photos: [
-        '/images/issue-photo-1.png',
-        '/images/issue-photo-1.png',
-        '/images/issue-photo-1.png',
-        '/images/issue-photo-1.png',
-      ],
-    },
-    {
-      id: '2',
-      title: 'AC Servicing',
-      dateTime: 'Today, 2:00 PM – 4:00 PM',
-      location: '8-A Light Industrial Area, ITI Rd',
-      issueDescription: 'AC not cooling properly, making noise',
-      photos: [
-        '/images/issue-photo-1.png',
-        '/images/issue-photo-1.png',
-        '/images/issue-photo-1.png',
-        '/images/issue-photo-1.png',
-      ],
-    },
-  ];
-
-  const service = {
-    id: 'foam-jet',
-    title: 'Foam-Jet AC Service',
-    price: 499,
-    duration: '60–90 min service',
+  const formatDate = (isoDate: string) => {
+    const date = new Date(isoDate);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
   return (
@@ -65,69 +41,80 @@ export function ReviewPageContent({
       <div className="w-full px-6 sm:px-12 lg:px-24 pb-16 lg:pb-24">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Left Column - Review Content */}
-            <div className="flex-1 flex flex-col gap-4">
-              {/* Service Review Cards */}
-              {serviceReviews.map((review) => (
-                <div
-                  key={review.id}
-                  className="
-                    bg-white
-                    border border-[rgba(0,0,0,0.1)]
-                    rounded-lg p-3
-                    flex flex-col gap-3
-                  "
-                >
-                  {/* Header with Edit */}
-                  <div className="flex items-center justify-between">
-                    <h3 className="
-                      font-roboto-condensed font-medium text-xl
-                      text-[#02368c]
-                      leading-normal
-                    ">
-                      {review.title}
-                    </h3>
-                    <button className="flex items-center gap-1">
-                      <div className="relative w-[15px] h-[15px]">
-                        <Image
-                          src="/images/icons/edit-small.svg"
-                          alt=""
-                          fill
-                          className="object-contain"
-                        />
-                      </div>
-                      <span className="
-                        font-roboto-condensed text-lg
-                        text-[#02368c]
-                        tracking-[0.24px] leading-[16px]
-                      ">
-                        Edit
-                      </span>
-                    </button>
-                  </div>
+            {/* Left Column - Booking Details */}
+            <div className="flex-1 flex flex-col gap-6">
+              {/* Booking Summary Card */}
+              <div className="
+                bg-white
+                border border-[rgba(0,0,0,0.1)]
+                rounded-xl p-6
+                shadow-[0px_1px_1px_rgba(0,0,0,0.05)]
+              ">
+                <h2 className="
+                  font-roboto-condensed font-semibold text-2xl
+                  text-[#0b1c30] mb-6
+                ">
+                  Booking Summary
+                </h2>
 
-                  {/* Date/Time */}
-                  <div className="flex items-center gap-2">
-                    <div className="relative w-[14px] h-[15px]">
+                {/* Service */}
+                <div className="flex items-start gap-4 mb-4 pb-4 border-b border-gray-100">
+                  <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                    {booking.service?.imageUrl ? (
                       <Image
-                        src="/images/icons/calendar.svg"
-                        alt=""
+                        src={booking.service.imageUrl}
+                        alt={booking.service.name}
                         fill
-                        className="object-contain"
+                        className="object-cover"
                       />
-                    </div>
-                    <span className="
-                      font-poppins text-base
-                      text-[rgba(17,17,17,0.75)]
-                      leading-normal
-                    ">
-                      {review.dateTime}
-                    </span>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
                   </div>
+                  <div className="flex-1">
+                    <h3 className="font-roboto-condensed font-semibold text-xl text-[#0b1c30] mb-1">
+                      {booking.service?.name}
+                    </h3>
+                    {booking.selectedPackage && (
+                      <p className="font-poppins text-sm text-[#64748b] mb-2">
+                        {booking.selectedPackage.label}
+                      </p>
+                    )}
+                    <p className="font-poppins font-semibold text-lg text-[#02368c]">
+                      GH₵ {booking.subtotal}
+                    </p>
+                  </div>
+                </div>
 
-                  {/* Location */}
-                  <div className="flex items-center gap-2">
-                    <div className="relative w-[12px] h-[15px]">
+                {/* Date & Time */}
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="relative w-5 h-5 flex-shrink-0 mt-0.5">
+                    <Image
+                      src="/images/icons/calendar.svg"
+                      alt=""
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-poppins font-medium text-sm text-[#424655] mb-1">
+                      Date & Time
+                    </p>
+                    <p className="font-poppins text-base text-[#0b1c30]">
+                      {booking.selectedDate && formatDate(booking.selectedDate)}
+                      {booking.selectedTime && ` at ${booking.selectedTime}`}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Address */}
+                {booking.selectedAddress && (
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="relative w-5 h-5 flex-shrink-0 mt-0.5">
                       <Image
                         src="/images/icons/location-pin.svg"
                         alt=""
@@ -135,360 +122,208 @@ export function ReviewPageContent({
                         className="object-contain"
                       />
                     </div>
-                    <span className="
-                      font-poppins text-sm text-[#777]
-                      leading-normal
-                    ">
-                      {review.location}
-                    </span>
-                  </div>
-
-                  {/* Issue Description + Photos */}
-                  <div className="flex flex-col sm:flex-row gap-3 items-start justify-between">
-                    <div className="flex-1">
-                      <h4 className="
-                        font-poppins font-medium text-base
-                        text-[#111]
-                        leading-normal mb-1
-                      ">
-                        Issue Description
-                      </h4>
-                      <p className="
-                        font-poppins text-sm text-[#777]
-                        leading-normal
-                      ">
-                        {review.issueDescription}
+                    <div>
+                      <p className="font-poppins font-medium text-sm text-[#424655] mb-1">
+                        Service Location
+                      </p>
+                      <p className="font-poppins text-base text-[#0b1c30]">
+                        {booking.selectedAddress.label}
+                      </p>
+                      <p className="font-poppins text-sm text-[#64748b]">
+                        {booking.selectedAddress.street}, {booking.selectedAddress.city}
                       </p>
                     </div>
-                    <div className="flex gap-2">
-                      {review.photos.map((photo, idx) => (
-                        <div
-                          key={idx}
-                          className="
-                            border border-[#e4e2e1]
-                            rounded-lg
-                            shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]
-                            overflow-hidden
-                            w-[92px] h-[92px]
-                            flex-shrink-0
-                            relative
-                          "
-                        >
-                          <Image
-                            src={photo}
-                            alt={`Issue photo ${idx + 1}`}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      ))}
+                  </div>
+                )}
+
+                {/* Notes */}
+                {booking.notes && (
+                  <div className="flex items-start gap-3 pt-4 border-t border-gray-100">
+                    <div className="relative w-5 h-5 flex-shrink-0 mt-0.5">
+                      <Image
+                        src="/images/icons/note-icon.svg"
+                        alt=""
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-poppins font-medium text-sm text-[#424655] mb-1">
+                        Additional Notes
+                      </p>
+                      <p className="font-poppins text-base text-[#0b1c30]">
+                        {booking.notes}
+                      </p>
                     </div>
                   </div>
-                </div>
-              ))}
+                )}
+              </div>
 
-              {/* Payment Options */}
-              <div className="flex flex-col gap-4 mt-9 max-w-[656px]">
-                <h3 className="
-                  font-poppins font-medium text-xl
-                  text-[#111]
-                  leading-normal
+              {/* Payment Method Selection */}
+              <div className="
+                bg-white
+                border border-[rgba(0,0,0,0.1)]
+                rounded-xl p-6
+                shadow-[0px_1px_1px_rgba(0,0,0,0.05)]
+              ">
+                <h2 className="
+                  font-roboto-condensed font-semibold text-2xl
+                  text-[#0b1c30] mb-4
                 ">
-                  Select your preferred payment option.
-                </h3>
+                  Payment Method
+                </h2>
 
-                <div className="flex flex-col gap-3">
-                  {/* Credit/Debit Card */}
-                  <button
-                    onClick={() => setSelectedPayment('card')}
-                    className={`
-                      bg-white
-                      border
-                      ${selectedPayment === 'card' ? 'border-[#c5c6cf]' : 'border-[#c5c6cf]'}
-                      rounded-lg p-3
-                      flex items-center gap-3
-                      w-full
-                      text-left
-                      transition-colors
-                    `}
-                  >
-                    <div className="
-                      bg-[#f0eded]
-                      w-10 h-10
-                      rounded-lg
-                      flex items-center justify-center
-                      flex-shrink-0
-                    ">
-                      <div className="relative w-5 h-4">
-                        <Image
-                          src="/images/icons/card-icon.svg"
-                          alt=""
-                          fill
-                          className="object-contain"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex-1">
-                      <h4 className="
-                        font-poppins font-medium text-base
-                        text-[#111]
-                        leading-[26px]
-                      ">
-                        Credit / Debit Card
-                      </h4>
-                      <p className="
-                        font-poppins text-sm text-[#44474e]
-                        leading-normal
-                      ">
-                        Visa, Mastercard
-                      </p>
-                    </div>
-
-                    <div className={`
-                      w-5 h-5
-                      rounded-full
-                      border-6
-                      flex-shrink-0
-                      ${selectedPayment === 'card' ? 'border-[#02368c] bg-white' : 'border-[#c5c6cf] border-2 bg-white'}
-                    `} />
-                  </button>
-
-                  {/* Mobile Money */}
-                  <button
-                    onClick={() => setSelectedPayment('mobile')}
-                    className={`
-                      bg-white
-                      border
-                      ${selectedPayment === 'mobile' ? 'border-[#c5c6cf]' : 'border-[#c5c6cf]'}
-                      rounded-lg p-3
-                      flex items-center gap-3
-                      w-full
-                      text-left
-                      transition-colors
-                    `}
-                  >
-                    <div className="
-                      bg-[#f0eded]
-                      w-10 h-10
-                      rounded-lg
-                      flex items-center justify-center
-                      flex-shrink-0
-                    ">
-                      <div className="relative w-[18px] h-5">
-                        <Image
-                          src="/images/icons/wallet-icon.svg"
-                          alt=""
-                          fill
-                          className="object-contain"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex-1">
-                      <h4 className="
-                        font-poppins font-medium text-base
-                        text-[#111]
-                        leading-[26px]
-                      ">
-                        Mobile Money (MTN)
-                      </h4>
-                      <p className="
-                        font-poppins text-sm text-[#777]
-                        leading-normal
-                      ">
-                        •••• 4521
-                      </p>
-                    </div>
-
-                    <div className={`
-                      w-5 h-5
-                      rounded-full
-                      border-2
-                      flex-shrink-0
-                      ${selectedPayment === 'mobile' ? 'border-[#02368c] bg-white' : 'border-[#c5c6cf] bg-white'}
-                    `} />
-                  </button>
-                </div>
+                {paymentMethods.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="font-poppins text-sm text-[#64748b] mb-4">
+                      No payment methods saved. You can add one now or pay later.
+                    </p>
+                    <button
+                      onClick={() => setShowAddPayment(true)}
+                      className="
+                        bg-[#eff4ff] text-[#02368c]
+                        px-6 py-3 rounded-lg
+                        font-roboto-condensed font-medium text-sm
+                        hover:bg-[#d3e4fe] transition-colors
+                      "
+                    >
+                      Add Payment Method
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {paymentMethods.map((method) => (
+                      <button
+                        key={method.id}
+                        onClick={() => onPaymentMethodSelect(method.id)}
+                        className={`
+                          border-2 rounded-lg p-4
+                          flex items-center justify-between
+                          transition-colors
+                          ${selectedPaymentMethod === method.id
+                            ? 'border-[#02368c] bg-[#eff4ff]'
+                            : 'border-gray-200 bg-white hover:border-[#02368c]'
+                          }
+                        `}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                            {method.type === 'CARD' ? '💳' : '📱'}
+                          </div>
+                          <div className="text-left">
+                            <p className="font-poppins font-medium text-base text-[#0b1c30]">
+                              {method.type === 'CARD' ? `Card ending in ${method.last4}` : `Mobile Money ${method.last4}`}
+                            </p>
+                            {method.brand && (
+                              <p className="font-poppins text-sm text-[#64748b]">
+                                {method.brand}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className={`
+                          w-5 h-5 rounded-full border-2
+                          flex items-center justify-center
+                          ${selectedPaymentMethod === method.id
+                            ? 'border-[#02368c]'
+                            : 'border-gray-300'
+                          }
+                        `}>
+                          {selectedPaymentMethod === method.id && (
+                            <div className="w-3 h-3 bg-[#02368c] rounded-full" />
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Right Column - Payment Summary (Sticky) */}
+            {/* Right Column - Price Summary & Pay Button */}
             <div className="lg:w-[420px] flex-shrink-0">
-              <div className="lg:sticky lg:top-24 flex flex-col gap-8">
-                {/* Booking Summary with Pay button */}
+              <div className="lg:sticky lg:top-24">
                 <div className="
                   bg-white
                   border border-[rgba(0,0,0,0.1)]
                   rounded-xl p-6
-                  shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1),0px_2px_4px_-2px_rgba(0,0,0,0.1)]
-                  flex flex-col gap-6
+                  shadow-[0px_1px_1px_rgba(0,0,0,0.05)]
                 ">
-                  <div className="pb-1">
-                    <h2 className="
-                      font-roboto-condensed font-semibold text-xl
-                      text-[#0b1c30] tracking-[-0.2px] leading-[28px]
-                    ">
-                      Your Booking
-                    </h2>
-                  </div>
-
-                  {/* Service Card */}
-                  <div className="
-                    bg-[#eff4ff]
-                    rounded-xl p-4
-                    flex flex-col gap-1
+                  <h3 className="
+                    font-roboto-condensed font-semibold text-xl
+                    text-[#0b1c30] mb-6
                   ">
-                    <div className="flex items-start justify-between">
-                      <h3 className="
-                        font-poppins font-semibold text-base
-                        text-[#0b1c30] leading-[24px]
-                      ">
-                        {service.title}
-                      </h3>
-                      <p className="
-                        font-poppins font-semibold text-base
-                        text-[#02368c] leading-[24px]
-                      ">
-                        ₹{service.price}
-                      </p>
+                    Price Details
+                  </h3>
+
+                  {/* Price Breakdown */}
+                  <div className="flex flex-col gap-4 mb-6">
+                    <div className="flex justify-between items-center">
+                      <span className="font-poppins text-base text-[#424655]">
+                        Service Charge
+                      </span>
+                      <span className="font-poppins font-semibold text-base text-[#0b1c30]">
+                        GH₵ {booking.subtotal.toFixed(2)}
+                      </span>
                     </div>
 
-                    <div className="flex items-center gap-1 pt-1">
-                      <div className="relative w-3 h-[14px]">
-                        <Image
-                          src="/images/icons/clock-small.svg"
-                          alt=""
-                          fill
-                          className="object-contain"
-                        />
+                    <div className="flex justify-between items-center">
+                      <span className="font-poppins text-base text-[#424655]">
+                        Platform Fee (3%)
+                      </span>
+                      <span className="font-poppins font-semibold text-base text-[#0b1c30]">
+                        GH₵ {booking.platformFee.toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="border-t border-gray-200 pt-4 mt-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-roboto-condensed font-semibold text-xl text-[#0b1c30]">
+                          Total Amount
+                        </span>
+                        <span className="font-roboto-condensed font-semibold text-2xl text-[#02368c]">
+                          GH₵ {booking.total.toFixed(2)}
+                        </span>
                       </div>
-                      <span className="
-                        font-poppins text-xs text-[#777]
-                        tracking-[0.3px] leading-[14.4px]
-                      ">
-                        {service.duration}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Cost Breakdown */}
-                  <div className="flex flex-col gap-2 pt-1">
-                    <div className="flex items-center justify-between">
-                      <span className="
-                        font-poppins text-base text-[#424655]
-                        leading-normal
-                      ">
-                        AC Servicing
-                      </span>
-                      <span className="
-                        font-poppins text-base text-[#0b1c30]
-                        leading-normal
-                      ">
-                        ₹{service.price}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="
-                        font-poppins text-base text-[#424655]
-                        leading-normal
-                      ">
-                        Platform Fee
-                      </span>
-                      <span className="
-                        font-poppins text-base text-[#0b1c30]
-                        leading-normal
-                      ">
-                        ₹45
-                      </span>
-                    </div>
-
-                    <div className="w-full h-px bg-[#d3e4fe] my-1" />
-
-                    <div className="flex items-center justify-between pt-1">
-                      <span className="
-                        font-poppins font-semibold text-xl
-                        text-[#0b1c30] tracking-[-0.2px] leading-[28px]
-                      ">
-                        Total
-                      </span>
-                      <span className="
-                        font-poppins font-semibold text-xl
-                        text-[#02368c] tracking-[-0.8px] leading-[48px]
-                      ">
-                        ₹544
-                      </span>
                     </div>
                   </div>
 
                   {/* Pay Button */}
                   <button
                     onClick={onPay}
-                    className="
-                      bg-[#02368c]
-                      w-full
-                      px-6 py-4
-                      rounded-xl
-                      font-roboto-condensed font-medium text-xs uppercase
-                      text-white text-center
-                      tracking-[2.816px] leading-[19.2px]
-                      hover:bg-[#024189] transition-colors
-                    "
+                    disabled={isProcessing}
+                    className={`
+                      w-full h-14 rounded-xl
+                      font-roboto-condensed font-medium text-lg
+                      text-white
+                      transition-colors
+                      ${isProcessing
+                        ? 'bg-gray-300 cursor-not-allowed'
+                        : 'bg-[#02368c] hover:bg-[#024189]'
+                      }
+                    `}
                   >
-                    Pay
+                    {isProcessing ? 'Processing...' : 'Confirm & Pay'}
                   </button>
-                </div>
 
-                {/* Need Help Card */}
-                <div className="
-                  bg-white
-                  border border-[rgba(0,0,0,0.1)]
-                  rounded-xl p-4
-                  shadow-[0px_1px_1px_rgba(0,0,0,0.05)]
-                  flex items-center justify-between
-                ">
-                  <div className="flex items-center gap-2">
-                    <div className="
-                      bg-[#dae2fd]
-                      w-9 h-9
-                      rounded-full
-                      flex items-center justify-center
-                    ">
-                      <div className="relative w-[17px] h-[15px]">
+                  {/* Additional Info */}
+                  <div className="mt-6 pt-6 border-t border-gray-100">
+                    <div className="flex items-start gap-2">
+                      <div className="relative w-5 h-5 flex-shrink-0 mt-0.5">
                         <Image
-                          src="/images/icons/help-circle.svg"
+                          src="/images/icons/shield-check.svg"
                           alt=""
                           fill
                           className="object-contain"
                         />
                       </div>
-                    </div>
-
-                    <div className="flex flex-col">
-                      <span className="
-                        font-roboto-condensed font-medium text-sm
-                        text-[#0b1c30] leading-normal
-                      ">
-                        Location assistance needed?
-                      </span>
-                      <span className="
-                        font-roboto-condensed text-xs text-[#424655]
-                        leading-normal
-                      ">
-                        Kasazon Support 24/7 on call
-                      </span>
+                      <div>
+                        <p className="font-poppins text-sm text-[#424655] leading-relaxed">
+                          Your payment is secure and protected. You can cancel within 24 hours for a full refund.
+                        </p>
+                      </div>
                     </div>
                   </div>
-
-                  <button className="
-                    font-inter font-bold text-xs
-                    text-[#02368c]
-                    tracking-[0.3px] leading-[14.4px]
-                    hover:underline
-                  ">
-                    Call Now
-                  </button>
                 </div>
               </div>
             </div>

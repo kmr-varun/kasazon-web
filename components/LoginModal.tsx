@@ -91,9 +91,19 @@ export function LoginModal({
       onLoginSuccess?.();
       onClose();
 
+      // Check for stored redirect URL
+      let targetUrl = redirectTo;
+      if (typeof window !== 'undefined') {
+        const storedRedirect = sessionStorage.getItem('kasazon_redirect_after_login');
+        if (storedRedirect) {
+          targetUrl = storedRedirect;
+          sessionStorage.removeItem('kasazon_redirect_after_login');
+        }
+      }
+
       // Redirect if specified
-      if (redirectTo) {
-        router.push(redirectTo);
+      if (targetUrl) {
+        router.push(targetUrl);
       }
     }
   };

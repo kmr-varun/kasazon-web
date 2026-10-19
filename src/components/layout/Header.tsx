@@ -67,7 +67,7 @@ export function Header({ className = '' }: HeaderProps) {
           </nav>
 
           {/* Auth Section - Desktop */}
-          <div className="hidden lg:block flex-shrink-0">
+          <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
             {isLoading ? (
               <div className="w-[100px] h-[44px] bg-gray-100 rounded-lg animate-pulse" />
             ) : isAuthenticated && user ? (
@@ -131,13 +131,22 @@ export function Header({ className = '' }: HeaderProps) {
                 )}
               </div>
             ) : (
-              <Button
-                variant="primary"
-                size="md"
-                onClick={() => setShowLoginModal(true)}
-              >
-                Login
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  size="md"
+                  onClick={() => router.push('/register')}
+                >
+                  Register
+                </Button>
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={() => setShowLoginModal(true)}
+                >
+                  Login
+                </Button>
+              </>
             )}
           </div>
 
@@ -209,17 +218,30 @@ export function Header({ className = '' }: HeaderProps) {
                   </button>
                 </div>
               ) : (
-                <Button
-                  variant="primary"
-                  size="md"
-                  fullWidth
-                  onClick={() => {
-                    setShowLoginModal(true);
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  Login
-                </Button>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    variant="outline"
+                    size="md"
+                    fullWidth
+                    onClick={() => {
+                      router.push('/register');
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    Register
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="md"
+                    fullWidth
+                    onClick={() => {
+                      setShowLoginModal(true);
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    Login
+                  </Button>
+                </div>
               )}
             </div>
           </div>

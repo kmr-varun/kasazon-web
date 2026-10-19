@@ -1,83 +1,55 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { Header, Footer } from "@/src/components/layout";
 import { ServiceHero, ServiceCategoryNav, FilterSortBar, ServiceListings } from "@/src/components/sections";
-
-// Mock data - will be replaced with API data
-const serviceData = {
-  'ac-servicing': {
-    image: '/images/ac-servicing-hero.png',
-    rating: 5,
-    reviewCount: 350,
-    title: 'AC Servicing',
-    description: "Keep your AC running smoothly with certified professionals, transparent fixed pricing, and India's most trusted 30-day cooling assurance.",
-    badges: [
-      {
-        icon: '/images/icons/verified-professionals.svg',
-        label: 'Verified Professionals',
-      },
-      {
-        icon: '/images/icons/transparent-pricing.svg',
-        label: 'Transparent Pricing',
-      },
-      {
-        icon: '/images/icons/warranty.svg',
-        label: '30-Day Warranty',
-      },
-      {
-        icon: '/images/icons/secure-payments.svg',
-        label: 'Secure Payments',
-      },
-    ],
-    categories: [
-      {
-        id: 'ac-service',
-        label: 'AC Service',
-        icon: '/images/icons/ac-service.svg',
-      },
-      {
-        id: 'repair-gas',
-        label: 'Repair & Gas Refill',
-        icon: '/images/icons/repair-gas.svg',
-      },
-      {
-        id: 'installation',
-        label: 'Installation',
-        icon: '/images/icons/installation.svg',
-      },
-      {
-        id: 'uninstallation',
-        label: 'Uninstallation',
-        icon: '/images/icons/uninstallation.svg',
-      },
-      {
-        id: 'ac-maintenance',
-        label: 'AC Maintenance',
-        icon: '/images/icons/ac-maintenance.svg',
-      },
-    ],
-  },
-};
+import { api } from '@/src/lib/api';
+import type { Service, ServiceCategory } from '@/src/lib/types';
 
 export default function ServiceCategoryPage() {
   const params = useParams();
+  const router = useRouter();
   const category = params.category as string;
-  const service = serviceData[category as keyof typeof serviceData];
 
-  // Handle unknown service
-  if (!service) {
+  const [categoryData, setCategoryData] = useState<ServiceCategory | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCategoryData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const categoryDetails = await api.services.getCategory(category);
+        setCategoryData(categoryDetails as ServiceCategory);
+
+        // For now, services are not returned with category, so we'll show placeholder
+        // In production, you'd have an API endpoint that returns services by category
+        setServices([]);
+      } catch (err) {
+        console.error('Error fetching category:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load category');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (category) {
+      fetchCategoryData();
+    }
+  }, [category]);
+
+  if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="font-roboto-condensed text-4xl text-black mb-4">
-              Service Not Found
-            </h1>
-            <p className="font-poppins text-lg text-[#424655]">
-              The service you're looking for doesn't exist.
-            </p>
+            <div className="w-16 h-16 border-4 border-[#02368c] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="font-poppins text-lg text-[#64748b]">Loading category...</p>
           </div>
         </main>
         <Footer />
@@ -85,85 +57,99 @@ export default function ServiceCategoryPage() {
     );
   }
 
+  if (error || !categoryData) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="font-roboto-condensed text-4xl text-black mb-4">
+              Category Not Found
+            </h1>
+            <p className="font-poppins text-lg text-[#424655] mb-6">
+              {error || 'The category you\'re looking for doesn\'t exist.'}
+            </p>
+            <button
+              onClick={() => router.push('/services')}
+              className="bg-[#02368c] text-white px-6 py-3 rounded-lg hover:bg-[#024189] transition-colors"
+            >
+              Browse All Services
+            </button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const badges = [
+    {
+      icon: '/images/icons/verified-professionals.svg',
+      label: 'Verified Professionals',
+    },
+    {
+      icon: '/images/icons/transparent-pricing.svg',
+      label: 'Transparent Pricing',
+    },
+    {
+      icon: '/images/icons/warranty.svg',
+      label: '30-Day Warranty',
+    },
+    {
+      icon: '/images/icons/secure-payments.svg',
+      label: 'Secure Payments',
+    },
+  ];
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-1">
         <ServiceHero
-          image={service.image}
-          rating={service.rating}
-          reviewCount={service.reviewCount}
-          title={service.title}
-          description={service.description}
-          badges={service.badges}
+          image={categoryData.imageUrl || '/images/ac-servicing-hero.png'}
+          rating={4.8}
+          reviewCount={350}
+          title={categoryData.name}
+          description={categoryData.description || `Professional ${categoryData.name.toLowerCase()} services at your doorstep`}
+          badges={badges}
         />
-        <ServiceCategoryNav
-          categories={service.categories}
-          defaultActiveId="ac-service"
-          onCategoryChange={(categoryId) => {
-            console.log('Category changed:', categoryId);
-            // TODO: Filter services by category
-          }}
-        />
-        <FilterSortBar
-          title="AC Service & Repair"
-          serviceCount={12}
-          sortBy="recommended"
-          onFilterChange={(filters) => {
-            console.log('Filters changed:', filters);
-            // TODO: Apply filters
-          }}
-          onSortChange={(sortBy) => {
-            console.log('Sort changed:', sortBy);
-            // TODO: Apply sorting
-          }}
-        />
-        <ServiceListings
-          sectionTitle="Super Saver Packages"
-          sectionDescription="Bundled deep cleaning packages tailored for multiple rooms"
-          services={[
-            {
-              id: '1',
-              title: 'Foam-Jet — 2 ACs',
-              description: 'Split or Window',
-              rating: 4.5,
-              reviewCount: 890,
-              duration: '3–4 hrs',
-              price: 40,
-              image: '/images/service-placeholder.png',
-            },
-            {
-              id: '2',
-              title: 'Foam-Jet — 2 ACs',
-              description: 'Split or Window',
-              rating: 4.5,
-              reviewCount: 890,
-              duration: '3–4 hrs',
-              price: 40,
-              image: '/images/service-placeholder.png',
-            },
-            {
-              id: '3',
-              title: 'Foam-Jet — 2 ACs',
-              description: 'Split or Window',
-              rating: 4.5,
-              reviewCount: 890,
-              duration: '3–4 hrs',
-              price: 40,
-              image: '/images/service-placeholder.png',
-            },
-            {
-              id: '4',
-              title: 'Foam-Jet — 2 ACs',
-              description: 'Split or Window',
-              rating: 4.5,
-              reviewCount: 890,
-              duration: '3–4 hrs',
-              price: 40,
-              image: '/images/service-placeholder.png',
-            },
-          ]}
-        />
+
+        {/* Service Listings Section */}
+        <div className="bg-white py-12">
+          <div className="max-w-7xl mx-auto px-6">
+            {services.length > 0 ? (
+              <ServiceListings
+                sectionTitle={`${categoryData.name} Services`}
+                sectionDescription={`Browse all available ${categoryData.name.toLowerCase()} services`}
+                services={services.map(service => ({
+                  id: service.id,
+                  title: service.name,
+                  description: service.description || '',
+                  rating: service.rating,
+                  reviewCount: service.reviewCount,
+                  duration: `${Math.floor(service.duration / 60)} hrs`,
+                  price: service.basePrice,
+                  image: service.imageUrl || '/images/service-placeholder.png',
+                }))}
+              />
+            ) : (
+              <div className="text-center py-12">
+                <h3 className="font-roboto-condensed text-2xl text-[#0b1c30] mb-4">
+                  {categoryData.name} Services
+                </h3>
+                <p className="font-poppins text-base text-[#64748b] mb-6">
+                  Services in this category are coming soon. Check back later!
+                </p>
+                <button
+                  onClick={() => router.push('/services')}
+                  className="bg-[#02368c] text-white px-6 py-3 rounded-lg hover:bg-[#024189] transition-colors"
+                >
+                  Browse All Categories
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </main>
       <Footer />
     </div>

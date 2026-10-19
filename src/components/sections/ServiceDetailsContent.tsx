@@ -22,7 +22,7 @@ export interface ServiceDetailsContentProps {
   packages: PackageOption[];
   includes: string[];
   processSteps: ProcessStep[];
-  onCheckout: () => void;
+  onCheckout: (selectedPackageId: string) => void;
   className?: string;
 }
 
@@ -225,7 +225,7 @@ export function ServiceDetailsContent({
               <div className="lg:sticky lg:top-24">
                 <BookingCart
                   itemCount={cartItems.length}
-                  onCheckout={onCheckout}
+                  onCheckout={() => onCheckout(selectedPackage)}
                 />
               </div>
             </div>
