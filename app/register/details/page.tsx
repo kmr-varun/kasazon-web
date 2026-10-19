@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -8,29 +8,50 @@ import { countryCodes } from '@/data/registration';
 import { OTPModal } from '@/components/OTPModal';
 import { Header } from '@/src/components/layout/Header';
 import { Footer } from '@/src/components/layout/Footer';
+import { sendOtp, formatPhoneForApi } from '@/src/lib/auth';
 
-export default function RegisterDetailsPage() {
+function RegisterDetailsContent() {
   const searchParams = useSearchParams();
   const accountType = searchParams.get('type') || 'customer';
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [emailVerified, setEmailVerified] = useState(false);
   const [showEmailOTP, setShowEmailOTP] = useState(false);
+  const [isEmailSending, setIsEmailSending] = useState(false);
 
   const [countryCode, setCountryCode] = useState('+233');
   const [mobile, setMobile] = useState('');
   const [mobileError, setMobileError] = useState('');
   const [mobileVerified, setMobileVerified] = useState(false);
   const [showMobileOTP, setShowMobileOTP] = useState(false);
+  const [isMobileSending, setIsMobileSending] = useState(false);
 
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+
+  // Pre-fill from session storage (from login flow)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const pendingPhone = sessionStorage.getItem('kasazon_pending_phone');
+      if (pendingPhone) {
+        // Extract country code and number from stored phone
+        // Format is +233544123456
+        const match = pendingPhone.match(/^\+(\d{1,4})(\d+)$/);
+        if (match) {
+          setCountryCode(`+${match[1]}`);
+          setMobile(match[2]);
+          // Phone was already verified during login
+          setMobileVerified(true);
+        }
+      }
+    }
+  }, []);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const handleVerifyEmail = () => {
+  const handleVerifyEmail = async () => {
     if (!email) {
       setEmailError('Email is required');
       return;
@@ -39,17 +60,27 @@ export default function RegisterDetailsPage() {
       setEmailError('Please enter a valid email');
       return;
     }
+
     setEmailError('');
-    setShowEmailOTP(true);
+    setIsEmailSending(true);
+
+    try {
+      await sendOtp(email, 'email', 'REGISTRATION');
+      setShowEmailOTP(true);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to send OTP';
+      setEmailError(message);
+    } finally {
+      setIsEmailSending(false);
+    }
   };
 
-  const handleEmailOTPVerify = (otp: string) => {
-    console.log('Email verified with OTP:', otp);
+  const handleEmailOTPVerify = () => {
     setEmailVerified(true);
     setShowEmailOTP(false);
   };
 
-  const handleVerifyMobile = () => {
+  const handleVerifyMobile = async () => {
     if (!mobile) {
       setMobileError('Mobile number is required');
       return;
@@ -58,12 +89,23 @@ export default function RegisterDetailsPage() {
       setMobileError('Please enter a valid mobile number');
       return;
     }
+
     setMobileError('');
-    setShowMobileOTP(true);
+    setIsMobileSending(true);
+
+    try {
+      const formattedPhone = formatPhoneForApi(countryCode, mobile);
+      await sendOtp(formattedPhone, 'phone', 'REGISTRATION');
+      setShowMobileOTP(true);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to send OTP';
+      setMobileError(message);
+    } finally {
+      setIsMobileSending(false);
+    }
   };
 
-  const handleMobileOTPVerify = (otp: string) => {
-    console.log('Mobile verified with OTP:', otp);
+  const handleMobileOTPVerify = () => {
     setMobileVerified(true);
     setShowMobileOTP(false);
   };
@@ -95,7 +137,12 @@ export default function RegisterDetailsPage() {
       return;
     }
 
-    console.log('Continue to step 3 as:', accountType);
+    // Store verified contact details for the complete page
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('kasazon_verified_email', email);
+      sessionStorage.setItem('kasazon_verified_phone', formatPhoneForApi(countryCode, mobile));
+    }
+
     window.location.href = `/register/complete?type=${accountType}`;
   };
 
@@ -176,6 +223,7 @@ export default function RegisterDetailsPage() {
                       if (emailError) setEmailError('');
                     }}
                     placeholder="john@gmail.com"
+                    disabled={emailVerified}
                     className="
                       flex-1
                       font-rubik text-base
@@ -185,6 +233,7 @@ export default function RegisterDetailsPage() {
                       outline-none
                       bg-transparent
                       min-w-0
+                      disabled:opacity-60
                     "
                   />
                   {emailVerified ? (
@@ -199,7 +248,8 @@ export default function RegisterDetailsPage() {
                     <button
                       onClick={handleVerifyEmail}
                       type="button"
-                      className="
+                      disabled={isEmailSending}
+                      className={`
                         font-rubik text-sm text-[#02368c]
                         leading-[22px]
                         underline
@@ -207,9 +257,10 @@ export default function RegisterDetailsPage() {
                         hover:opacity-80 transition-opacity
                         flex-shrink-0
                         whitespace-nowrap
-                      "
+                        ${isEmailSending ? 'opacity-50' : ''}
+                      `}
                     >
-                      Verify
+                      {isEmailSending ? 'Sending...' : 'Verify'}
                     </button>
                   )}
                 </div>
@@ -238,17 +289,19 @@ export default function RegisterDetailsPage() {
                 {/* Country Code Dropdown */}
                 <div className="relative flex-shrink-0">
                   <button
-                    onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                    onClick={() => !mobileVerified && setShowCountryDropdown(!showCountryDropdown)}
                     type="button"
-                    className="
+                    disabled={mobileVerified}
+                    className={`
                       border border-[#d9d9d9]
                       rounded-lg
                       px-3
                       h-[40px]
                       flex items-center gap-2
                       bg-white
-                      hover:border-[#02368c] transition-colors
-                    "
+                      transition-colors
+                      ${mobileVerified ? 'opacity-60' : 'hover:border-[#02368c]'}
+                    `}
                   >
                     <span className="
                       font-rubik text-base text-[#222]
@@ -257,14 +310,16 @@ export default function RegisterDetailsPage() {
                     ">
                       {countryCode}
                     </span>
-                    <div className="relative w-[15px] h-[12px]">
-                      <Image
-                        src="/images/icons/dropdown-arrow.svg"
-                        alt=""
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
+                    {!mobileVerified && (
+                      <div className="relative w-[15px] h-[12px]">
+                        <Image
+                          src="/images/icons/dropdown-arrow.svg"
+                          alt=""
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    )}
                   </button>
 
                   {/* Dropdown Menu */}
@@ -323,6 +378,7 @@ export default function RegisterDetailsPage() {
                         if (mobileError) setMobileError('');
                       }}
                       placeholder="XXXXX-XXXXX"
+                      disabled={mobileVerified}
                       className="
                         flex-1
                         font-rubik text-base
@@ -332,6 +388,7 @@ export default function RegisterDetailsPage() {
                         outline-none
                         bg-transparent
                         min-w-0
+                        disabled:opacity-60
                       "
                     />
                     {mobileVerified ? (
@@ -346,7 +403,8 @@ export default function RegisterDetailsPage() {
                       <button
                         onClick={handleVerifyMobile}
                         type="button"
-                        className="
+                        disabled={isMobileSending}
+                        className={`
                           font-rubik text-sm text-[#02368c]
                           leading-[22px]
                           underline
@@ -354,9 +412,10 @@ export default function RegisterDetailsPage() {
                           hover:opacity-80 transition-opacity
                           flex-shrink-0
                           whitespace-nowrap
-                        "
+                          ${isMobileSending ? 'opacity-50' : ''}
+                        `}
                       >
-                        Verify
+                        {isMobileSending ? 'Sending...' : 'Verify'}
                       </button>
                     )}
                     {mobileError && !mobileVerified && (
@@ -443,6 +502,7 @@ export default function RegisterDetailsPage() {
         onVerify={handleEmailOTPVerify}
         type="email"
         contact={email}
+        purpose="REGISTRATION"
       />
 
       <OTPModal
@@ -451,7 +511,16 @@ export default function RegisterDetailsPage() {
         onVerify={handleMobileOTPVerify}
         type="mobile"
         contact={`${countryCode} ${mobile}`}
+        purpose="REGISTRATION"
       />
     </>
+  );
+}
+
+export default function RegisterDetailsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <RegisterDetailsContent />
+    </Suspense>
   );
 }

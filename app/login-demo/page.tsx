@@ -1,14 +1,25 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { LoginModal } from '@/components/LoginModal';
+import { useAuth } from '@/src/hooks/useAuth';
 import Link from 'next/link';
 
 export default function LoginDemoPage() {
+  const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
 
   const handleLoginSuccess = () => {
+    // The login modal will close automatically and auth state will update
+    // We can show a success message or redirect
     alert('Login successful! Welcome back!');
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    alert('Logged out successfully!');
   };
 
   return (
@@ -38,6 +49,28 @@ export default function LoginDemoPage() {
           </p>
         </div>
 
+        {/* Auth Status Display */}
+        {isAuthenticated && user && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+            <p className="font-poppins text-sm text-green-800 text-center">
+              <strong>Logged in as:</strong> {user.fullName || user.phone || user.email || 'User'}
+            </p>
+            <button
+              onClick={handleLogout}
+              className="
+                w-full mt-3
+                bg-red-600
+                h-[44px]
+                rounded-lg
+                font-roboto-condensed font-medium text-base text-white
+                hover:bg-red-700 transition-colors
+              "
+            >
+              Logout
+            </button>
+          </div>
+        )}
+
         <div className="flex flex-col gap-4">
           <button
             onClick={() => setShowLogin(true)}
@@ -50,7 +83,7 @@ export default function LoginDemoPage() {
               hover:bg-[#024189] transition-colors
             "
           >
-            Open Login Modal
+            {isAuthenticated ? 'Open Login Modal (Already Logged In)' : 'Open Login Modal'}
           </button>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

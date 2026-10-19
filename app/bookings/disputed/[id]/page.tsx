@@ -1,55 +1,120 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/src/components/layout/Header';
 import { Footer } from '@/src/components/layout/Footer';
+import { getBookingById, isAuthenticated, api } from '@/src/lib/api';
+import type { BookingDetail } from '@/src/lib/types';
 
 export default function DisputedBookingDetailPage() {
   const params = useParams();
-  const bookingId = params.id;
+  const router = useRouter();
+  const bookingId = params.id as string;
 
+  const [booking, setBooking] = useState<BookingDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [copiedBookingId, setCopiedBookingId] = useState(false);
   const [response, setResponse] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const booking = {
-    id: bookingId,
-    bookingCode: 'KASA-AC-30926',
-    service: 'Foam-Jet AC Service',
-    customer: {
-      name: 'Ama Owusu',
-      avatar: '/images/customer-avatar.png',
-      disputeSubmitted: '2 days ago',
-    },
-    complaint: {
-      reason: 'Incomplete work',
-      description: "The wiring issue wasn't fully fixed, and it stopped working again the next day.",
-      evidenceImage: '/images/evidence-thumbnail.png',
-    },
-    pricing: {
-      serviceAmount: 499,
-      platformFee: 45,
-      total: 544,
-    },
-    image: '/images/booking-service-image.png',
-  };
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      router.push(`/login?redirect=/bookings/disputed/${bookingId}`);
+      return;
+    }
+
+    async function fetchBooking() {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getBookingById(bookingId);
+        setBooking(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load booking');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchBooking();
+  }, [bookingId, router]);
 
   const copyBookingId = () => {
-    navigator.clipboard.writeText(booking.bookingCode);
-    setCopiedBookingId(true);
-    setTimeout(() => setCopiedBookingId(false), 2000);
+    if (booking) {
+      navigator.clipboard.writeText(booking.id);
+      setCopiedBookingId(true);
+      setTimeout(() => setCopiedBookingId(false), 2000);
+    }
   };
 
-  const handleSubmitResponse = () => {
-    console.log('Submit response:', response);
-    // Submit response logic here
+  const handleSubmitResponse = async () => {
+    if (!response.trim()) {
+      alert('Please enter your response');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      // TODO: Submit dispute response to API
+      // await apiFetch(`/disputes/${disputeId}/respond`, {
+      //   method: 'POST',
+      //   body: JSON.stringify({ response }),
+      // });
+      alert('Response submitted successfully');
+      setResponse('');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to submit response');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleContactSupport = () => {
-    console.log('Contact support');
-    // Contact support logic here
+    // TODO: Open support chat or phone
+    alert('Contact support functionality coming soon');
   };
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen bg-white py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-24">
+          <div className="max-w-[1728px] mx-auto flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#02368c]"></div>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (error || !booking) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen bg-white py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-24">
+          <div className="max-w-[1728px] mx-auto">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-red-700">{error || 'Booking not found'}</p>
+              <button
+                onClick={() => router.push('/bookings')}
+                className="mt-2 text-red-600 underline hover:text-red-800"
+              >
+                Back to bookings
+              </button>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  const platformFee = Math.round(booking.totalAmount * 0.08);
+  const serviceAmount = booking.totalAmount - platformFee;
 
   return (
     <>
@@ -63,15 +128,18 @@ export default function DisputedBookingDetailPage() {
             </h1>
           </div>
 
-          {/* Booking Header Banner - No status badge */}
+          {/* Booking Header Banner */}
           <div className="flex items-start gap-4 mb-6">
             <div className="flex-1 flex flex-col gap-1.5">
+              <div className="bg-[#fff3cd] inline-flex items-center px-3 py-1 rounded-full w-fit">
+                <span className="font-inter font-bold text-xs text-[#856404] leading-4">Disputed</span>
+              </div>
               <h2 className="font-inter font-bold text-2xl text-[#0f172a] leading-8 tracking-[-0.6px] pt-1.5">
-                {booking.service}
+                {booking.serviceName}
               </h2>
               <div className="flex items-center gap-2">
                 <span className="font-inter text-sm text-[#475569] leading-5">
-                  Booking ID: {booking.bookingCode}
+                  Booking ID: {booking.id.slice(0, 15)}...
                 </span>
                 <button
                   onClick={copyBookingId}
@@ -79,12 +147,15 @@ export default function DisputedBookingDetailPage() {
                 >
                   <Image src="/images/icons/copy-booking-id.svg" alt="Copy" width={16} height={16} />
                 </button>
+                {copiedBookingId && (
+                  <span className="text-xs text-green-600">Copied!</span>
+                )}
               </div>
             </div>
             <div className="w-[235px] h-[121px] rounded-lg overflow-hidden flex-shrink-0">
               <Image
-                src={booking.image}
-                alt={booking.service}
+                src={booking.serviceImageUrl || '/images/booking-service-image.png'}
+                alt={booking.serviceName}
                 width={235}
                 height={121}
                 className="w-full h-full object-cover"
@@ -96,91 +167,83 @@ export default function DisputedBookingDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Left Column - Dispute Details */}
             <div className="lg:col-span-8 flex flex-col gap-6">
-              {/* Customer's Complaint Card */}
+              {/* Dispute Status Card */}
               <div className="bg-[#f5f5f5] border border-[#ebebeb] rounded-lg p-3 flex flex-col gap-3">
                 <h3 className="font-poppins text-base text-[#111] leading-normal">
-                  Customer's Complaint
+                  Dispute Status
                 </h3>
-                <p className="font-poppins font-medium text-lg text-[#111] leading-normal">
-                  Reason: {booking.complaint.reason}
+                <p className="font-poppins font-medium text-lg text-[#856404] leading-normal">
+                  Under Review
                 </p>
-                <div className="flex gap-4">
-                  <div className="flex-1 bg-white rounded-lg p-3 pb-3">
-                    <p className="font-poppins text-base text-[#777] leading-normal">
-                      {booking.complaint.description}
-                    </p>
-                  </div>
-                  <div className="w-20 h-[86px] border border-[#e4e2e1] rounded-lg overflow-hidden flex-shrink-0">
-                    <Image
-                      src={booking.complaint.evidenceImage}
-                      alt="Evidence"
-                      width={80}
-                      height={86}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
+                <p className="font-poppins text-sm text-[#777] leading-normal">
+                  Our team is reviewing your dispute. Resolution typically takes 24-48 hours.
+                </p>
               </div>
 
-              {/* Your Submitted Evidence Section */}
-              <div className="bg-white border border-[rgba(0,0,0,0.1)] rounded-lg p-4 flex flex-col gap-4">
-                <h3 className="font-roboto-condensed font-medium text-lg text-black leading-normal">
-                  Your Submitted Evidence
-                </h3>
-                <div className="flex gap-3 w-[351px]">
-                  <div className="flex-1 flex flex-col gap-2">
-                    <h4 className="font-poppins font-medium text-base text-[#1a2b4c] leading-normal">
-                      Before Photo
-                    </h4>
-                    <div className="relative h-32 rounded-lg overflow-hidden">
-                      <Image
-                        src="/images/before-after-photo.png"
-                        alt="Before"
-                        fill
-                        className="object-cover"
-                      />
-                      <div className="absolute inset-0 bg-[rgba(26,43,76,0.2)]" />
-                    </div>
-                  </div>
-                  <div className="flex-1 flex flex-col gap-2">
-                    <h4 className="font-poppins font-medium text-base text-[#1a2b4c] leading-normal">
-                      After Photo
-                    </h4>
-                    <div className="relative h-32 rounded-lg overflow-hidden">
-                      <Image
-                        src="/images/before-after-photo.png"
-                        alt="After"
-                        fill
-                        className="object-cover"
-                      />
-                      <div className="absolute inset-0 bg-[rgba(26,43,76,0.2)]" />
-                    </div>
-                  </div>
+              {/* Service Details Card */}
+              <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-[0px_1px_1px_rgba(0,0,0,0.05)]">
+                <div className="flex items-center gap-2.5 mb-5">
+                  <Image src="/images/icons/service-details-icon.svg" alt="" width={20} height={20} />
+                  <h3 className="font-poppins font-semibold text-xl text-[#111] leading-normal">
+                    Service Details
+                  </h3>
                 </div>
-              </div>
-
-              {/* Customer Info Card */}
-              <div className="bg-white border border-[rgba(0,0,0,0.1)] rounded-lg p-3 flex items-center justify-center">
-                <div className="flex gap-3 items-center w-full">
-                  <div className="w-[62px] h-[62px] rounded-full overflow-hidden flex-shrink-0 shadow-sm">
-                    <Image
-                      src={booking.customer.avatar}
-                      alt={booking.customer.name}
-                      width={62}
-                      height={62}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                <div className="flex items-start justify-between pl-4">
                   <div className="flex flex-col gap-1">
-                    <h4 className="font-poppins font-medium text-base text-[#111] leading-normal">
-                      {booking.customer.name}
+                    <h4 className="font-poppins font-medium text-lg text-[#0f172a] leading-normal">
+                      {booking.serviceName}
                     </h4>
-                    <p className="font-poppins text-sm text-[#44474e] leading-normal">
-                      Dispute Submitted {booking.customer.disputeSubmitted}
-                    </p>
+                    {booking.notes && (
+                      <p className="font-poppins text-sm text-[#777] leading-normal">
+                        {booking.notes}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end gap-0.5">
+                    <span className="font-poppins text-sm text-[#777] leading-normal">Amount</span>
+                    <span className="font-poppins font-semibold text-xl text-[#02368c] leading-normal">
+                      {booking.currency}{serviceAmount}
+                    </span>
                   </div>
                 </div>
               </div>
+
+              {/* Provider Card */}
+              {booking.vendor && (
+                <div className="bg-white border border-[rgba(0,0,0,0.1)] rounded-lg p-3 flex items-center">
+                  <div className="flex gap-3 items-center w-full">
+                    <div className="w-[62px] h-[62px] rounded-full overflow-hidden flex-shrink-0 shadow-sm bg-gray-200">
+                      {booking.vendor.avatarUrl ? (
+                        <Image
+                          src={booking.vendor.avatarUrl}
+                          alt={booking.vendor.businessName}
+                          width={62}
+                          height={62}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-gray-500">
+                          {booking.vendor.businessName.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <h4 className="font-poppins font-medium text-base text-[#111] leading-normal">
+                        {booking.vendor.businessName}
+                      </h4>
+                      <div className="flex items-center gap-1">
+                        <Image src="/images/icons/star-rating-icon.svg" alt="" width={12} height={14} />
+                        <span className="font-poppins text-sm text-[rgba(17,17,17,0.7)] leading-normal">
+                          {booking.vendor.rating.toFixed(1)}
+                        </span>
+                        <span className="font-poppins text-sm text-[rgba(17,17,17,0.7)] leading-normal before:content-['·'] before:mx-1">
+                          {booking.vendor.reviewCount} reviews
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Response Textarea Section */}
               <div className="flex flex-col gap-2">
@@ -205,7 +268,7 @@ export default function DisputedBookingDetailPage() {
                   className="flex-shrink-0"
                 />
                 <p className="font-poppins text-sm text-[#111] leading-normal">
-                  Our team is reviewing evidence from both sides. Resolution typically takes 24–48 hours. Your payment for this job remains held until resolved.
+                  Our team is reviewing evidence from both sides. Resolution typically takes 24-48 hours. Your payment for this job remains held until resolved.
                 </p>
               </div>
 
@@ -213,10 +276,11 @@ export default function DisputedBookingDetailPage() {
               <div className="flex gap-6">
                 <button
                   onClick={handleSubmitResponse}
-                  className="bg-[#02368c] px-6 py-4 rounded-xl w-[354px] hover:bg-[#024189] transition-colors"
+                  disabled={submitting}
+                  className="bg-[#02368c] px-6 py-4 rounded-xl w-[354px] hover:bg-[#024189] transition-colors disabled:opacity-50"
                 >
                   <span className="font-roboto-condensed text-lg text-white leading-normal">
-                    Submit Your Response
+                    {submitting ? 'Submitting...' : 'Submit Your Response'}
                   </span>
                 </button>
                 <button
@@ -241,33 +305,35 @@ export default function DisputedBookingDetailPage() {
                 {/* Service Item */}
                 <div className="border-b border-[#f1f5f9] pb-5 mb-6">
                   <h4 className="font-poppins text-lg text-[#0f172a] leading-normal mb-1">
-                    {booking.service}
+                    {booking.serviceName}
                   </h4>
-                  <div className="flex items-center gap-1">
-                    <span className="font-poppins text-sm text-[#f59e0b] leading-normal">★</span>
-                    <span className="font-poppins text-sm text-[#777] leading-normal">4.5</span>
-                    <span className="font-inter text-[11px] text-[#64748b] leading-[16.5px] mx-1">•</span>
-                    <span className="font-poppins text-sm text-[#64748b] leading-normal">420 reviews</span>
-                  </div>
+                  {booking.vendor && (
+                    <div className="flex items-center gap-1">
+                      <span className="font-poppins text-sm text-[#f59e0b] leading-normal">★</span>
+                      <span className="font-poppins text-sm text-[#777] leading-normal">{booking.vendor.rating.toFixed(1)}</span>
+                      <span className="font-inter text-[11px] text-[#64748b] leading-[16.5px] mx-1">·</span>
+                      <span className="font-poppins text-sm text-[#64748b] leading-normal">{booking.vendor.reviewCount} reviews</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Cost Breakdown */}
                 <div className="flex flex-col gap-2 pt-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-poppins text-base text-[#424655] leading-normal">AC Servicing</span>
-                    <span className="font-poppins text-base text-[#0b1c30] leading-normal">₵{booking.pricing.serviceAmount}</span>
+                    <span className="font-poppins text-base text-[#424655] leading-normal">{booking.serviceName}</span>
+                    <span className="font-poppins text-base text-[#0b1c30] leading-normal">{booking.currency}{serviceAmount}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="font-poppins text-base text-[#424655] leading-normal">Platform Fee</span>
-                    <span className="font-poppins text-base text-[#0b1c30] leading-normal">₵{booking.pricing.platformFee}</span>
+                    <span className="font-poppins text-base text-[#0b1c30] leading-normal">{booking.currency}{platformFee}</span>
                   </div>
                   <div className="bg-[#d3e4fe] h-px my-1" />
                   <div className="flex items-center justify-between pt-1">
                     <span className="font-poppins font-semibold text-xl text-[#0b1c30] leading-7 tracking-[-0.2px]">
                       Total
                     </span>
-                    <span className="font-poppins font-semibold text-xl text-[#02368c] leading-[48px] tracking-[-0.8px]">
-                      ₵{booking.pricing.total}
+                    <span className="font-poppins font-semibold text-xl text-[#856404] leading-[48px] tracking-[-0.8px]">
+                      On Hold
                     </span>
                   </div>
                 </div>

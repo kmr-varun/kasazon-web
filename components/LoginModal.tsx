@@ -2,13 +2,16 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { OTPModal } from './OTPModal';
 import { countryCodes } from '@/data/registration';
+import { sendOtp, formatPhoneForApi } from '@/src/lib/auth';
 
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   onLoginSuccess?: () => void;
+  redirectTo?: string;
 }
 
 const languages = [
@@ -22,7 +25,13 @@ const languages = [
   { id: 'hi', name: 'Hindi' },
 ];
 
-export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps) {
+export function LoginModal({
+  isOpen,
+  onClose,
+  onLoginSuccess,
+  redirectTo
+}: LoginModalProps) {
+  const router = useRouter();
   const [fullName, setFullName] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
@@ -31,10 +40,11 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
   const [phoneNumber, setPhoneNumber] = useState('');
   const [showOTP, setShowOTP] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const selectedLanguageName = languages.find(l => l.id === selectedLanguage)?.name || '';
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     // Validation
     if (!fullName.trim()) {
       setError('Please enter your full name');
@@ -50,19 +60,58 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
     }
 
     setError('');
-    setShowOTP(true);
+    setIsLoading(true);
+
+    try {
+      const formattedPhone = formatPhoneForApi(countryCode, phoneNumber);
+      await sendOtp(formattedPhone, 'phone', 'LOGIN');
+      setShowOTP(true);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to send OTP';
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleOTPVerify = (otp: string) => {
-    console.log('Login successful with OTP:', otp);
+  const handleOTPVerify = (data: { isNewUser: boolean }) => {
     setShowOTP(false);
-    onLoginSuccess?.();
-    onClose();
+
+    if (data.isNewUser) {
+      // New user - redirect to registration to complete profile
+      // Store the name they entered for use in registration
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('kasazon_pending_name', fullName);
+        sessionStorage.setItem('kasazon_pending_phone', formatPhoneForApi(countryCode, phoneNumber));
+      }
+      onClose();
+      router.push('/register');
+    } else {
+      // Existing user - login successful
+      onLoginSuccess?.();
+      onClose();
+
+      // Redirect if specified
+      if (redirectTo) {
+        router.push(redirectTo);
+      }
+    }
   };
 
   const handleSocialLogin = (provider: string) => {
     console.log(`Login with ${provider}`);
     alert(`${provider} login coming soon!`);
+  };
+
+  const handleClose = () => {
+    // Reset form state when closing
+    setFullName('');
+    setSelectedLanguage('');
+    setPhoneNumber('');
+    setCountryCode('+233');
+    setError('');
+    setShowOTP(false);
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -71,7 +120,7 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
     <>
       <div
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fadeIn"
-        onClick={onClose}
+        onClick={handleClose}
       >
         <div
           className="
@@ -85,7 +134,7 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
         >
           {/* Close Button */}
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="
               absolute top-3 right-3
               w-8 h-8 flex items-center justify-center
@@ -131,6 +180,7 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
                   if (error) setError('');
                 }}
                 placeholder="Enter your full name"
+                disabled={isLoading}
                 className="
                   border border-[rgba(0,0,0,0.12)]
                   rounded-lg
@@ -143,6 +193,7 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
                   outline-none
                   focus:border-[#02368c]
                   transition-colors
+                  disabled:opacity-50 disabled:cursor-not-allowed
                 "
               />
             </div>
@@ -155,6 +206,7 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
               <button
                 type="button"
                 onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
+                disabled={isLoading}
                 className="
                   border border-[rgba(0,0,0,0.12)]
                   rounded-lg
@@ -167,6 +219,7 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
                   outline-none
                   hover:border-[#02368c]
                   transition-colors
+                  disabled:opacity-50 disabled:cursor-not-allowed
                 "
               >
                 <span className={selectedLanguage ? 'text-[#111]' : ''}>
@@ -222,7 +275,7 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
               <label className="font-poppins text-sm text-[#111] leading-normal">
                 Phone Number
               </label>
-              <div className="
+              <div className={`
                 border border-[rgba(0,0,0,0.12)]
                 rounded-lg
                 h-[44px]
@@ -230,17 +283,20 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
                 flex items-center gap-5
                 focus-within:border-[#02368c]
                 transition-colors
-              ">
+                ${isLoading ? 'opacity-50' : ''}
+              `}>
                 {/* Country Code Dropdown */}
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                    disabled={isLoading}
                     className="
                       font-poppins text-xs text-[#111]
                       leading-normal
                       whitespace-nowrap
                       hover:opacity-70 transition-opacity
+                      disabled:cursor-not-allowed
                     "
                   >
                     {countryCode}
@@ -302,6 +358,7 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
                     if (error) setError('');
                   }}
                   placeholder="Enter your phone number"
+                  disabled={isLoading}
                   className="
                     flex-1
                     font-poppins text-xs
@@ -311,6 +368,7 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
                     outline-none
                     bg-transparent
                     min-w-0
+                    disabled:cursor-not-allowed
                   "
                 />
               </div>
@@ -329,7 +387,8 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
           {/* Login Button */}
           <button
             onClick={handleLogin}
-            className="
+            disabled={isLoading}
+            className={`
               w-full
               bg-[#02368c]
               h-[49px]
@@ -337,9 +396,10 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
               font-roboto-condensed font-medium text-lg text-white
               hover:bg-[#024189] transition-colors
               mb-4
-            "
+              ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}
+            `}
           >
-            Login
+            {isLoading ? 'Sending OTP...' : 'Login'}
           </button>
 
           {/* Terms */}
@@ -391,11 +451,13 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
           <div className="flex items-center justify-center gap-[18px]">
             <button
               onClick={() => handleSocialLogin('Google')}
+              disabled={isLoading}
               className="
                 border border-[rgba(0,0,0,0.1)]
                 rounded-lg
                 p-[9px]
                 hover:bg-gray-50 transition-colors
+                disabled:opacity-50 disabled:cursor-not-allowed
               "
             >
               <div className="relative w-7 h-7">
@@ -410,11 +472,13 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
 
             <button
               onClick={() => handleSocialLogin('Apple')}
+              disabled={isLoading}
               className="
                 border border-[rgba(0,0,0,0.1)]
                 rounded-lg
                 p-[9px]
                 hover:bg-gray-50 transition-colors
+                disabled:opacity-50 disabled:cursor-not-allowed
               "
             >
               <div className="relative w-7 h-7">
@@ -429,11 +493,13 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
 
             <button
               onClick={() => handleSocialLogin('Facebook')}
+              disabled={isLoading}
               className="
                 border border-[rgba(0,0,0,0.1)]
                 rounded-lg
                 p-[9px]
                 hover:bg-gray-50 transition-colors
+                disabled:opacity-50 disabled:cursor-not-allowed
               "
             >
               <div className="relative w-7 h-7">
@@ -456,6 +522,7 @@ export function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginModalProps)
         onVerify={handleOTPVerify}
         type="mobile"
         contact={`${countryCode} ${phoneNumber}`}
+        purpose="LOGIN"
       />
 
       <style dangerouslySetInnerHTML={{__html: `

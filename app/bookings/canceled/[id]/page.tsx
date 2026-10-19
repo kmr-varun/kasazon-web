@@ -1,37 +1,91 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/src/components/layout/Header';
 import { Footer } from '@/src/components/layout/Footer';
+import { getBookingById, isAuthenticated } from '@/src/lib/api';
+import type { BookingDetail } from '@/src/lib/types';
 
 export default function CanceledBookingDetailPage() {
   const params = useParams();
-  const bookingId = params.id;
+  const router = useRouter();
+  const bookingId = params.id as string;
 
+  const [booking, setBooking] = useState<BookingDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [copiedBookingId, setCopiedBookingId] = useState(false);
 
-  const booking = {
-    id: bookingId,
-    bookingCode: 'KASA-AC-30926',
-    service: 'Foam-Jet AC Service',
-    addOns: '+ Anti-bacterial Coating',
-    canceledBy: 'You',
-    cancelReason: 'Schedule conflict',
-    pricing: {
-      serviceAmount: 499,
-      platformFee: 45,
-      total: 544,
-    },
-    image: '/images/booking-service-image.png',
-  };
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      router.push(`/login?redirect=/bookings/canceled/${bookingId}`);
+      return;
+    }
+
+    async function fetchBooking() {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getBookingById(bookingId);
+        setBooking(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load booking');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchBooking();
+  }, [bookingId, router]);
 
   const copyBookingId = () => {
-    navigator.clipboard.writeText(booking.bookingCode);
-    setCopiedBookingId(true);
-    setTimeout(() => setCopiedBookingId(false), 2000);
+    if (booking) {
+      navigator.clipboard.writeText(booking.id);
+      setCopiedBookingId(true);
+      setTimeout(() => setCopiedBookingId(false), 2000);
+    }
   };
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen bg-white py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-24">
+          <div className="max-w-[1728px] mx-auto flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#02368c]"></div>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (error || !booking) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen bg-white py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-24">
+          <div className="max-w-[1728px] mx-auto">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-red-700">{error || 'Booking not found'}</p>
+              <button
+                onClick={() => router.push('/bookings')}
+                className="mt-2 text-red-600 underline hover:text-red-800"
+              >
+                Back to bookings
+              </button>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  const platformFee = Math.round(booking.totalAmount * 0.08);
+  const serviceAmount = booking.totalAmount - platformFee;
 
   return (
     <>
@@ -48,12 +102,15 @@ export default function CanceledBookingDetailPage() {
           {/* Booking Header Banner - No status badge for canceled */}
           <div className="flex items-start gap-4 mb-6">
             <div className="flex-1 flex flex-col gap-1.5">
+              <div className="bg-[#f8d7da] inline-flex items-center px-3 py-1 rounded-full w-fit">
+                <span className="font-inter font-bold text-xs text-[#721c24] leading-4">Cancelled</span>
+              </div>
               <h2 className="font-inter font-bold text-2xl text-[#0f172a] leading-8 tracking-[-0.6px] pt-1.5">
-                {booking.service}
+                {booking.serviceName}
               </h2>
               <div className="flex items-center gap-2">
                 <span className="font-inter text-sm text-[#475569] leading-5">
-                  Booking ID: {booking.bookingCode}
+                  Booking ID: {booking.id.slice(0, 15)}...
                 </span>
                 <button
                   onClick={copyBookingId}
@@ -61,12 +118,15 @@ export default function CanceledBookingDetailPage() {
                 >
                   <Image src="/images/icons/copy-booking-id.svg" alt="Copy" width={16} height={16} />
                 </button>
+                {copiedBookingId && (
+                  <span className="text-xs text-green-600">Copied!</span>
+                )}
               </div>
             </div>
             <div className="w-[235px] h-[121px] rounded-lg overflow-hidden flex-shrink-0">
               <Image
-                src={booking.image}
-                alt={booking.service}
+                src={booking.serviceImageUrl || '/images/booking-service-image.png'}
+                alt={booking.serviceName}
                 width={235}
                 height={121}
                 className="w-full h-full object-cover"
@@ -89,16 +149,18 @@ export default function CanceledBookingDetailPage() {
                 <div className="flex items-start justify-between pl-4">
                   <div className="flex flex-col gap-1">
                     <h4 className="font-poppins font-medium text-lg text-[#0f172a] leading-normal">
-                      {booking.service}
+                      {booking.serviceName}
                     </h4>
-                    <p className="font-poppins text-sm text-[#777] leading-normal">
-                      {booking.addOns}
-                    </p>
+                    {booking.notes && (
+                      <p className="font-poppins text-sm text-[#777] leading-normal">
+                        {booking.notes}
+                      </p>
+                    )}
                   </div>
                   <div className="flex flex-col items-end gap-0.5">
-                    <span className="font-poppins text-sm text-[#777] leading-normal">Amount Paid</span>
+                    <span className="font-poppins text-sm text-[#777] leading-normal">Amount</span>
                     <span className="font-poppins font-semibold text-xl text-[#02368c] leading-normal">
-                      ₵{booking.pricing.serviceAmount}
+                      {booking.currency}{serviceAmount}
                     </span>
                   </div>
                 </div>
@@ -107,10 +169,10 @@ export default function CanceledBookingDetailPage() {
               {/* Cancellation Details Card */}
               <div className="bg-[#f5f5f5] border border-[rgba(0,0,0,0.1)] rounded-lg p-4 flex flex-col gap-2">
                 <p className="font-poppins font-medium text-xl text-[#111] leading-normal">
-                  Cancelled by: {booking.canceledBy}
+                  Cancelled by: You
                 </p>
                 <p className="font-poppins text-lg text-[#777] leading-normal">
-                  Reason: {booking.cancelReason}
+                  Reason: {booking.cancellationReason || 'No reason provided'}
                 </p>
               </div>
 
@@ -127,6 +189,18 @@ export default function CanceledBookingDetailPage() {
                   Cancelling jobs after acceptance may affect your reliability score. Try to avoid cancelling once a job is confirmed.
                 </p>
               </div>
+
+              {/* Book Again Button */}
+              <div className="flex gap-6">
+                <button
+                  onClick={() => router.push(`/services/${booking.serviceId}?reorder=true`)}
+                  className="bg-[#02368c] h-14 px-6 rounded-xl flex items-center justify-center w-[354px] shadow-[0px_1px_1px_rgba(0,0,0,0.05)] hover:bg-[#024189] transition-colors"
+                >
+                  <span className="font-roboto-condensed font-medium text-base text-white leading-6">
+                    Book Again
+                  </span>
+                </button>
+              </div>
             </div>
 
             {/* Right Column - Booking Summary */}
@@ -140,33 +214,35 @@ export default function CanceledBookingDetailPage() {
                 {/* Service Item */}
                 <div className="border-b border-[#f1f5f9] pb-5 mb-6">
                   <h4 className="font-poppins text-lg text-[#0f172a] leading-normal mb-1">
-                    {booking.service}
+                    {booking.serviceName}
                   </h4>
-                  <div className="flex items-center gap-1">
-                    <span className="font-poppins text-sm text-[#f59e0b] leading-normal">★</span>
-                    <span className="font-poppins text-sm text-[#777] leading-normal">4.5</span>
-                    <span className="font-inter text-[11px] text-[#64748b] leading-[16.5px] mx-1">•</span>
-                    <span className="font-poppins text-sm text-[#64748b] leading-normal">420 reviews</span>
-                  </div>
+                  {booking.vendor && (
+                    <div className="flex items-center gap-1">
+                      <span className="font-poppins text-sm text-[#f59e0b] leading-normal">★</span>
+                      <span className="font-poppins text-sm text-[#777] leading-normal">{booking.vendor.rating.toFixed(1)}</span>
+                      <span className="font-inter text-[11px] text-[#64748b] leading-[16.5px] mx-1">·</span>
+                      <span className="font-poppins text-sm text-[#64748b] leading-normal">{booking.vendor.reviewCount} reviews</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Cost Breakdown */}
                 <div className="flex flex-col gap-2 pt-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-poppins text-base text-[#424655] leading-normal">AC Servicing</span>
-                    <span className="font-poppins text-base text-[#0b1c30] leading-normal">₵{booking.pricing.serviceAmount}</span>
+                    <span className="font-poppins text-base text-[#424655] leading-normal">{booking.serviceName}</span>
+                    <span className="font-poppins text-base text-[#0b1c30] leading-normal line-through">{booking.currency}{serviceAmount}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="font-poppins text-base text-[#424655] leading-normal">Platform Fee</span>
-                    <span className="font-poppins text-base text-[#0b1c30] leading-normal">₵{booking.pricing.platformFee}</span>
+                    <span className="font-poppins text-base text-[#0b1c30] leading-normal line-through">{booking.currency}{platformFee}</span>
                   </div>
                   <div className="bg-[#d3e4fe] h-px my-1" />
                   <div className="flex items-center justify-between pt-1">
                     <span className="font-poppins font-semibold text-xl text-[#0b1c30] leading-7 tracking-[-0.2px]">
                       Total
                     </span>
-                    <span className="font-poppins font-semibold text-xl text-[#02368c] leading-[48px] tracking-[-0.8px]">
-                      ₵{booking.pricing.total}
+                    <span className="font-poppins font-semibold text-xl text-[#721c24] leading-[48px] tracking-[-0.8px]">
+                      Cancelled
                     </span>
                   </div>
                 </div>

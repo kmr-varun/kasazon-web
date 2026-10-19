@@ -1,15 +1,51 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/src/components/layout/Header';
 import { Footer } from '@/src/components/layout/Footer';
+import { useAuth } from '@/src/hooks/useAuth';
 
 export default function AccountPage() {
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [expandAddPayment, setExpandAddPayment] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<'mobile' | 'card'>('mobile');
   const [selectedProvider, setSelectedProvider] = useState<'mtn' | 'telecel' | 'airteltigo'>('mtn');
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/login?redirect=/account');
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user?.fullName) return '?';
+    const names = user.fullName.trim().split(' ');
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[1][0]}`.toUpperCase();
+    }
+    return names[0][0].toUpperCase();
+  };
+
+  if (isLoading) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#02368c] border-t-transparent" />
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return null;
+  }
 
   return (
     <>
@@ -35,26 +71,30 @@ export default function AccountPage() {
                 {/* Avatar */}
                 <div className="flex flex-col items-center pb-4">
                   <div className="w-20 h-20 rounded-full bg-[#02368c] flex items-center justify-center mb-2 shadow-[inset_0px_2px_4px_0px_rgba(0,0,0,0.05)]">
-                    <span className="font-bold text-2xl text-white leading-8">LB</span>
+                    <span className="font-bold text-2xl text-white leading-8">{getUserInitials()}</span>
                   </div>
                   <h2 className="font-poppins font-medium text-xl text-[#111] leading-7 tracking-[-0.2px] text-center">
-                    Leo Boateng
+                    {user.fullName || 'User'}
                   </h2>
                   <div className="flex flex-col items-center gap-0.5 mt-2">
-                    <p className="font-poppins text-sm text-[#424655] leading-normal text-center">
-                      leo.boateng@.com
-                    </p>
-                    <div className="flex items-center gap-1.5">
-                      <Image
-                        src="/images/icons/phone-icon.svg"
-                        alt=""
-                        width={11}
-                        height={11}
-                      />
-                      <p className="font-poppins text-sm text-[#424655] leading-normal">
-                        +233 8986547436
+                    {user.email && (
+                      <p className="font-poppins text-sm text-[#424655] leading-normal text-center">
+                        {user.email}
                       </p>
-                    </div>
+                    )}
+                    {user.phone && (
+                      <div className="flex items-center gap-1.5">
+                        <Image
+                          src="/images/icons/phone-icon.svg"
+                          alt=""
+                          width={11}
+                          height={11}
+                        />
+                        <p className="font-poppins text-sm text-[#424655] leading-normal">
+                          {user.phone}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 

@@ -24,7 +24,7 @@ export function LocationPicker({ onLocationSelect }: LocationPickerProps) {
   const [isSearching, setIsSearching] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const searchTimeoutRef = useRef<NodeJS.Timeout>();
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);

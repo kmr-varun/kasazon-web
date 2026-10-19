@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -8,11 +8,38 @@ import { countries, documentTypes, type Country, type State, type City } from '@
 import { LocationPicker } from '@/components/LocationPicker';
 import { Header } from '@/src/components/layout/Header';
 import { Footer } from '@/src/components/layout/Footer';
+import { register, type AccountType as AuthAccountType, getStoredUser } from '@/src/lib/auth';
 
-export default function RegisterCompletePage() {
+function RegisterCompleteContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const accountType = searchParams.get('type') || 'customer';
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+
+  // Get stored data from previous steps
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const pendingName = sessionStorage.getItem('kasazon_pending_name') || '';
+      const verifiedEmail = sessionStorage.getItem('kasazon_verified_email') || '';
+      const verifiedPhone = sessionStorage.getItem('kasazon_verified_phone') || '';
+
+      setFullName(pendingName);
+      setEmail(verifiedEmail);
+      setPhone(verifiedPhone);
+
+      // Check if user is already registered (came from login flow)
+      const storedUser = getStoredUser();
+      if (storedUser?.fullName && storedUser?.email) {
+        // User is already registered, redirect to home
+        router.push('/');
+      }
+    }
+  }, [router]);
 
   // Redirect professionals to their dedicated page
   useEffect(() => {
@@ -105,27 +132,63 @@ export default function RegisterCompletePage() {
     setShowDocTypeDropdown(false);
   };
 
-  const handleSubmit = () => {
-    const registrationData = {
-      location: {
-        searchQuery,
-        addressLine1,
-        addressLine2,
-        country: selectedCountry?.name,
-        state: selectedState?.name,
-        city: selectedCity?.name,
-        zipCode,
-        type: addressType,
-        isDefault: saveAsDefault,
-      },
-      identity: {
-        documentType: selectedDocType,
-        documentFile: selectedFile?.name,
-      },
-    };
-    console.log('Submit registration:', registrationData);
-    // TODO: Send to backend
-    alert('Registration submitted! (Mock)');
+  const handleSubmit = async () => {
+    // Validate required fields
+    if (!fullName && !email && !phone) {
+      setSubmitError('Please complete the previous registration steps first.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      // Call the register API
+      const authAccountType: AuthAccountType = accountType === 'professional' ? 'PROFESSIONAL' : 'CUSTOMER';
+
+      await register({
+        fullName: fullName || 'User',
+        email: email || undefined,
+        phone: phone || undefined,
+        accountType: authAccountType,
+      });
+
+      // Clear session storage
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('kasazon_pending_name');
+        sessionStorage.removeItem('kasazon_pending_phone');
+        sessionStorage.removeItem('kasazon_verified_email');
+        sessionStorage.removeItem('kasazon_verified_phone');
+      }
+
+      // Log registration data for future address API integration
+      const registrationData = {
+        location: {
+          searchQuery,
+          addressLine1,
+          addressLine2,
+          country: selectedCountry?.name,
+          state: selectedState?.name,
+          city: selectedCity?.name,
+          zipCode,
+          type: addressType,
+          isDefault: saveAsDefault,
+        },
+        identity: {
+          documentType: selectedDocType,
+          documentFile: selectedFile?.name,
+        },
+      };
+      console.log('Additional registration data (for future address API):', registrationData);
+
+      // Redirect to home or dashboard
+      router.push('/');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Registration failed';
+      setSubmitError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -200,6 +263,84 @@ export default function RegisterCompletePage() {
         ">
           {/* Form Content */}
           <div className="flex flex-col gap-10">
+            {/* PERSONAL INFO Section */}
+            <div className="
+              border-b border-[rgba(0,0,0,0.2)]
+              pb-10
+              flex flex-col gap-3.5
+            ">
+              <h2 className="
+                font-rubik text-base text-[#888] uppercase
+                leading-[24px]
+              ">
+                PERSONAL INFO
+              </h2>
+
+              <div className="flex flex-col gap-6">
+                {/* Full Name */}
+                <div className="flex flex-col gap-2">
+                  <label className="
+                    font-rubik text-base text-[#222]
+                    leading-[24px]
+                  ">
+                    Full Name*
+                  </label>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Enter your full name"
+                    className="
+                      border border-[#d9d9d9]
+                      rounded-lg
+                      px-3
+                      h-[40px]
+                      font-rubik text-base
+                      placeholder:text-[rgba(0,0,0,0.25)]
+                      text-[#222]
+                      leading-[24px]
+                      outline-none
+                      bg-white
+                    "
+                  />
+                </div>
+
+                {/* Display verified email and phone (read-only) */}
+                {(email || phone) && (
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    {email && (
+                      <div className="flex-1 flex flex-col gap-2">
+                        <label className="font-rubik text-base text-[#222] leading-[24px]">
+                          Email
+                        </label>
+                        <div className="flex items-center gap-2 px-3 h-[40px] bg-[#f5f5f5] border border-[#d9d9d9] rounded-lg">
+                          <span className="font-rubik text-base text-[#222] flex-1 truncate">{email}</span>
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <circle cx="8" cy="8" r="8" fill="#10b981"/>
+                            <path d="M5 8L7 10L11 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      </div>
+                    )}
+                    {phone && (
+                      <div className="flex-1 flex flex-col gap-2">
+                        <label className="font-rubik text-base text-[#222] leading-[24px]">
+                          Phone
+                        </label>
+                        <div className="flex items-center gap-2 px-3 h-[40px] bg-[#f5f5f5] border border-[#d9d9d9] rounded-lg">
+                          <span className="font-rubik text-base text-[#222] flex-1 truncate">{phone}</span>
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <circle cx="8" cy="8" r="8" fill="#10b981"/>
+                            <path d="M5 8L7 10L11 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* LOCATION Section */}
             <div className="
               border-b border-[rgba(0,0,0,0.2)]
@@ -753,18 +894,29 @@ export default function RegisterCompletePage() {
 
           {/* Actions */}
           <div className="flex flex-col gap-4">
+            {/* Error Message */}
+            {submitError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-800 text-center">
+                  {submitError}
+                </p>
+              </div>
+            )}
+
             {/* Submit Button */}
             <button
               onClick={handleSubmit}
-              className="
+              disabled={isSubmitting}
+              className={`
                 bg-[#02368c]
                 h-[49px]
                 rounded-lg
                 font-roboto-condensed text-lg text-white
                 hover:bg-[#024189] transition-colors
-              "
+                ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}
+              `}
             >
-              Submit
+              {isSubmitting ? 'Submitting...' : 'Submit'}
             </button>
 
             {/* Login Link */}
@@ -802,5 +954,13 @@ export default function RegisterCompletePage() {
     </div>
     <Footer />
     </>
+  );
+}
+
+export default function RegisterCompletePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <RegisterCompleteContent />
+    </Suspense>
   );
 }

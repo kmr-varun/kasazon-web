@@ -2,27 +2,37 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import { verifyOtp, sendOtp, detectContactType, type OtpPurpose } from '@/src/lib/auth';
 
 interface OTPModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onVerify: (otp: string) => void;
+  onVerify: (data: { isNewUser: boolean }) => void;
   type: 'email' | 'mobile';
   contact: string;
+  purpose?: OtpPurpose;
 }
 
-export function OTPModal({ isOpen, onClose, onVerify, type, contact }: OTPModalProps) {
+export function OTPModal({
+  isOpen,
+  onClose,
+  onVerify,
+  type,
+  contact,
+  purpose = 'LOGIN'
+}: OTPModalProps) {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  // Mock OTP for testing: 123456
-  const MOCK_OTP = '123456';
 
   useEffect(() => {
     if (isOpen && inputRefs.current[0]) {
       inputRefs.current[0]?.focus();
+      // Reset state when modal opens
+      setOtp(['', '', '', '', '', '']);
+      setError('');
     }
   }, [isOpen]);
 
@@ -61,7 +71,14 @@ export function OTPModal({ isOpen, onClose, onVerify, type, contact }: OTPModalP
     inputRefs.current[lastFilledIndex]?.focus();
   };
 
-  const handleVerify = () => {
+  // Clean contact for API (strip display formatting)
+  const getCleanContact = () => {
+    // For phone, remove spaces and ensure proper format
+    // contact might be "+233 544123456" so strip spaces
+    return contact.replace(/\s+/g, '');
+  };
+
+  const handleVerify = async () => {
     const otpString = otp.join('');
 
     if (otpString.length !== 6) {
@@ -70,25 +87,43 @@ export function OTPModal({ isOpen, onClose, onVerify, type, contact }: OTPModalP
     }
 
     setIsVerifying(true);
+    setError('');
 
-    // Simulate API call
-    setTimeout(() => {
-      if (otpString === MOCK_OTP) {
-        onVerify(otpString);
-        setOtp(['', '', '', '', '', '']);
-        setError('');
-      } else {
-        setError('Invalid OTP. Please try again.');
-      }
+    try {
+      const cleanContact = getCleanContact();
+      const contactType = type === 'mobile' ? 'phone' : 'email';
+      const response = await verifyOtp(cleanContact, otpString, purpose, contactType);
+
+      // Clear OTP and call success callback
+      setOtp(['', '', '', '', '', '']);
+      onVerify({ isNewUser: response.isNewUser });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Verification failed';
+      setError(message);
+    } finally {
       setIsVerifying(false);
-    }, 1000);
+    }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
+    setIsResending(true);
     setOtp(['', '', '', '', '', '']);
     setError('');
-    alert(`New OTP sent to your ${type}! (Mock: ${MOCK_OTP})`);
-    inputRefs.current[0]?.focus();
+
+    try {
+      const cleanContact = getCleanContact();
+      const contactType = detectContactType(cleanContact);
+      await sendOtp(cleanContact, contactType, purpose);
+
+      // Show success message briefly
+      setError('');
+      inputRefs.current[0]?.focus();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to resend OTP';
+      setError(message);
+    } finally {
+      setIsResending(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -153,7 +188,7 @@ export function OTPModal({ isOpen, onClose, onVerify, type, contact }: OTPModalP
             {otp.map((digit, index) => (
               <input
                 key={index}
-                ref={(el) => (inputRefs.current[index] = el)}
+                ref={(el) => { inputRefs.current[index] = el; }}
                 type="text"
                 inputMode="numeric"
                 maxLength={1}
@@ -161,6 +196,7 @@ export function OTPModal({ isOpen, onClose, onVerify, type, contact }: OTPModalP
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onPaste={index === 0 ? handlePaste : undefined}
+                disabled={isVerifying}
                 className={`
                   w-12 h-12 sm:w-14 sm:h-14
                   text-center
@@ -168,6 +204,7 @@ export function OTPModal({ isOpen, onClose, onVerify, type, contact }: OTPModalP
                   border-2 rounded-lg
                   outline-none
                   transition-all
+                  ${isVerifying ? 'opacity-50 cursor-not-allowed' : ''}
                   ${error
                     ? 'border-[#d10002] bg-[#fef2f2]'
                     : digit
@@ -210,19 +247,22 @@ export function OTPModal({ isOpen, onClose, onVerify, type, contact }: OTPModalP
             Didn't receive the code?{' '}
             <button
               onClick={handleResend}
-              className="text-[#02368c] font-medium hover:underline"
+              disabled={isResending}
+              className={`text-[#02368c] font-medium hover:underline ${isResending ? 'opacity-50' : ''}`}
             >
-              Resend OTP
+              {isResending ? 'Sending...' : 'Resend OTP'}
             </button>
           </p>
         </div>
 
-        {/* Mock OTP Hint (Remove in production) */}
-        <div className="mt-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <p className="text-xs text-yellow-800 text-center">
-            <strong>Test Mode:</strong> Use OTP: <code className="font-mono bg-yellow-100 px-2 py-1 rounded">123456</code>
-          </p>
-        </div>
+        {/* Test Mode Hint (only shown in development) */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-xs text-yellow-800 text-center">
+              <strong>Test Mode:</strong> Use OTP: <code className="font-mono bg-yellow-100 px-2 py-1 rounded">123456</code>
+            </p>
+          </div>
+        )}
       </div>
 
       <style dangerouslySetInnerHTML={{__html: `

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Roboto_Condensed, Montaga } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
+import { AuthProvider } from "@/src/lib/auth-context";
 
 // Poppins font for general text and navigation
 const poppins = Poppins({
@@ -47,7 +48,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${poppins.variable} ${robotoCondensed.variable} ${montaga.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-poppins">{children}</body>
+      <body className="min-h-full flex flex-col font-poppins">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
