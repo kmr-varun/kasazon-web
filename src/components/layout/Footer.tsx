@@ -58,7 +58,7 @@ export function Footer({ className = '' }: FooterProps) {
               className="
                 w-full h-14 rounded-full
                 bg-[rgba(255,248,240,0.06)] border border-[rgba(255,248,240,0.2)]
-                px-6 pr-40
+                px-6 pr-48
                 text-white placeholder:text-[rgba(255,248,240,0.4)]
                 font-poppins text-base
                 focus:outline-none focus:border-[rgba(255,248,240,0.4)]
@@ -68,7 +68,7 @@ export function Footer({ className = '' }: FooterProps) {
             <button
               type="submit"
               className="
-                absolute right-1.5 top-1/2 -translate-y-1/2
+                absolute right-2.5 top-1/2 -translate-y-1/2
                 bg-white text-[#02368c]
                 font-roboto-condensed font-medium uppercase tracking-[0.22em]
                 h-11 px-6 rounded-xl
