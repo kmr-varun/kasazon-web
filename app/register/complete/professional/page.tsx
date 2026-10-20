@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { countries, type Country } from '@/data/locations';
@@ -9,21 +9,38 @@ import { serviceCategories, genders, relationships } from '@/data/professional';
 import { countryCodes } from '@/data/registration';
 import { Header } from '@/src/components/layout/Header';
 import { Footer } from '@/src/components/layout/Footer';
+import { register, type AccountType as AuthAccountType } from '@/src/lib/auth';
 
 function ProfessionalRegisterContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const accountType = searchParams.get('type') || 'professional';
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   // Identity & Location section
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [selectedServiceCategory, setSelectedServiceCategory] = useState('');
   const [selectedGender, setSelectedGender] = useState('');
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [selectedCity, setSelectedCity] = useState('');
 
+  // Load verified contact details from previous steps
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const verifiedEmail = sessionStorage.getItem('kasazon_verified_email') || '';
+      const verifiedPhone = sessionStorage.getItem('kasazon_verified_phone') || '';
+      setEmail(verifiedEmail);
+      setPhone(verifiedPhone);
+    }
+  }, []);
+
   //  Documents
+  const [selfieImage, setSelfieImage] = useState<File | null>(null);
   const [identityDoc, setIdentityDoc] = useState<File | null>(null);
   const [proofOfAddressDoc, setProofOfAddressDoc] = useState<File | null>(null);
   const [tradeCertDoc, setTradeCertDoc] = useState<File | null>(null);
@@ -49,45 +66,148 @@ function ProfessionalRegisterContent() {
   const [showRelationshipDropdown, setShowRelationshipDropdown] = useState(false);
   const [showGuaranteerCountryDropdown, setShowGuaranteerCountryDropdown] = useState(false);
 
+  // Ref for selfie file input
+  const selfieInputRef = useState<HTMLInputElement | null>(null)[1];
+
   const handleFileUpload = (setter: React.Dispatch<React.SetStateAction<File | null>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setter(e.target.files[0]);
     }
   };
 
-  const handleSubmit = () => {
-    const data = {
-      accountType,
-      fullName,
-      email,
-      dateOfBirth,
-      serviceCategory: selectedServiceCategory,
-      gender: selectedGender,
-      country: selectedCountry?.name,
-      city: selectedCity,
-      documents: {
-        identity: identityDoc?.name,
-        proofOfAddress: proofOfAddressDoc?.name,
-        tradeCertificate: tradeCertDoc?.name,
-        policeClearance: policeClearanceDoc?.name,
-      },
-      backgroundCheck: {
-        institution,
-        certificateNumber,
-        expiryDate,
-      },
-      guaranteer: {
-        name: guaranteerName,
-        relationship: guaranteerRelationship,
-        mobile: `${guaranteerCountryCode} ${guaranteerMobile}`,
-        occupation: guaranteerOccupation,
-        idNumber: guaranteerIdNumber,
-      },
-    };
-    console.log('Professional registration:', data);
-    // TODO: Send to backend API
-    // Redirect to success page
-    window.location.href = '/register/complete/professional/success';
+  const handleSelfieCapture = () => {
+    // Trigger the hidden file input
+    const input = document.getElementById('selfie-input') as HTMLInputElement;
+    if (input) {
+      input.click();
+    }
+  };
+
+  const handleSubmit = async () => {
+    // Validation for required fields
+    if (!fullName) {
+      setSubmitError('Please enter your full name');
+      return;
+    }
+
+    if (!email && !phone) {
+      setSubmitError('Please complete the previous registration steps (email/phone verification)');
+      return;
+    }
+
+    if (!dateOfBirth) {
+      setSubmitError('Date of Birth is required for professional registration');
+      return;
+    }
+
+    if (!selectedGender) {
+      setSubmitError('Gender is required for professional registration');
+      return;
+    }
+
+    // Guarantor validation
+    if (!guaranteerName) {
+      setSubmitError('Guarantor name is required for professional registration');
+      return;
+    }
+
+    if (!guaranteerRelationship) {
+      setSubmitError('Guarantor relationship is required for professional registration');
+      return;
+    }
+
+    if (!guaranteerMobile || guaranteerMobile.length < 9) {
+      setSubmitError('Valid guarantor mobile number is required for professional registration');
+      return;
+    }
+
+    if (!guaranteerOccupation) {
+      setSubmitError('Guarantor occupation is required for professional registration');
+      return;
+    }
+
+    if (!guaranteerIdNumber) {
+      setSubmitError('Guarantor ID number is required for professional registration');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      // Call backend registration API with required professional fields
+      const authAccountType: AuthAccountType = 'PROFESSIONAL';
+
+      const registrationResponse = await register({
+        fullName,
+        email: email || undefined,
+        phone: phone || undefined,
+        accountType: authAccountType,
+        // Professional required fields
+        dateOfBirth,
+        gender: selectedGender,
+        guarantorName: guaranteerName,
+        guarantorRelationship: guaranteerRelationship,
+        guarantorPhone: `${guaranteerCountryCode}${guaranteerMobile}`,
+        guarantorOccupation: guaranteerOccupation,
+        guarantorIdNumber: guaranteerIdNumber,
+      });
+
+      // Create address with location data if available
+      if (selectedCountry && selectedCity && (addressLine1 || selectedState)) {
+        try {
+          const { api } = await import('@/src/lib/api');
+          await api.addresses.create({
+            type: 'HOME',
+            label: 'Home Address',
+            addressLine1: addressLine1 || selectedCity,
+            addressLine2: addressLine2 || undefined,
+            city: selectedCity,
+            state: selectedState?.name || '',
+            country: selectedCountry.name,
+            isDefault: true,
+          });
+          console.log('✅ Address saved successfully');
+        } catch (addrErr) {
+          console.error('Failed to save address:', addrErr);
+          // Don't block registration if address save fails
+        }
+      }
+
+      // Log additional professional data that's not yet supported by backend
+      const additionalData = {
+        serviceCategory: selectedServiceCategory,
+        documents: {
+          selfie: selfieImage?.name,
+          identity: identityDoc?.name,
+          proofOfAddress: proofOfAddressDoc?.name,
+          tradeCertificate: tradeCertDoc?.name,
+          policeClearance: policeClearanceDoc?.name,
+        },
+        backgroundCheck: {
+          institution,
+          certificateNumber,
+          expiryDate,
+        },
+      };
+      console.log('Additional professional data (not yet sent to backend):', additionalData);
+
+      // Clear session storage
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('kasazon_pending_name');
+        sessionStorage.removeItem('kasazon_pending_phone');
+        sessionStorage.removeItem('kasazon_verified_email');
+        sessionStorage.removeItem('kasazon_verified_phone');
+      }
+
+      // Redirect to success/activation page
+      router.push('/register/complete/professional/success');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Registration failed';
+      setSubmitError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const selectedServiceCategoryName = serviceCategories.find(s => s.id === selectedServiceCategory)?.name;
@@ -127,12 +247,37 @@ function ProfessionalRegisterContent() {
               <div className="flex flex-col gap-5">
                 {/* Take Selfie */}
                 <div className="flex flex-col items-center gap-3">
-                  <button className="bg-[rgba(217,217,217,0.44)] w-[100px] h-[100px] rounded-full flex items-center justify-center p-6">
-                    <div className="relative w-[52px] h-[52px]">
-                      <Image src="/images/icons/camera-icon.svg" alt="" fill className="object-contain" />
-                    </div>
+                  <button
+                    type="button"
+                    onClick={handleSelfieCapture}
+                    className="bg-[rgba(217,217,217,0.44)] w-[100px] h-[100px] rounded-full flex items-center justify-center p-6 hover:bg-[rgba(217,217,217,0.6)] transition-colors"
+                  >
+                    {selfieImage ? (
+                      <div className="relative w-full h-full rounded-full overflow-hidden">
+                        <Image src={URL.createObjectURL(selfieImage)} alt="Selfie" fill className="object-cover" />
+                      </div>
+                    ) : (
+                      <div className="relative w-[52px] h-[52px]">
+                        <Image src="/images/icons/camera-icon.svg" alt="" fill className="object-contain" />
+                      </div>
+                    )}
                   </button>
-                  <button className="font-poppins text-[10px] text-[#02368c] underline">Take a quick selfie</button>
+                  <button
+                    type="button"
+                    onClick={handleSelfieCapture}
+                    className="font-poppins text-[10px] text-[#02368c] underline hover:opacity-80 transition-opacity"
+                  >
+                    {selfieImage ? 'Change selfie' : 'Take a quick selfie'}
+                  </button>
+                  {/* Hidden file input for selfie */}
+                  <input
+                    id="selfie-input"
+                    type="file"
+                    accept="image/*"
+                    capture="user"
+                    onChange={handleFileUpload(setSelfieImage)}
+                    className="hidden"
+                  />
                 </div>
 
                 {/* Upload Identity Document */}
@@ -156,19 +301,59 @@ function ProfessionalRegisterContent() {
                 {/* Full Name */}
                 <div className="flex flex-col gap-2">
                   <label className="font-rubik text-base text-[#222]">Full Name</label>
-                  <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className="border border-[#d9d9d9] rounded-lg px-3 h-[40px] font-rubik text-base outline-none" />
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="border border-[#d9d9d9] rounded-lg px-3 h-[40px] font-rubik text-base outline-none"
+                  />
                 </div>
 
-                {/* Email */}
-                <div className="flex flex-col gap-2">
-                  <label className="font-rubik text-base text-[#222]">Email</label>
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="border border-[#d9d9d9] rounded-lg px-3 h-[40px] font-rubik text-base outline-none" />
+                {/* Display verified email and phone (read-only) */}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {/* Email - Verified and Read-only */}
+                  {email && (
+                    <div className="flex-1 flex flex-col gap-2">
+                      <label className="font-rubik text-base text-[#222] leading-[24px]">
+                        Email
+                      </label>
+                      <div className="flex items-center gap-2 px-3 h-[40px] bg-[#f5f5f5] border border-[#d9d9d9] rounded-lg">
+                        <span className="font-rubik text-base text-[#222] flex-1 truncate">{email}</span>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                          <circle cx="8" cy="8" r="8" fill="#10b981"/>
+                          <path d="M5 8L7 10L11 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Phone - Verified and Read-only */}
+                  {phone && (
+                    <div className="flex-1 flex flex-col gap-2">
+                      <label className="font-rubik text-base text-[#222] leading-[24px]">
+                        Phone
+                      </label>
+                      <div className="flex items-center gap-2 px-3 h-[40px] bg-[#f5f5f5] border border-[#d9d9d9] rounded-lg">
+                        <span className="font-rubik text-base text-[#222] flex-1 truncate">{phone}</span>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                          <circle cx="8" cy="8" r="8" fill="#10b981"/>
+                          <path d="M5 8L7 10L11 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Date of Birth */}
                 <div className="flex flex-col gap-2">
-                  <label className="font-rubik text-base text-[#222]">Date of Birth</label>
-                  <input type="text" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} placeholder="DD/MM/YYYY" className="border border-[#d9d9d9] rounded-lg px-3 h-[40px] font-rubik text-base placeholder:text-[rgba(0,0,0,0.25)] outline-none" />
+                  <label className="font-rubik text-base text-[#222]">Date of Birth*</label>
+                  <input
+                    type="date"
+                    value={dateOfBirth}
+                    onChange={(e) => setDateOfBirth(e.target.value)}
+                    className="border border-[#d9d9d9] rounded-lg px-3 h-[40px] font-rubik text-base text-[#222] outline-none bg-white"
+                    required
+                  />
                 </div>
 
                 {/* Service Category - Dropdown */}
@@ -195,7 +380,7 @@ function ProfessionalRegisterContent() {
 
                 {/* Gender - Dropdown */}
                 <div className="flex flex-col gap-2 relative">
-                  <label className="font-rubik text-base text-[#222]">Gender</label>
+                  <label className="font-rubik text-base text-[#222]">Gender*</label>
                   <button type="button" onClick={() => setShowGenderDropdown(!showGenderDropdown)} className="border border-[#d9d9d9] rounded-lg px-3 h-[40px] flex items-center justify-between bg-white hover:border-[#02368c] transition-colors">
                     <span className={`font-rubik text-base ${selectedGender ? 'text-[#222]' : 'text-[rgba(0,0,0,0.25)]'}`}>
                       {selectedGenderName || 'Select'}
@@ -302,7 +487,12 @@ function ProfessionalRegisterContent() {
                 {/* Expiry Date */}
                 <div className="flex flex-col gap-2">
                   <label className="font-rubik text-base text-[#222]">Expiry Date (if any)</label>
-                  <input type="text" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} placeholder="DD/MM/YYYY" className="border border-[#d9d9d9] rounded-lg px-3 h-[40px] font-rubik text-base placeholder:text-[rgba(0,0,0,0.25)] outline-none" />
+                  <input
+                    type="date"
+                    value={expiryDate}
+                    onChange={(e) => setExpiryDate(e.target.value)}
+                    className="border border-[#d9d9d9] rounded-lg px-3 h-[40px] font-rubik text-base text-[#222] outline-none bg-white"
+                  />
                 </div>
 
                 {/* Upload Police Clearance */}
@@ -424,8 +614,29 @@ function ProfessionalRegisterContent() {
 
             {/* Actions */}
             <div className="flex flex-col gap-4">
-              <button onClick={handleSubmit} className="bg-[#02368c] h-[49px] rounded-lg font-roboto-condensed text-lg text-white hover:bg-[#024189] transition-colors">
-                Submit
+              {/* Error Message */}
+              {submitError && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-800 text-center">
+                    {submitError}
+                  </p>
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className={`
+                  bg-[#02368c]
+                  h-[49px]
+                  rounded-lg
+                  font-roboto-condensed text-lg text-white
+                  hover:bg-[#024189] transition-colors
+                  ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}
+                `}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
 
               <div className="text-center pt-1">

@@ -56,6 +56,18 @@ export interface RegisterRequest {
   phone?: string;
   accountType: AccountType;
   referralCode?: string;
+  // Professional-specific fields (required for PROFESSIONAL account type)
+  dateOfBirth?: string;
+  gender?: string;
+  guarantorName?: string;
+  guarantorRelationship?: string;
+  guarantorPhone?: string;
+  guarantorOccupation?: string;
+  guarantorIdNumber?: string;
+  // Optional professional fields
+  title?: string;
+  bio?: string;
+  experienceYears?: number;
 }
 
 export interface RegisterResponse {

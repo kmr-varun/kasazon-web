@@ -7,33 +7,45 @@ const API_BASE_URL = "http://localhost:4000/api/v1";
 // Types for API responses
 export interface VendorProfile {
   id: string;
-  title: string;
-  bio: string;
-  yearsOfExperience: number;
-  rating: number;
-  totalReviews: number;
-  totalJobs: number;
+  userId: string;
+  title: string | null;
+  bio: string | null;
+  dateOfBirth: string;
+  gender: string;
+  experienceYears: number | null;
   verificationStatus: string;
-  isAvailable: boolean;
-  user: {
+  overallRating: string;
+  totalReviews: number;
+  profileStrength: number;
+  availableBalance: string;
+  guarantorName: string;
+  guarantorRelationship: string;
+  guarantorPhone: string;
+  guarantorOccupation: string;
+  guarantorIdNumber: string;
+  uniformTrackingNumber: string | null;
+  uniformReceived: boolean;
+  uniformReceivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user?: {
     id: string;
     fullName: string;
     email: string;
-    phoneNumber: string;
-    avatarUrl: string;
-    dateOfBirth: string;
-    gender: string;
+    phone: string;
+    avatarUrl: string | null;
+    phoneVerified: boolean;
     emailVerified: boolean;
   };
-  ratingBreakdown: {
-    1: number;
-    2: number;
-    3: number;
-    4: number;
-    5: number;
-  };
-  services: VendorService[];
-  availability: VendorAvailability[];
+  ratingBreakdown?: {
+    oneStarCount: number;
+    twoStarCount: number;
+    threeStarCount: number;
+    fourStarCount: number;
+    fiveStarCount: number;
+  } | null;
+  services?: VendorService[];
+  availability?: VendorAvailability[];
 }
 
 export interface VendorService {
@@ -461,7 +473,7 @@ export function useVendorDashboardStats() {
     const [profileRes, requestsRes, bookingsRes, balanceRes] = await Promise.all([
       fetchWithAuth<VendorProfile>("/vendor/profile"),
       fetchWithAuth<{ data: JobRequest[]; pagination: { total: number } }>("/vendor/jobs/requests"),
-      fetchWithAuth<{ data: Booking[]; pagination: { total: number } }>("/vendor/jobs/bookings?status=in_progress"),
+      fetchWithAuth<{ data: Booking[]; pagination: { total: number } }>("/vendor/jobs/bookings?status=IN_PROGRESS"),
       fetchWithAuth<VendorBalance>("/vendor/transactions/balance"),
     ]);
 

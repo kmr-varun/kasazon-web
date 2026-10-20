@@ -56,7 +56,7 @@ export default function VendorDashboard() {
   const { profile, loading: profileLoading, error: profileError, refetch: refetchProfile } = useVendorProfile();
   const { stats, loading: statsLoading, error: statsError, refetch: refetchStats } = useVendorDashboardStats();
   const { requests, loading: requestsLoading, acceptJob, declineJob, refetch: refetchRequests } = useJobRequests({ limit: 3 });
-  const { bookings, loading: bookingsLoading, refetch: refetchBookings } = useVendorBookings({ status: "in_progress", limit: 2 });
+  const { bookings, loading: bookingsLoading, refetch: refetchBookings } = useVendorBookings({ status: "IN_PROGRESS", limit: 2 });
 
   // Transform job requests to match NewRequests component format
   const transformedRequests = useMemo(() => {

@@ -382,7 +382,7 @@ export function VendorProfile({
                   Private identity verified details
                 </p>
               </div>
-              <button className="p-2 rounded-lg">
+              <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors" onClick={onEditProfile}>
                 <EditIcon color="#131b2e" />
               </button>
             </div>

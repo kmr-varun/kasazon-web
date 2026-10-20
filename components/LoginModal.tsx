@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { OTPModal } from './OTPModal';
 import { countryCodes } from '@/data/registration';
-import { sendOtp, formatPhoneForApi } from '@/src/lib/auth';
+import { sendOtp, formatPhoneForApi, getStoredUser } from '@/src/lib/auth';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -91,8 +91,10 @@ export function LoginModal({
       onLoginSuccess?.();
       onClose();
 
-      // Check for stored redirect URL
+      // Check user account type and redirect accordingly
+      const user = getStoredUser();
       let targetUrl = redirectTo;
+
       if (typeof window !== 'undefined') {
         const storedRedirect = sessionStorage.getItem('kasazon_redirect_after_login');
         if (storedRedirect) {
@@ -101,10 +103,17 @@ export function LoginModal({
         }
       }
 
-      // Redirect if specified
-      if (targetUrl) {
-        router.push(targetUrl);
+      // Redirect based on account type if no specific redirect URL
+      if (!targetUrl || targetUrl === '/') {
+        if (user?.accountType === 'PROFESSIONAL') {
+          targetUrl = '/vendor';
+        } else {
+          targetUrl = '/';
+        }
       }
+
+      // Redirect
+      router.push(targetUrl);
     }
   };
 

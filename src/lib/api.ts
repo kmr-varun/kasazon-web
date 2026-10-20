@@ -192,24 +192,74 @@ class ApiClient {
     /**
      * Create a new booking
      */
-    create: (data: CreateBookingData) =>
-      this.request<Booking>('/bookings', {
+    create: async (data: CreateBookingData): Promise<Booking> => {
+      const booking = await this.request<any>('/bookings', {
         method: 'POST',
         body: JSON.stringify(data),
-      }),
+      });
+      return this.bookings.transformBooking(booking);
+    },
+
+    /**
+     * Transform backend booking response to frontend format
+     */
+    transformBooking: (booking: any): Booking => ({
+      id: booking.id,
+      serviceId: booking.service?.id || booking.serviceId,
+      serviceName: booking.service?.name || '',
+      serviceImageUrl: booking.service?.imageUrl || null,
+      vendorId: booking.vendor?.id || booking.vendorId,
+      vendorName: booking.vendor?.fullName || 'Vendor',
+      customerId: booking.customer?.id || booking.customerId,
+      status: booking.status,
+      scheduledDate: booking.scheduledDate,
+      scheduledTimeStart: booking.scheduledTimeStart,
+      scheduledTimeEnd: booking.scheduledTimeEnd,
+      duration: booking.service?.durationMinutes || booking.duration,
+      totalAmount: typeof booking.totalAmount === 'string' ? parseFloat(booking.totalAmount) : booking.totalAmount,
+      currency: 'USD',
+      addressId: booking.address?.id || booking.addressId,
+      address: booking.address ? {
+        id: booking.address.id,
+        label: booking.address.label,
+        addressLine1: booking.address.addressLine1,
+        city: booking.address.city,
+      } : { id: '', label: '', addressLine1: '', city: '' },
+      createdAt: booking.createdAt,
+      updatedAt: booking.updatedAt,
+    }),
 
     /**
      * List user's bookings, optionally filtered by status
      */
     list: async (status?: string): Promise<Booking[]> => {
-      const response = await this.request<{ items: Booking[]; total: number }>(`/bookings${status ? `?status=${status}` : ''}`);
-      return response.items || [];
+      const response = await this.request<{ items: any[]; total: number }>(`/bookings${status ? `?status=${status}` : ''}`);
+      return (response.items || []).map(this.bookings.transformBooking);
     },
 
     /**
      * Get booking details by ID
      */
-    getById: (id: string) => this.request<BookingDetail>(`/bookings/${id}`),
+    getById: async (id: string): Promise<BookingDetail> => {
+      const booking = await this.request<any>(`/bookings/${id}`);
+      return {
+        ...this.bookings.transformBooking(booking),
+        service: booking.service || {},
+        vendor: booking.vendor ? {
+          id: booking.vendor.id,
+          businessName: booking.vendor.fullName,
+          avatarUrl: booking.vendor.avatarUrl,
+          rating: booking.vendor.overallRating ? parseFloat(booking.vendor.overallRating) : 0,
+          reviewCount: booking.vendor.totalReviews || 0,
+          verified: true,
+        } : {} as any,
+        customer: booking.customer || {},
+        payments: booking.payments || [],
+        notes: booking.issueDescription || null,
+        cancellationReason: booking.cancellationReason || null,
+        completedAt: booking.completedAt || null,
+      } as BookingDetail;
+    },
 
     /**
      * Reschedule a booking
@@ -540,10 +590,19 @@ export function isAuthenticated(): boolean {
  * Maps frontend filter values to backend status values
  */
 export async function getBookings(filter: BookingFilter = 'all'): Promise<Booking[]> {
-  // Map frontend filter to backend status
+  // For 'upcoming', we need to get both PENDING and CONFIRMED bookings
+  // Since backend only supports single status filter, fetch all and filter client-side
+  if (filter === 'upcoming') {
+    const allBookings = await api.bookings.list();
+    return allBookings.filter(b =>
+      (b.status === 'PENDING' || b.status === 'CONFIRMED') &&
+      new Date(b.scheduledDate) >= new Date()
+    );
+  }
+
+  // Map frontend filter to backend status for other cases
   const statusMap: Record<string, string | undefined> = {
     all: undefined,
-    upcoming: 'CONFIRMED', // Or PENDING, ASSIGNED - bookings scheduled for future
     ongoing: 'IN_PROGRESS',
     completed: 'COMPLETED',
     cancelled: 'CANCELLED',
