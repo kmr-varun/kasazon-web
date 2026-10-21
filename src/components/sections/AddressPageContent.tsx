@@ -128,7 +128,7 @@ export function AddressPageContent({
     {
       icon: '/images/icons/location-pin.svg',
       title: 'Service Location',
-      value: selectedAddress ? selectedAddress.label : 'Select address',
+      value: selectedAddress ? (selectedAddress.label || selectedAddress.addressLine1) : 'Select address',
     },
   ];
 

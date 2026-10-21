@@ -15,9 +15,6 @@ export interface HeaderProps {
 const navItems = [
   { label: 'Home', href: '/' },
   { label: 'Services', href: '/services' },
-  { label: 'About', href: '/about' },
-  { label: 'Offers', href: '/offers' },
-  { label: 'Contact', href: '/contact' },
 ];
 
 export function Header({ className = '' }: HeaderProps) {

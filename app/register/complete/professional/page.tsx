@@ -28,6 +28,9 @@ function ProfessionalRegisterContent() {
   const [selectedGender, setSelectedGender] = useState('');
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [selectedCity, setSelectedCity] = useState('');
+  const [selectedState, setSelectedState] = useState<{ name: string } | null>(null);
+  const [addressLine1, setAddressLine1] = useState('');
+  const [addressLine2, setAddressLine2] = useState('');
 
   // Load verified contact details from previous steps
   useEffect(() => {

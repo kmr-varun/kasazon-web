@@ -266,7 +266,7 @@ export default function FavoriteServicesPage() {
                                 height={10}
                               />
                               <span className="font-poppins text-[10px] text-[#777] leading-normal">
-                                {service.rating.toFixed(1)}
+                                {Number(service.rating).toFixed(1)}
                               </span>
                             </div>
                             <span className="font-poppins text-[10px] text-[#777] leading-normal before:content-['•'] before:mr-1">

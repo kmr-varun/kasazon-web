@@ -91,7 +91,7 @@ export default function JobRequestsPage() {
 
     return {
       pending: pendingCount,
-      avgPrice: `GH₵ ${avgPrice.toFixed(2)}`,
+      avgPrice: `GH₵ ${Number(avgPrice).toFixed(2)}`,
       responseRate: "98%", // Would need separate API for this
       todayRequests: requests.filter(r => {
         const today = new Date().toDateString();

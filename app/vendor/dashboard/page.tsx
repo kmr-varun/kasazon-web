@@ -63,7 +63,7 @@ export default function VendorDashboard() {
     return requests.map((req) => ({
       id: `#${req.bookingCode}`,
       service: req.service?.name || "Service",
-      price: `GH₵ ${(req.totalAmount || 0).toFixed(2)}`,
+      price: `GH₵ ${Number(req.totalAmount || 0).toFixed(2)}`,
       customer: req.customer?.fullName || "Customer",
       avatar: req.customer?.avatarUrl || "/images/vendor/customer-avatar.png",
       distance: req.address?.city ? `${req.address.city}` : "Location",
@@ -90,7 +90,7 @@ export default function VendorDashboard() {
       return {
         id: index + 1,
         service: booking.service?.name || "Service",
-        price: `GH₵ ${(booking.totalAmount || 0).toFixed(2)}`,
+        price: `GH₵ ${Number(booking.totalAmount || 0).toFixed(2)}`,
         customer: booking.customer?.fullName || "Customer",
         startTime: booking.startedAt
           ? new Date(booking.startedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
@@ -155,12 +155,8 @@ export default function VendorDashboard() {
       <VendorBanner
         vendorName={profile?.user?.fullName || "Vendor"}
         vendorAvatar={profile?.user?.avatarUrl || "/images/vendor/banner-avatar.png"}
-        isAvailable={profile?.isAvailable ?? true}
-        statusMessage={
-          profile?.isAvailable
-            ? "Customers can currently find and book your services."
-            : "You are currently not accepting new bookings."
-        }
+        isAvailable={true}
+        statusMessage="Customers can currently find and book your services."
       />
 
       {/* Stats Cards */}

@@ -157,7 +157,7 @@ function SearchResults() {
                         height={16}
                       />
                       <span className="font-poppins text-sm text-[#777]">
-                        {service.rating.toFixed(1)}
+                        {Number(service.rating).toFixed(1)}
                       </span>
                     </div>
                     <span className="font-poppins text-sm text-[#777]">

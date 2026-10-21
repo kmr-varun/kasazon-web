@@ -64,7 +64,7 @@ export function ServiceDetailCard({
                 />
               </div>
               <span className="font-poppins text-[12.5px] text-[rgba(21,58,99,0.8)] leading-[1.5]">
-                {rating.toFixed(1)}
+                {Number(rating).toFixed(1)}
               </span>
             </div>
 

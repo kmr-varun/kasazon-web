@@ -130,7 +130,7 @@ export function ReviewPageContent({
                         {booking.selectedAddress.label}
                       </p>
                       <p className="font-poppins text-sm text-[#64748b]">
-                        {booking.selectedAddress.street}, {booking.selectedAddress.city}
+                        {booking.selectedAddress.addressLine1}, {booking.selectedAddress.city}
                       </p>
                     </div>
                   </div>
@@ -263,7 +263,7 @@ export function ReviewPageContent({
                         Service Charge
                       </span>
                       <span className="font-poppins font-semibold text-base text-[#0b1c30]">
-                        GH₵ {booking.subtotal.toFixed(2)}
+                        GH₵ {Number(booking.subtotal).toFixed(2)}
                       </span>
                     </div>
 
@@ -272,7 +272,7 @@ export function ReviewPageContent({
                         Platform Fee (3%)
                       </span>
                       <span className="font-poppins font-semibold text-base text-[#0b1c30]">
-                        GH₵ {booking.platformFee.toFixed(2)}
+                        GH₵ {Number(booking.platformFee).toFixed(2)}
                       </span>
                     </div>
 
@@ -282,7 +282,7 @@ export function ReviewPageContent({
                           Total Amount
                         </span>
                         <span className="font-roboto-condensed font-semibold text-2xl text-[#02368c]">
-                          GH₵ {booking.total.toFixed(2)}
+                          GH₵ {Number(booking.total).toFixed(2)}
                         </span>
                       </div>
                     </div>

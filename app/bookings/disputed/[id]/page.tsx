@@ -234,7 +234,7 @@ export default function DisputedBookingDetailPage() {
                       <div className="flex items-center gap-1">
                         <Image src="/images/icons/star-rating-icon.svg" alt="" width={12} height={14} />
                         <span className="font-poppins text-sm text-[rgba(17,17,17,0.7)] leading-normal">
-                          {booking.vendor.rating.toFixed(1)}
+                          {Number(booking.vendor.rating).toFixed(1)}
                         </span>
                         <span className="font-poppins text-sm text-[rgba(17,17,17,0.7)] leading-normal before:content-['·'] before:mx-1">
                           {booking.vendor.reviewCount} reviews
@@ -310,7 +310,7 @@ export default function DisputedBookingDetailPage() {
                   {booking.vendor && (
                     <div className="flex items-center gap-1">
                       <span className="font-poppins text-sm text-[#f59e0b] leading-normal">★</span>
-                      <span className="font-poppins text-sm text-[#777] leading-normal">{booking.vendor.rating.toFixed(1)}</span>
+                      <span className="font-poppins text-sm text-[#777] leading-normal">{Number(booking.vendor.rating).toFixed(1)}</span>
                       <span className="font-inter text-[11px] text-[#64748b] leading-[16.5px] mx-1">·</span>
                       <span className="font-poppins text-sm text-[#64748b] leading-normal">{booking.vendor.reviewCount} reviews</span>
                     </div>

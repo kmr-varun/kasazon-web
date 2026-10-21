@@ -496,7 +496,7 @@ export function useVendorDashboardStats() {
     const totalEarnings = balanceData?.totalEarnings || 0;
 
     // Rating from profile
-    const avgRating = profile?.rating || 0;
+    const avgRating = Number(profile?.overallRating) || 0;
     const totalReviews = profile?.totalReviews || 0;
 
     setStats({

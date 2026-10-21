@@ -8,7 +8,7 @@ import { Header } from '@/src/components/layout/Header';
 import { Footer } from '@/src/components/layout/Footer';
 import { useAuth } from '@/src/lib/auth-context';
 import { api } from '@/src/lib/api';
-import type { Address } from '@/src/lib/types';
+import type { Address, AddressType } from '@/src/lib/types';
 
 export default function SavedAddressesPage() {
   const router = useRouter();
@@ -20,14 +20,25 @@ export default function SavedAddressesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    type: AddressType;
+    label: string;
+    addressLine1: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+    landmark: string;
+    isDefault: boolean;
+  }>({
+    type: 'HOME',
     label: '',
-    street: '',
+    addressLine1: '',
     city: '',
     state: '',
     postalCode: '',
     country: 'Ghana',
-    additionalInfo: '',
+    landmark: '',
     isDefault: false,
   });
 
@@ -63,20 +74,21 @@ export default function SavedAddressesPage() {
 
   const resetForm = () => {
     setFormData({
+      type: 'HOME' as AddressType,
       label: '',
-      street: '',
+      addressLine1: '',
       city: '',
       state: '',
       postalCode: '',
       country: 'Ghana',
-      additionalInfo: '',
+      landmark: '',
       isDefault: false,
     });
     setEditingId(null);
   };
 
   const handleAddAddress = async () => {
-    if (!formData.label || !formData.street || !formData.city || !formData.state || !formData.postalCode) {
+    if (!formData.label || !formData.addressLine1 || !formData.city || !formData.state || !formData.postalCode) {
       alert('Please fill in all required fields');
       return;
     }
@@ -97,13 +109,14 @@ export default function SavedAddressesPage() {
 
   const handleEditAddress = (address: Address) => {
     setFormData({
-      label: address.label,
-      street: address.street,
+      type: address.type,
+      label: address.label || '',
+      addressLine1: address.addressLine1,
       city: address.city,
       state: address.state,
-      postalCode: address.postalCode,
+      postalCode: address.postalCode || '',
       country: address.country,
-      additionalInfo: address.additionalInfo || '',
+      landmark: address.landmark || '',
       isDefault: address.isDefault,
     });
     setEditingId(address.id);
@@ -113,7 +126,7 @@ export default function SavedAddressesPage() {
   const handleUpdateAddress = async () => {
     if (!editingId) return;
 
-    if (!formData.label || !formData.street || !formData.city || !formData.state || !formData.postalCode) {
+    if (!formData.label || !formData.addressLine1 || !formData.city || !formData.state || !formData.postalCode) {
       alert('Please fill in all required fields');
       return;
     }
@@ -311,14 +324,14 @@ export default function SavedAddressesPage() {
                         </div>
                         <div className="flex flex-col gap-0.5">
                           <p className="font-poppins text-lg text-[#111] leading-normal">
-                            {address.street}
+                            {address.addressLine1}
                           </p>
                           <p className="font-poppins text-sm text-[#777] leading-normal">
                             {address.city}, {address.state} {address.postalCode}
                           </p>
-                          {address.additionalInfo && (
+                          {address.landmark && (
                             <p className="font-poppins text-sm text-[#777] leading-normal">
-                              {address.additionalInfo}
+                              {address.landmark}
                             </p>
                           )}
                         </div>
@@ -427,8 +440,8 @@ export default function SavedAddressesPage() {
                         </label>
                         <input
                           type="text"
-                          value={formData.street}
-                          onChange={(e) => handleFormChange('street', e.target.value)}
+                          value={formData.addressLine1}
+                          onChange={(e) => handleFormChange('addressLine1', e.target.value)}
                           placeholder="House number, street name"
                           className="border border-[rgba(0,0,0,0.12)] rounded-lg h-11 px-5 font-roboto-flex text-xs text-[#111] placeholder:text-[#777] leading-normal outline-none focus:border-[#02368c]"
                         />
@@ -489,8 +502,8 @@ export default function SavedAddressesPage() {
                         </label>
                         <input
                           type="text"
-                          value={formData.additionalInfo}
-                          onChange={(e) => handleFormChange('additionalInfo', e.target.value)}
+                          value={formData.landmark}
+                          onChange={(e) => handleFormChange('landmark', e.target.value)}
                           placeholder="e.g. Near Shell Station, blue gate"
                           className="border border-[rgba(0,0,0,0.12)] rounded-lg h-11 px-5 font-roboto-flex text-xs text-[#111] placeholder:text-[#777] leading-normal outline-none focus:border-[#02368c]"
                         />

@@ -215,7 +215,7 @@ export default function WalletPage() {
                       <div className="h-12 w-32 bg-white/20 rounded animate-pulse" />
                     ) : (
                       <h2 className="font-roboto-condensed font-bold text-5xl text-white">
-                        GH₵ {walletInfo?.balance.toFixed(2) || '0.00'}
+                        GH₵ {walletInfo?.balance != null ? Number(walletInfo.balance).toFixed(2) : '0.00'}
                       </h2>
                     )}
                   </div>
@@ -225,7 +225,7 @@ export default function WalletPage() {
                 </div>
                 {walletInfo && walletInfo.pendingBalance > 0 && (
                   <p className="font-poppins text-sm text-white/80">
-                    Pending: GH₵ {walletInfo.pendingBalance.toFixed(2)}
+                    Pending: GH₵ {Number(walletInfo.pendingBalance).toFixed(2)}
                   </p>
                 )}
               </div>
@@ -328,7 +328,7 @@ export default function WalletPage() {
                             transaction.type === 'CREDIT' ? 'text-[#2e9e5b]' : 'text-[#e4685d]'
                           }`}
                         >
-                          {transaction.type === 'CREDIT' ? '+' : '-'}GH₵{Math.abs(transaction.amount).toFixed(2)}
+                          {transaction.type === 'CREDIT' ? '+' : '-'}GH₵{Math.abs(Number(transaction.amount)).toFixed(2)}
                         </span>
                       </div>
                     ))}

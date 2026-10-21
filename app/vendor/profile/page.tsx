@@ -29,9 +29,7 @@ interface Service {
   id: string;
   name: string;
   description: string;
-  category: {
-    name: string;
-  };
+  categoryName: string;
 }
 
 interface VendorService {
@@ -68,7 +66,7 @@ export default function ProfilePage() {
       try {
         const [addressResponse, servicesResponse] = await Promise.all([
           api.addresses.list(),
-          api.services.getAll(),
+          api.services.getPopular(),
         ]);
         setAddresses(addressResponse.addresses || []);
         setAllServices(servicesResponse || []);
@@ -617,7 +615,7 @@ export default function ProfilePage() {
                             {service.description}
                           </p>
                           <span className="inline-block px-2 py-1 bg-gray-100 text-xs text-gray-600 rounded">
-                            {service.category.name}
+                            {service.categoryName}
                           </span>
                         </div>
                       </div>

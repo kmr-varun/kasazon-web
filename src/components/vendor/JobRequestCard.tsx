@@ -75,7 +75,7 @@ export function JobRequestCard({
               className="text-[16px] font-bold text-[#02368c] leading-[16px]"
               style={{ fontFamily: "Roboto Flex, Roboto, sans-serif" }}
             >
-              GH₵ {job.price.toFixed(2)}
+              GH₵ {Number(job.price).toFixed(2)}
             </p>
           </div>
           <Link

@@ -99,7 +99,7 @@ export function BookingCard({ booking }: BookingCardProps) {
 
           {/* Price */}
           <span className="text-[16px] font-bold text-[#02368c]" style={{ fontFamily: "Roboto Flex, sans-serif" }}>
-            GH₵ {booking.amount.toFixed(2)}
+            GH₵ {Number(booking.amount).toFixed(2)}
           </span>
         </div>
 
