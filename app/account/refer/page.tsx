@@ -20,8 +20,8 @@ export default function ReferEarnPage() {
     }
   }, [isLoading, isAuthenticated, router]);
 
-  // Get referral code from user data (placeholder if not available)
-  const referralCode = user?.email ? `KASAZON-${user.email.substring(0, 6).toUpperCase()}` : 'KASAZON-USER';
+  // Get referral code from user data
+  const referralCode = user?.customerProfile?.referralCode || 'KASAZON-USER';
   const referralLink = `https://kasazon.com/join/${referralCode}`;
 
   const getUserInitials = () => {

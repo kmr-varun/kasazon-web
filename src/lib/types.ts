@@ -9,6 +9,10 @@ export interface User {
   fullName: string;
   avatarUrl: string | null;
   accountType: 'CUSTOMER' | 'PROFESSIONAL';
+  customerProfile?: {
+    referralCode?: string;
+    walletBalance?: string;
+  };
 }
 
 export interface AuthResponse {
