@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/src/components/layout/Header';
 import { Footer } from '@/src/components/layout/Footer';
-import { getBookings, getBookingStats, isAuthenticated } from '@/src/lib/api';
+import { getBookings, getBookingStats, isAuthenticated, api } from '@/src/lib/api';
 import type { Booking, BookingStats } from '@/src/lib/types';
 
 export default function CompletedBookingsPage() {
@@ -16,6 +16,8 @@ export default function CompletedBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [ratings, setRatings] = useState<{ [key: string]: number }>({});
+  const [submittedRatings, setSubmittedRatings] = useState<Set<string>>(new Set());
+  const [submittingRating, setSubmittingRating] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -54,12 +56,21 @@ export default function CompletedBookingsPage() {
     });
   };
 
-  const handleStarClick = (bookingId: string, starIndex: number) => {
-    setRatings(prev => ({
-      ...prev,
-      [bookingId]: starIndex + 1
-    }));
-    // TODO: Submit rating to API
+  const handleStarClick = async (bookingId: string, starIndex: number) => {
+    const rating = starIndex + 1;
+    setRatings(prev => ({ ...prev, [bookingId]: rating }));
+    if (submittedRatings.has(bookingId) || submittingRating) return;
+    setSubmittingRating(bookingId);
+    try {
+      await api.reviews.create({ bookingId, rating });
+      setSubmittedRatings(prev => new Set([...prev, bookingId]));
+    } catch (err: any) {
+      if (err?.status === 409) {
+        setSubmittedRatings(prev => new Set([...prev, bookingId]));
+      }
+    } finally {
+      setSubmittingRating(null);
+    }
   };
 
   const handleReorder = (booking: Booking) => {
@@ -165,24 +176,36 @@ export default function CompletedBookingsPage() {
 
                         {/* Star Rating */}
                         <div className="flex items-center gap-1.5">
-                          {[0, 1, 2, 3, 4].map((index) => (
-                            <button
-                              key={index}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handleStarClick(booking.id, index);
-                              }}
-                              className="w-[52.5px] h-[52.5px] transition-transform hover:scale-110"
-                            >
-                              <Image
-                                src="/images/icons/star-filled.svg"
-                                alt=""
-                                width={52.5}
-                                height={52.5}
-                                className={(ratings[booking.id] || 0) > index ? 'opacity-100' : 'opacity-30'}
-                              />
-                            </button>
-                          ))}
+                          {submittedRatings.has(booking.id) ? (
+                            <span className="font-poppins text-sm text-green-600 flex items-center gap-1">
+                              ✓ Rated {ratings[booking.id] || 0}/5
+                            </span>
+                          ) : (
+                            <>
+                              {[0, 1, 2, 3, 4].map((index) => (
+                                <button
+                                  key={index}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handleStarClick(booking.id, index);
+                                  }}
+                                  disabled={submittingRating === booking.id}
+                                  className="w-[52.5px] h-[52.5px] transition-transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  <Image
+                                    src="/images/icons/star-filled.svg"
+                                    alt=""
+                                    width={52.5}
+                                    height={52.5}
+                                    className={(ratings[booking.id] || 0) > index ? 'opacity-100' : 'opacity-30'}
+                                  />
+                                </button>
+                              ))}
+                              {submittingRating === booking.id && (
+                                <span className="font-poppins text-xs text-[#424655]">Saving...</span>
+                              )}
+                            </>
+                          )}
                         </div>
 
                         {/* Reorder Button */}

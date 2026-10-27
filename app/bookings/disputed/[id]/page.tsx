@@ -14,11 +14,13 @@ export default function DisputedBookingDetailPage() {
   const bookingId = params.id as string;
 
   const [booking, setBooking] = useState<BookingDetail | null>(null);
+  const [dispute, setDispute] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copiedBookingId, setCopiedBookingId] = useState(false);
   const [response, setResponse] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -30,8 +32,13 @@ export default function DisputedBookingDetailPage() {
       try {
         setLoading(true);
         setError(null);
-        const data = await getBookingById(bookingId);
+        const [data, disputesData] = await Promise.all([
+          getBookingById(bookingId),
+          api.disputes.list().catch(() => [] as any[]),
+        ]);
         setBooking(data);
+        const relatedDispute = (disputesData as any[]).find((d: any) => d.bookingId === bookingId);
+        setDispute(relatedDispute || null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load booking');
       } finally {
@@ -56,15 +63,16 @@ export default function DisputedBookingDetailPage() {
       return;
     }
 
+    if (!dispute) {
+      alert('No dispute found for this booking');
+      return;
+    }
+
     try {
       setSubmitting(true);
-      // TODO: Submit dispute response to API
-      // await apiFetch(`/disputes/${disputeId}/respond`, {
-      //   method: 'POST',
-      //   body: JSON.stringify({ response }),
-      // });
-      alert('Response submitted successfully');
+      await api.disputes.sendMessage(dispute.id, response);
       setResponse('');
+      setSubmitSuccess(true);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to submit response');
     } finally {
@@ -273,14 +281,19 @@ export default function DisputedBookingDetailPage() {
               </div>
 
               {/* Action Buttons */}
+              {submitSuccess && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-green-700 font-poppins text-sm">
+                  ✓ Your response has been submitted successfully.
+                </div>
+              )}
               <div className="flex gap-6">
                 <button
                   onClick={handleSubmitResponse}
-                  disabled={submitting}
+                  disabled={submitting || submitSuccess}
                   className="bg-[#02368c] px-6 py-4 rounded-xl w-[354px] hover:bg-[#024189] transition-colors disabled:opacity-50"
                 >
                   <span className="font-roboto-condensed text-lg text-white leading-normal">
-                    {submitting ? 'Submitting...' : 'Submit Your Response'}
+                    {submitting ? 'Submitting...' : submitSuccess ? 'Response Submitted' : 'Submit Your Response'}
                   </span>
                 </button>
                 <button

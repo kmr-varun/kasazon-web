@@ -392,7 +392,7 @@ export interface CreateReviewData {
   bookingId: string;
   rating: number;
   title?: string;
-  comment: string;
+  comment?: string;
   images?: string[];
 }
 
