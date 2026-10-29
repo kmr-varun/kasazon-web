@@ -36,7 +36,7 @@ export function TestimonialCard({
       </div>
 
       {/* Star Rating */}
-      <div className="flex items-center gap-1 mb-6">
+      <div className="flex items-center gap-1 mb-6 ml-16">
         {Array.from({ length: rating }).map((_, index) => (
           <div key={index} className="relative w-4 h-4">
             <Image

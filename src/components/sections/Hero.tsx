@@ -57,12 +57,12 @@ export function Hero({ className = '' }: HeroProps) {
       {/* Content */}
       <div className="relative z-10 flex items-center min-h-[600px] lg:min-h-[807px]">
         <div className="w-full px-6 sm:px-12 lg:px-24 py-10">
-          <div className="w-full">
+          <div className="w-full lg:w-1/2">
             {/* Heading */}
             <h1 className="
               font-roboto-condensed font-medium text-white
-              text-4xl sm:text-5xl lg:text-6xl xl:text-[96px]
-              leading-tight mb-6 lg:mb-8
+              text-3xl sm:text-4xl lg:text-5xl xl:text-[56px]
+              leading-tight mb-4 lg:mb-6
             ">
               Trusted Services.
               <br />
@@ -72,25 +72,24 @@ export function Hero({ className = '' }: HeroProps) {
             {/* Description */}
             <p className="
               font-poppins text-[#c5c3c3]
-              text-base lg:text-lg
-              leading-normal mb-8 lg:mb-11
-              max-w-xl
+              text-sm lg:text-base
+              leading-normal mb-6 lg:mb-8
             ">
               Book trusted professionals for cleaning, repairs, maintenance,
               painting, and more—all in one place.
             </p>
 
             {/* Search Bar */}
-            <div className="mb-10 lg:mb-16 max-w-2xl">
+            <div className="mb-8 lg:mb-12">
               <SearchBar
                 placeholder="Search your service"
                 onSearch={handleSearch}
-                className="w-full"
+                className="w-full max-w-md"
               />
             </div>
 
             {/* Value Badges */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 max-w-2xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               {valueBadges.map((badge, index) => (
                 <Badge
                   key={index}

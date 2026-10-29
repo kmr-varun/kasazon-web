@@ -11,7 +11,7 @@ export function Logo({ className = '', width = 120, height = 40 }: LogoProps) {
     <div className={`relative ${className}`} style={{ width: `${width}px`, height: `${height}px` }}>
       <Image
         src="/images/icons/logo.png"
-        alt="Kasazon Logo"
+        alt="WallKas Logo"
         fill
         className="object-contain"
         priority

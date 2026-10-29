@@ -468,7 +468,7 @@ export function Quotation({
                 className="text-[12px] font-semibold text-[#02368c] tracking-[0.24px]"
                 style={{ fontFamily: "Inter, sans-serif" }}
               >
-                Kasazon Escrow Protected
+                WallKas Escrow Protected
               </span>
             </div>
           </div>

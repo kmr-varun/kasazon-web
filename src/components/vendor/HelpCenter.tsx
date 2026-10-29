@@ -55,7 +55,7 @@ const defaultFAQs: FAQItem[] = [
   {
     id: "1",
     question: "When will I receive my earnings?",
-    answer: "Earnings from completed domestic jobs are secured within the Kasazon Escrow Vault until the homeowner validates the service handover using their confidential 4-digit PIN. Once entered on your technician terminal, funds are cleared automatically and disbursed to your registered MTN Mobile Money or Telecel Cash wallet within 60 seconds.",
+    answer: "Earnings from completed domestic jobs are secured within the WallKas Escrow Vault until the homeowner validates the service handover using their confidential 4-digit PIN. Once entered on your technician terminal, funds are cleared automatically and disbursed to your registered MTN Mobile Money or Telecel Cash wallet within 60 seconds.",
   },
   {
     id: "2",
@@ -282,7 +282,7 @@ export function HelpCenter({
                   className="text-[16px] text-[#424655] leading-normal"
                   style={{ fontFamily: "Roboto Flex, sans-serif" }}
                 >
-                  Speak directly with a Kasazon pro account manager fluent in English, Twi, Ga, and Hausa.
+                  Speak directly with a WallKas pro account manager fluent in English, Twi, Ga, and Hausa.
                 </p>
               </div>
               <button

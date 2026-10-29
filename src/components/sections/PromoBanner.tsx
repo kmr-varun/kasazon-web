@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { Button } from '../common/Button';
 
 export interface PromoBannerProps {
-  title: string;
+  title: React.ReactNode;
   description: string;
   buttonText: string;
   backgroundImage: string;
@@ -42,7 +42,7 @@ export function PromoBanner({
       </div>
 
       {/* Overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/20" />
+      <div className="absolute inset-0 bg-black/5" />
 
       {/* Content */}
       <div className="relative z-10 flex items-center min-h-[400px] lg:min-h-[481px]">
@@ -62,6 +62,7 @@ export function PromoBanner({
             <p className="
               font-poppins text-white
               text-base lg:text-xl
+              font-[300]
               leading-relaxed lg:leading-[1.3]
               mb-8 lg:mb-11
             ">

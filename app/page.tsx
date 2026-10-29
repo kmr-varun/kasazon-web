@@ -25,7 +25,7 @@ export default function Home() {
         <FeaturesBar />
         <Services />
         <PromoBanner
-          title="Get 20% OFF Beauty Services"
+          title={<>Get 20% OFF<br />Beauty Services</>}
           description="Pamper yourself at home with professional facial, skincare, and beauty treatments."
           buttonText="Book Now"
           backgroundImage="/images/beauty-promo-bg.png"

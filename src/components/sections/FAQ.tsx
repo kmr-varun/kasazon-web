@@ -6,7 +6,7 @@ export interface FAQProps {
 
 const faqs = [
   {
-    question: 'What services can I book through Kasazon?',
+    question: 'What services can I book through WallKas?',
     answer: 'You can book a wide range of home services including cleaning, plumbing, electrical repairs, AC servicing, painting, carpentry, beauty services, and more. We connect you with trusted professionals for both quick services and multi-day projects.',
   },
   {
@@ -15,11 +15,11 @@ const faqs = [
   },
   {
     question: 'Are the professionals verified?',
-    answer: 'Yes, all professionals on Kasazon go through a thorough verification process. We verify their identity, check their credentials, review their past work, and monitor customer ratings to ensure you receive quality service from trusted professionals.',
+    answer: 'Yes, all professionals on WallKas go through a thorough verification process. We verify their identity, check their credentials, review their past work, and monitor customer ratings to ensure you receive quality service from trusted professionals.',
   },
   {
     question: 'How does payment work?',
-    answer: 'Kasazon offers secure payment options including credit/debit cards, digital wallets, and cash on delivery. You can see the price upfront before booking. Payment is processed securely through our platform, and you only pay after the service is completed to your satisfaction.',
+    answer: 'WallKas offers secure payment options including credit/debit cards, digital wallets, and cash on delivery. You can see the price upfront before booking. Payment is processed securely through our platform, and you only pay after the service is completed to your satisfaction.',
   },
 ];
 

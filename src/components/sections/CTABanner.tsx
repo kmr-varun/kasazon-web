@@ -29,7 +29,7 @@ export function CTABanner({ className = '' }: CTABannerProps) {
               src="/images/cta-banner-bg.png"
               alt="Get things done"
               fill
-              className="object-cover"
+              className="object-cover object-[80%_80%]"
               priority
             />
           </div>
@@ -38,7 +38,7 @@ export function CTABanner({ className = '' }: CTABannerProps) {
           <div
             className="absolute inset-0"
             style={{
-              background: 'linear-gradient(to right, rgb(2, 54, 140) 0%, rgba(2, 54, 140, 0.95) 40%, rgba(2, 54, 140, 0) 100%)',
+              background: 'linear-gradient(to right, rgba(2, 54, 140, 0.85) 0%, rgba(2, 54, 140, 0.7) 40%, rgba(2, 54, 140, 0) 100%)',
             }}
           />
 

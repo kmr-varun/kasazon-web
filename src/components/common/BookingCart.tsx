@@ -116,7 +116,7 @@ export function BookingCart({
         </p>
       </div>
 
-      {/* Kasazon Promise */}
+      {/* WallKas Promise */}
       <div className="flex flex-col gap-2 pt-6 border-t border-[rgba(0,0,0,0.05)]">
         {/* Header */}
         <div className="flex items-center gap-1">
@@ -132,7 +132,7 @@ export function BookingCart({
             font-roboto-condensed font-medium text-sm
             text-[#0b1c30]
           ">
-            Kasazon Promise
+            WallKas Promise
           </h3>
         </div>
 

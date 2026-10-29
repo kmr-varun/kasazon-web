@@ -27,15 +27,15 @@ export function SearchBar({
     <form
       onSubmit={handleSubmit}
       className={`
-        flex items-center gap-2.5
+        flex items-center gap-2
         bg-white border border-[#b2b2b2] rounded-[48px]
-        h-[70px] pl-5 pr-2 py-2
+        h-[56px] pl-4 pr-1.5 py-1.5
         shadow-[0px_7px_11.25px_rgba(0,0,0,0.07)]
         ${className}
       `}
     >
       {/* Search Icon */}
-      <div className="relative w-5 h-5 flex-shrink-0">
+      <div className="relative w-4 h-4 flex-shrink-0">
         <Image
           src="/images/icons/search.svg"
           alt="Search"
@@ -52,7 +52,7 @@ export function SearchBar({
         placeholder={placeholder}
         className="
           flex-1 min-w-0
-          font-poppins text-sm text-[#878787]
+          font-poppins text-[13px] text-[#878787]
           placeholder:text-[#878787]
           bg-transparent border-none outline-none
         "
@@ -63,14 +63,14 @@ export function SearchBar({
         type="submit"
         className="
           flex items-center justify-center
-          w-[53px] h-[53px] rounded-full
+          w-[44px] h-[44px] rounded-full
           bg-[#02368c] hover:opacity-90
           transition-opacity duration-200
           flex-shrink-0
         "
         aria-label="Search"
       >
-        <div className="relative w-8 h-8">
+        <div className="relative w-6 h-6">
           <Image
             src="/images/icons/search-button.svg"
             alt="Search"
