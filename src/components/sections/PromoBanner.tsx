@@ -21,7 +21,7 @@ export function PromoBanner({
   className = '',
 }: PromoBannerProps) {
   const handleClick = () => {
-    console.log('Promo button clicked:', title);
+    console.log('Promo button clicked');
     if (onButtonClick) {
       onButtonClick();
     }
@@ -34,7 +34,7 @@ export function PromoBanner({
       <div className="absolute inset-0 w-full h-full">
         <Image
           src={backgroundImage}
-          alt={title}
+          alt="Promo banner"
           fill
           className="object-cover object-top mix-blend-multiply"
           priority
