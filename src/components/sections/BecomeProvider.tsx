@@ -87,17 +87,17 @@ export function BecomeProvider({ className = '' }: BecomeProviderProps) {
                 variant="primary"
                 size="md"
                 onClick={handleBecomeProvider}
-                className="w-full sm:w-auto min-w-[222px] normal-case"
+                className="w-full sm:w-auto min-w-[222px] !normal-case"
               >
-                Become a Provider
+                Become a provider
               </Button>
               <Button
                 variant="outline"
                 size="md"
                 onClick={handleLearnMore}
-                className="w-full sm:w-auto min-w-[222px] normal-case"
+                className="w-full sm:w-auto min-w-[222px] !normal-case"
               >
-                Learn More
+                Learn more
               </Button>
             </div>
           </div>

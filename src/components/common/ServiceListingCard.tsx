@@ -34,9 +34,19 @@ export function ServiceListingCard({
       hover:shadow-md transition-shadow
       ${className}
     `}>
-      <div className="flex gap-4">
-        {/* Content - Left */}
-        <div className="flex-1 flex flex-col">
+      <div className="flex flex-col sm:flex-row gap-4">
+        {/* Image - Top on mobile, Right on larger screens */}
+        <div className="relative w-full sm:w-[200px] md:w-[250px] lg:w-[297px] h-[200px] sm:h-[178px] rounded-lg overflow-hidden sm:order-2 flex-shrink-0">
+          <Image
+            src={image}
+            alt={title}
+            fill
+            className="object-cover"
+          />
+        </div>
+
+        {/* Content - Bottom on mobile, Left on larger screens */}
+        <div className="flex-1 flex flex-col sm:order-1">
           <div className="flex flex-col gap-1 pt-1">
             {/* Title */}
             <h3 className="
@@ -104,6 +114,7 @@ export function ServiceListingCard({
                 h-[30px] px-6
                 rounded flex items-center justify-center gap-0.5
                 hover:bg-[#024189] transition-colors
+                w-full sm:w-auto
               "
             >
               <div className="relative w-[15px] h-[15px]">
@@ -121,16 +132,6 @@ export function ServiceListingCard({
               </span>
             </button>
           </div>
-        </div>
-
-        {/* Image - Right */}
-        <div className="relative w-[200px] sm:w-[250px] lg:w-[297px] h-[178px] rounded-lg overflow-hidden flex-shrink-0">
-          <Image
-            src={image}
-            alt={title}
-            fill
-            className="object-cover"
-          />
         </div>
       </div>
     </div>

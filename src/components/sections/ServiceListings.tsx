@@ -44,11 +44,11 @@ export function ServiceListings({
 
   return (
     <section className={`bg-white ${className}`}>
-      <div className="w-full px-6 sm:px-12 lg:px-24 pb-16 lg:pb-24">
+      <div className="w-full px-4 sm:px-6 md:px-12 lg:px-24 pb-16 lg:pb-24">
         <div className="max-w-[1700px] mx-auto">
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-16">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-12 xl:gap-16">
             {/* Left: Service Listings */}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               {/* Section Header */}
               <div className="mb-4">
                 <h2 className="
@@ -85,7 +85,7 @@ export function ServiceListings({
             </div>
 
             {/* Right: Booking Cart - Sticky on larger screens */}
-            <div className="lg:w-[460px] flex-shrink-0">
+            <div className="w-full lg:w-[380px] xl:w-[460px] flex-shrink-0">
               <div className="lg:sticky lg:top-24">
                 <BookingCart
                   itemCount={0}

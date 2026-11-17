@@ -50,7 +50,7 @@ export default function ContactPage() {
                     required
                     value={formData.fullName}
                     onChange={handleChange}
-                    className="w-full bg-[#f8f8f8] rounded-lg px-4 py-4 font-poppins text-sm text-[#9c9c9c] placeholder:text-[#9c9c9c] focus:outline-none transition-colors"
+                    className="w-full bg-[#f8f8f8] rounded-lg px-4 py-4 font-poppins text-sm text-[#9c9c9c] placeholder:text-[#9c9c9c] focus:outline-none focus:ring-2 focus:ring-[#02368c] transition-all"
                   />
                   <input
                     type="tel"
@@ -58,7 +58,7 @@ export default function ContactPage() {
                     placeholder="Phone no."
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full bg-[#f8f8f8] rounded-lg px-4 py-4 font-poppins text-sm text-[#9c9c9c] placeholder:text-[#9c9c9c] focus:outline-none transition-colors"
+                    className="w-full bg-[#f8f8f8] rounded-lg px-4 py-4 font-poppins text-sm text-[#9c9c9c] placeholder:text-[#9c9c9c] focus:outline-none focus:ring-2 focus:ring-[#02368c] transition-all"
                   />
                   <input
                     type="email"
@@ -67,7 +67,7 @@ export default function ContactPage() {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full bg-[#f8f8f8] rounded-lg px-4 py-4 font-poppins text-sm text-[#9c9c9c] placeholder:text-[#9c9c9c] focus:outline-none transition-colors"
+                    className="w-full bg-[#f8f8f8] rounded-lg px-4 py-4 font-poppins text-sm text-[#9c9c9c] placeholder:text-[#9c9c9c] focus:outline-none focus:ring-2 focus:ring-[#02368c] transition-all"
                   />
                   <textarea
                     name="message"
@@ -75,7 +75,7 @@ export default function ContactPage() {
                     rows={4}
                     value={formData.message}
                     onChange={handleChange}
-                    className="w-full bg-[#f8f8f8] rounded-lg px-4 py-4 font-poppins text-sm text-[#9c9c9c] placeholder:text-[#9c9c9c] focus:outline-none transition-colors resize-none"
+                    className="w-full bg-[#f8f8f8] rounded-lg px-4 py-4 font-poppins text-sm text-[#9c9c9c] placeholder:text-[#9c9c9c] focus:outline-none focus:ring-2 focus:ring-[#02368c] transition-all resize-none"
                   />
                 </div>
 

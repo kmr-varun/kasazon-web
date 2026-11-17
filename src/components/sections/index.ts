@@ -31,3 +31,5 @@ export { IssuesPageContent, type IssuesPageContentProps } from './IssuesPageCont
 export { ServiceCategoryNav, type ServiceCategoryNavProps, type ServiceCategory } from './ServiceCategoryNav';
 export { FilterSortBar, type FilterSortBarProps } from './FilterSortBar';
 export { ServiceListings, type ServiceListingsProps, type Service } from './ServiceListings';
+export { ServiceCategoryPills, type ServiceCategoryPillsProps, type ServiceCategoryPill } from './ServiceCategoryPills';
+export { ServiceFilterSort, type ServiceFilterSortProps, type FilterOption } from './ServiceFilterSort';

@@ -11,6 +11,7 @@ export interface ServiceDetailHeroProps {
   duration: string;
   warrantyText: string;
   onBookNow: () => void;
+  onAddToCart?: () => void;
   className?: string;
 }
 
@@ -23,6 +24,7 @@ export function ServiceDetailHero({
   duration,
   warrantyText,
   onBookNow,
+  onAddToCart,
   className = '',
 }: ServiceDetailHeroProps) {
   const handleShare = () => {

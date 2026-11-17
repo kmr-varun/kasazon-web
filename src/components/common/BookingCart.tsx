@@ -26,15 +26,16 @@ export function BookingCart({
     <div className={`
       bg-[#f2f3f9]
       border border-[rgba(0,0,0,0.1)]
-      rounded-xl p-6
+      rounded-xl p-4 sm:p-6
       shadow-[0px_1px_1px_rgba(0,0,0,0.05)]
       flex flex-col gap-4
+      w-full
       ${className}
     `}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="
-          font-roboto-condensed font-semibold text-xl
+          font-roboto-condensed font-semibold text-lg sm:text-xl
           text-[#0b1c30] tracking-[-0.2px] leading-[28px]
         ">
           Your Booking
@@ -43,8 +44,9 @@ export function BookingCart({
           bg-[rgba(0,87,205,0.1)]
           px-2 py-0.5
           rounded-full
+          flex-shrink-0
         ">
-          <span className="font-roboto-condensed text-xs text-[#02368c]">
+          <span className="font-roboto-condensed text-xs text-[#02368c] whitespace-nowrap">
             {itemCount} items
           </span>
         </div>
@@ -80,10 +82,10 @@ export function BookingCart({
 
           {/* Description */}
           <p className="
-            font-poppins text-sm text-[#424655]
-            text-center leading-normal
+            font-poppins text-xs sm:text-sm text-[#424655]
+            text-center leading-normal max-w-[200px]
           ">
-            Add a service to schedule your<br />appointment.
+            Add a service to schedule your appointment.
           </p>
         </div>
       )}
@@ -94,9 +96,9 @@ export function BookingCart({
           onClick={onCheckout}
           disabled={isEmpty}
           className={`
-            h-[51px]
+            h-[45px] sm:h-[51px]
             rounded-xl
-            font-roboto-condensed font-medium text-xs uppercase tracking-[2.816px]
+            font-roboto-condensed font-medium text-[10px] sm:text-xs uppercase tracking-[2px] sm:tracking-[2.816px]
             text-white
             transition-colors
             ${isEmpty
@@ -109,10 +111,10 @@ export function BookingCart({
         </button>
 
         <p className="
-          font-poppins text-sm text-[#424655]
+          font-poppins text-xs sm:text-sm text-[#424655]
           text-center leading-normal
         ">
-          Select at least one service to<br />continue
+          Select at least one service to continue
         </p>
       </div>
 
@@ -139,8 +141,8 @@ export function BookingCart({
         {/* List */}
         <div className="flex flex-col gap-1">
           {promises.map((promise, index) => (
-            <div key={index} className="flex items-center gap-1">
-              <div className="relative w-[11px] h-[8px]">
+            <div key={index} className="flex items-start gap-2">
+              <div className="relative w-[11px] h-[8px] mt-1.5 flex-shrink-0">
                 <Image
                   src="/images/icons/checkmark.svg"
                   alt=""
@@ -149,7 +151,7 @@ export function BookingCart({
                 />
               </div>
               <span className="
-                font-poppins text-sm text-[#424655]
+                font-poppins text-xs sm:text-sm text-[#424655]
                 leading-normal
               ">
                 {promise}

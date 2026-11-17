@@ -128,7 +128,8 @@ function RegisterDetailsContent() {
       setMobileError('Please enter your mobile number');
       return;
     }
-    if (mobile.length < 9) {
+    // Only check length if not yet verified
+    if (!mobileVerified && mobile.length < 9) {
       setMobileError('Please enter a valid mobile number');
       return;
     }
