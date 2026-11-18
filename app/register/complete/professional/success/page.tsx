@@ -174,7 +174,7 @@ export default function ProfessionalSuccessPage() {
               Back to Home
             </Link>
             <Link
-              href="/dashboard"
+              href="/vendor/dashboard"
               className="
                 flex-1
                 border-2 border-[#02368c]
