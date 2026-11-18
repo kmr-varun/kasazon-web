@@ -1,6 +1,8 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
+
+const STORAGE_KEY = 'kasazon_pending_booking';
 import type { Service, Address } from './types';
 
 // ============================================
@@ -100,7 +102,27 @@ function calculateTotals(subtotal: number): {
 // ============================================
 
 export function BookingProvider({ children }: { children: ReactNode }) {
-  const [booking, setBooking] = useState<BookingState>(INITIAL_BOOKING_STATE);
+  const [booking, setBooking] = useState<BookingState>(() => {
+    if (typeof window === 'undefined') return INITIAL_BOOKING_STATE;
+    try {
+      const saved = sessionStorage.getItem(STORAGE_KEY);
+      return saved ? { ...INITIAL_BOOKING_STATE, ...JSON.parse(saved) } : INITIAL_BOOKING_STATE;
+    } catch {
+      return INITIAL_BOOKING_STATE;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      if (booking.service) {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(booking));
+      } else {
+        sessionStorage.removeItem(STORAGE_KEY);
+      }
+    } catch {
+      // sessionStorage unavailable (e.g. private mode quota)
+    }
+  }, [booking]);
 
   /**
    * Set the selected service and package
@@ -155,6 +177,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
    */
   const clearBooking = useCallback(() => {
     setBooking(INITIAL_BOOKING_STATE);
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
   }, []);
 
   // Computed values for navigation validation

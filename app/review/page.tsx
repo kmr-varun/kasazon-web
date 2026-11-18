@@ -31,8 +31,7 @@ export default function ReviewPage() {
   // Check authentication
   useEffect(() => {
     if (!isAuthenticated) {
-      sessionStorage.setItem('kasazon_redirect_after_login', '/review');
-      router.push('/login');
+      router.push('/login?redirect=/review');
     }
   }, [isAuthenticated, router]);
 

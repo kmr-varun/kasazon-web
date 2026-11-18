@@ -24,8 +24,7 @@ function TimeSlotsContent() {
     // Check authentication before proceeding
     if (!isAuthenticated) {
       // Store intended destination
-      sessionStorage.setItem('kasazon_redirect_after_login', '/address');
-      router.push('/login');
+      router.push('/login?redirect=/address');
       return;
     }
 

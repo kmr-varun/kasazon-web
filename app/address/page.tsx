@@ -27,8 +27,7 @@ export default function AddressPage() {
   // Check authentication
   useEffect(() => {
     if (!isAuthenticated) {
-      sessionStorage.setItem('kasazon_redirect_after_login', '/address');
-      router.push('/login');
+      router.push('/login?redirect=/address');
     }
   }, [isAuthenticated, router]);
 
