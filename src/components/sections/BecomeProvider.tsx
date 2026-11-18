@@ -19,13 +19,11 @@ export function BecomeProvider({ className = '' }: BecomeProviderProps) {
   const router = useRouter();
 
   const handleBecomeProvider = () => {
-    router.push('/register/complete/professional');
+    router.push('/register');
   };
 
   const handleLearnMore = () => {
-    // For now, navigate to the professional registration page
-    // Later this can be changed to a dedicated info page
-    router.push('/register/complete/professional');
+    router.push('/register');
   };
 
   return (
