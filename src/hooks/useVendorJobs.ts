@@ -353,7 +353,7 @@ export function toJobAcceptedData(b: VendorBooking) {
 
 /**
  * Fetch vendor job requests (PENDING bookings).
- * Endpoint: GET /bookings?role=vendor&status=PENDING
+ * Endpoint: GET /vendor/jobs/requests
  */
 export function useJobRequests(query?: { limit?: number; offset?: number }) {
   const [requests, setRequests] = useState<VendorBooking[]>([]);
@@ -363,12 +363,12 @@ export function useJobRequests(query?: { limit?: number; offset?: number }) {
 
   const fetchRequests = useCallback(async () => {
     setLoading(true);
-    const params = new URLSearchParams({ role: "vendor", status: "PENDING" });
+    const params = new URLSearchParams();
     if (query?.limit) params.set("limit", query.limit.toString());
     if (query?.offset) params.set("offset", query.offset.toString());
 
     const { data, error: fetchError } = await fetchWithAuth<PaginatedBookings>(
-      `/bookings?${params.toString()}`
+      `/vendor/jobs/requests${params.toString() ? `?${params.toString()}` : ""}`
     );
 
     if (data) {
@@ -420,7 +420,7 @@ export function useJobRequests(query?: { limit?: number; offset?: number }) {
 
 /**
  * Fetch all vendor bookings, optionally filtered by status.
- * Endpoint: GET /bookings?role=vendor[&status=X]
+ * Endpoint: GET /vendor/jobs/bookings[?status=X]
  */
 export function useAllBookings(query?: {
   status?: string;
@@ -434,13 +434,13 @@ export function useAllBookings(query?: {
 
   const fetchBookings = useCallback(async () => {
     setLoading(true);
-    const params = new URLSearchParams({ role: "vendor" });
+    const params = new URLSearchParams();
     if (query?.status) params.set("status", query.status);
     if (query?.limit) params.set("limit", query.limit.toString());
     if (query?.offset) params.set("offset", query.offset.toString());
 
     const { data, error: fetchError } = await fetchWithAuth<PaginatedBookings>(
-      `/bookings?${params.toString()}`
+      `/vendor/jobs/bookings${params.toString() ? `?${params.toString()}` : ""}`
     );
 
     if (data) {
@@ -461,10 +461,11 @@ export function useAllBookings(query?: {
 // ─── useBookingDetail ─────────────────────────────────────────────────────────
 
 /**
- * Fetch a single booking by ID.
- * Endpoint: GET /bookings/:id
+ * Fetch a single booking/request by ID.
+ * type='request' → GET /vendor/jobs/requests/:id
+ * type='booking' → GET /vendor/jobs/bookings/:id (default)
  */
-export function useBookingDetail(id: string | null) {
+export function useBookingDetail(id: string | null, type: "request" | "booking" = "booking") {
   const [booking, setBooking] = useState<VendorBooking | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<ApiError | null>(null);
@@ -475,28 +476,27 @@ export function useBookingDetail(id: string | null) {
       return;
     }
     setLoading(true);
-    const { data, error: fetchError } = await fetchWithAuth<VendorBooking>(
-      `/bookings/${id}`
-    );
+    const path = type === "request" ? `/vendor/jobs/requests/${id}` : `/vendor/jobs/bookings/${id}`;
+    const { data, error: fetchError } = await fetchWithAuth<VendorBooking>(path);
     setBooking(data);
     setError(fetchError);
     setLoading(false);
-  }, [id]);
+  }, [id, type]);
 
   useEffect(() => {
     fetchBooking();
   }, [fetchBooking]);
 
   /**
-   * Mark job as complete and confirm with the customer's OTP.
-   * Endpoint: POST /bookings/:id/release-payment
+   * Mark job as complete with the customer's 6-digit completion code.
+   * Endpoint: POST /vendor/jobs/bookings/:id/complete
    */
   const releasePayment = useCallback(
     async (otp?: string) => {
       if (!id) return { data: null, error: { status: 400, message: "No booking ID" } };
-      return fetchWithAuth(`/bookings/${id}/release-payment`, {
+      return fetchWithAuth(`/vendor/jobs/bookings/${id}/complete`, {
         method: "POST",
-        body: JSON.stringify(otp ? { otp } : {}),
+        body: JSON.stringify({ completionCode: otp ?? "" }),
       });
     },
     [id]
@@ -504,12 +504,12 @@ export function useBookingDetail(id: string | null) {
 
   /**
    * Cancel this booking.
-   * Endpoint: POST /bookings/:id/cancel
+   * Endpoint: POST /vendor/jobs/bookings/:id/cancel
    */
   const cancelBooking = useCallback(
     async (reason: string) => {
       if (!id) return { data: null, error: { status: 400, message: "No booking ID" } };
-      return fetchWithAuth(`/bookings/${id}/cancel`, {
+      return fetchWithAuth(`/vendor/jobs/bookings/${id}/cancel`, {
         method: "POST",
         body: JSON.stringify({ reason }),
       });

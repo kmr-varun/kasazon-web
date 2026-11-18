@@ -217,7 +217,7 @@ export function useVendorStatsFetch() {
   return { stats, loading, error, refetch };
 }
 
-/** Fetches GET /bookings?role=vendor&status=IN_PROGRESS — active jobs for this vendor */
+/** Fetches GET /vendor/jobs/bookings?status=IN_PROGRESS — active jobs for this vendor */
 export function useVendorActiveJobsFetch(limit = 2) {
   const [jobs, setJobs] = useState<VendorBookingItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -227,8 +227,8 @@ export function useVendorActiveJobsFetch(limit = 2) {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({ role: "vendor", status: "IN_PROGRESS", limit: String(limit) });
-      const data = await vendorFetch<BookingsListResponse>(`/bookings?${params.toString()}`);
+      const params = new URLSearchParams({ status: "IN_PROGRESS", limit: String(limit) });
+      const data = await vendorFetch<BookingsListResponse>(`/vendor/jobs/bookings?${params.toString()}`);
       const { items } = extractBookings(data);
       setJobs(items);
     } catch (err) {
@@ -245,7 +245,7 @@ export function useVendorActiveJobsFetch(limit = 2) {
   return { jobs, loading, error, refetch };
 }
 
-/** Fetches GET /bookings?role=vendor&status=PENDING — new/pending job requests */
+/** Fetches GET /vendor/jobs/requests — new/pending job requests */
 export function useVendorPendingRequestsFetch(limit = 3) {
   const [requests, setRequests] = useState<VendorBookingItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -256,8 +256,8 @@ export function useVendorPendingRequestsFetch(limit = 3) {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({ role: "vendor", status: "PENDING", limit: String(limit) });
-      const data = await vendorFetch<BookingsListResponse>(`/bookings?${params.toString()}`);
+      const params = new URLSearchParams({ limit: String(limit) });
+      const data = await vendorFetch<BookingsListResponse>(`/vendor/jobs/requests?${params.toString()}`);
       const { items, total: t } = extractBookings(data);
       setRequests(items);
       setTotal(t);

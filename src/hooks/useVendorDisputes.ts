@@ -235,6 +235,16 @@ export function useVendorDisputeList() {
       ApiDispute[] | { items: ApiDispute[]; total: number }
     >("/disputes");
 
+    // /disputes is CUSTOMER-only; professionals get 403 — treat as empty list
+    if (error && error.status === 403) {
+      setDisputes([]);
+      setTotal(0);
+      setStats({ reworkRequested: 0, totalDisputes: 0, reworkCompleted: 0 });
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
     if (data) {
       const rawList: ApiDispute[] = Array.isArray(data)
         ? data

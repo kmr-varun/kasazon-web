@@ -29,7 +29,7 @@ export default function JobRequestDetailPage() {
   const id = typeof params?.id === "string" ? params.id : null;
 
   const { booking, loading, error, refetch, acceptJob, declineJob } =
-    useBookingDetail(id);
+    useBookingDetail(id, "request");
 
   const [showAcceptedModal, setShowAcceptedModal] = useState(false);
   const [acceptedBooking, setAcceptedBooking] = useState<VendorBooking | null>(null);
