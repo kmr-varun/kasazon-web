@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { VendorProfile } from "@/src/components/vendor";
 import { useVendorProfile } from "@/src/hooks/useVendorApi";
+import { useUpdateProfile, useUploadAvatar } from "@/src/hooks/useVendorProfile";
 import { api } from "@/src/lib/api";
 import type { Address } from "@/src/lib/types";
 
@@ -41,6 +42,8 @@ interface VendorService {
 
 export default function ProfilePage() {
   const { profile, loading, error, refetch } = useVendorProfile();
+  const { update: updateProfile, saving: savingProfile, saveError: profileSaveError } = useUpdateProfile();
+  const { upload: uploadAvatar, uploading: uploadingAvatar, uploadError: avatarUploadError } = useUploadAvatar();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showServicesModal, setShowServicesModal] = useState(false);
@@ -190,50 +193,38 @@ export default function ProfilePage() {
     setShowEditModal(true);
   };
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const ok = await uploadAvatar(file);
+    if (ok) {
+      await refetch();
+    }
+    // Error message is surfaced via avatarUploadError state in the UI
+    // Clear file input so the same file can be re-selected if needed
+    e.target.value = '';
+  };
+
   const handleSaveProfile = async () => {
-    try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('kasazon_access_token') : null;
+    const ok = await updateProfile({
+      title: editForm.title,
+      bio: editForm.bio,
+      dateOfBirth: editForm.dateOfBirth,
+      gender: editForm.gender,
+      experienceYears: editForm.experienceYears > 0 ? editForm.experienceYears : undefined,
+      guarantorName: editForm.guarantorName,
+      guarantorRelationship: editForm.guarantorRelationship,
+      guarantorPhone: editForm.guarantorPhone,
+      guarantorOccupation: editForm.guarantorOccupation,
+      guarantorIdNumber: editForm.guarantorIdNumber,
+    });
 
-      if (!token) {
-        alert('Not authenticated');
-        return;
-      }
-
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
-
-      // Update vendor profile
-      const response = await fetch(`${API_URL}/vendor/profile`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title: editForm.title || undefined,
-          bio: editForm.bio || undefined,
-          dateOfBirth: editForm.dateOfBirth || undefined,
-          gender: editForm.gender || undefined,
-          experienceYears: editForm.experienceYears > 0 ? editForm.experienceYears : undefined,
-          guarantorName: editForm.guarantorName || undefined,
-          guarantorRelationship: editForm.guarantorRelationship || undefined,
-          guarantorPhone: editForm.guarantorPhone || undefined,
-          guarantorOccupation: editForm.guarantorOccupation || undefined,
-          guarantorIdNumber: editForm.guarantorIdNumber || undefined,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to update profile');
-      }
-
-      // Refresh profile data
+    if (ok) {
       await refetch();
       setShowEditModal(false);
       alert('Profile updated successfully!');
-    } catch (err) {
-      console.error('Failed to update profile:', err);
-      alert(err instanceof Error ? err.message : 'Failed to update profile');
+    } else {
+      alert(profileSaveError ?? 'Failed to update profile');
     }
   };
 
@@ -361,6 +352,41 @@ export default function ProfilePage() {
             </div>
 
             <div className="p-6 space-y-6">
+              {/* Avatar Upload */}
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                  {profile?.user?.avatarUrl ? (
+                    <img
+                      src={profile.user.avatarUrl}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#8B7355] to-[#6B5344] flex items-center justify-center">
+                      <span className="text-white text-2xl font-medium">
+                        {profile?.user?.fullName
+                          ?.split(" ")
+                          .map((n) => n[0])
+                          .join("") ?? "?"}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <label className="cursor-pointer text-sm text-[#02368c] underline">
+                  {uploadingAvatar ? "Uploading…" : "Change Photo"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                    disabled={uploadingAvatar}
+                  />
+                </label>
+                {avatarUploadError && (
+                  <p className="text-xs text-red-600">{avatarUploadError}</p>
+                )}
+              </div>
+
               {/* Personal Information Section */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-[#0f172a] border-b border-gray-200 pb-2">Personal Information</h3>
@@ -544,9 +570,10 @@ export default function ProfilePage() {
               </button>
               <button
                 onClick={handleSaveProfile}
-                className="flex-1 px-4 py-3 bg-[#02368c] text-white rounded-lg hover:bg-[#024189] transition-colors font-medium"
+                disabled={savingProfile}
+                className="flex-1 px-4 py-3 bg-[#02368c] text-white rounded-lg hover:bg-[#024189] transition-colors font-medium disabled:opacity-60"
               >
-                Save Changes
+                {savingProfile ? "Saving…" : "Save Changes"}
               </button>
             </div>
           </div>
