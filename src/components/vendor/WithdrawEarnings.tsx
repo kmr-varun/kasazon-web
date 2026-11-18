@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import type { PayoutMethod } from "@/src/hooks/useVendorFinance";
 
 const MobileMoneyIcon = () => (
   <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -10,24 +11,57 @@ const MobileMoneyIcon = () => (
   </svg>
 );
 
+function getMethodLabel(method: PayoutMethod): string {
+  if (method.displayName) return method.displayName;
+  const provider = method.provider || method.type || "Account";
+  const ending = method.lastFour || method.maskedPhone?.slice(-4) || "••••";
+  return `${provider} ••••${ending}`;
+}
+
 interface WithdrawEarningsProps {
   availableBalance: number;
+  payoutMethods?: PayoutMethod[];
+  /** @deprecated pass payoutMethods instead */
   payoutMethod?: string;
+  /** @deprecated pass payoutMethods instead */
   payoutAccountEnding?: string;
-  onWithdraw?: (amount: number) => void;
+  onWithdraw?: (amount: number, payoutMethodId: string) => void;
   onChangePayoutMethod?: () => void;
   isWithdrawing?: boolean;
 }
 
 export function WithdrawEarnings({
   availableBalance,
-  payoutMethod = "Mobile Money (MTN)",
-  payoutAccountEnding = "4521",
+  payoutMethods,
+  payoutMethod: legacyMethod = "Mobile Money (MTN)",
+  payoutAccountEnding: legacyEnding = "4521",
   onWithdraw,
   onChangePayoutMethod,
   isWithdrawing = false,
 }: WithdrawEarningsProps) {
   const [amount, setAmount] = useState<string>("");
+
+  // Pick default method: first isDefault, otherwise first in list
+  const defaultMethod =
+    payoutMethods?.find((m) => m.isDefault) ?? payoutMethods?.[0] ?? null;
+
+  const [selectedMethodId, setSelectedMethodId] = useState<string>(
+    defaultMethod?.id ?? ""
+  );
+
+  // Sync selectedMethodId when payout methods load for the first time
+  useEffect(() => {
+    if (defaultMethod && !selectedMethodId) {
+      setSelectedMethodId(defaultMethod.id);
+    }
+  }, [defaultMethod?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const displayMethod =
+    payoutMethods?.find((m) => m.id === selectedMethodId) ?? defaultMethod;
+
+  const methodLabel = displayMethod
+    ? getMethodLabel(displayMethod)
+    : `${legacyMethod} ••••${legacyEnding}`;
 
   const quickAmounts = [100, 500];
 
@@ -42,7 +76,7 @@ export function WithdrawEarnings({
   const handleSubmit = () => {
     const numAmount = parseFloat(amount);
     if (numAmount > 0 && numAmount <= availableBalance) {
-      onWithdraw?.(numAmount);
+      onWithdraw?.(numAmount, selectedMethodId || displayMethod?.id || "");
     }
   };
 
@@ -118,9 +152,23 @@ export function WithdrawEarnings({
                 className="text-[14px] text-[#1b1c1c]"
                 style={{ fontFamily: "Roboto Flex, sans-serif" }}
               >
-                {payoutMethod} ••••{payoutAccountEnding}
+                {methodLabel}
               </span>
             </div>
+            {payoutMethods && payoutMethods.length > 1 && (
+              <select
+                value={selectedMethodId}
+                onChange={(e) => setSelectedMethodId(e.target.value)}
+                className="text-[12px] text-[#1b1c1c] bg-transparent outline-none cursor-pointer"
+                style={{ fontFamily: "Roboto Flex, sans-serif" }}
+              >
+                {payoutMethods.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {getMethodLabel(m)}
+                  </option>
+                ))}
+              </select>
+            )}
             <button
               onClick={onChangePayoutMethod}
               className="text-[12px] font-medium text-[#02368c] tracking-[0.24px] underline text-left"

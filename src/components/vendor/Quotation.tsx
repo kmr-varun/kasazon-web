@@ -64,6 +64,7 @@ interface QuotationProps {
   onAddAdditionalWork?: () => void;
   onSendQuotation?: () => void;
   onChange?: (field: string, value: string) => void;
+  isSubmitting?: boolean;
 }
 
 const defaultQuotation: QuotationData = {
@@ -127,6 +128,7 @@ export function Quotation({
   onAddAdditionalWork,
   onSendQuotation,
   onChange,
+  isSubmitting = false,
 }: QuotationProps) {
   const [notes, setNotes] = useState(quotation.notes);
 
@@ -519,14 +521,31 @@ export function Quotation({
         <div className="max-w-[1280px]">
           <button
             onClick={onSendQuotation}
-            className="bg-[#02368c] text-white rounded-lg px-5 py-3 w-[244px] h-[49px]"
+            disabled={isSubmitting}
+            className={`text-white rounded-lg px-5 py-3 w-[244px] h-[49px] flex items-center justify-center gap-2 ${
+              isSubmitting
+                ? "bg-[#02368c]/60 cursor-not-allowed"
+                : "bg-[#02368c] hover:bg-[#012d73]"
+            }`}
           >
-            <span
-              className="text-[18px]"
-              style={{ fontFamily: "Roboto Condensed, sans-serif" }}
-            >
-              Send Quotation
-            </span>
+            {isSubmitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span
+                  className="text-[18px]"
+                  style={{ fontFamily: "Roboto Condensed, sans-serif" }}
+                >
+                  Sending...
+                </span>
+              </>
+            ) : (
+              <span
+                className="text-[18px]"
+                style={{ fontFamily: "Roboto Condensed, sans-serif" }}
+              >
+                Send Quotation
+              </span>
+            )}
           </button>
         </div>
       </div>

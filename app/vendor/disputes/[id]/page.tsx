@@ -1,89 +1,95 @@
 "use client";
 
 import { use } from "react";
-import { DisputeDetail, DisputeDetailData } from "@/src/components/vendor";
-
-const mockDispute: DisputeDetailData = {
-  id: "1",
-  bookingId: "KB-12345",
-  serviceName: "AC Servicing",
-  serviceCategory: "contract",
-  status: "rework-requested",
-  location: "East Legon, Greater Accra",
-  postalCode: "GA-382-0192",
-  bookedDate: "Oct 24, 2024",
-  bookedTime: "08:30 GMT",
-  customerComplaint: "The AC still makes a rattling noise after the service and the condensate pan is still leaking slightly. I want the provider to return and complete the final performance check and drainage flush again.",
-  requestedRework: "Re-inspect the blower wheel, tighten any loose mounts, and verify zero overflow from the drainage pan.",
-  vendorResponse: "",
-  afterImages: [
-    "/images/vendor/sample-ac-1.jpg",
-    "/images/vendor/sample-ac-2.jpg",
-    "/images/vendor/sample-ac-3.jpg",
-  ],
-  categoryType: "AC Servicing",
-  serviceDetails: [
-    "AC Servicing × 1",
-    "Foam-Jet Cleaning",
-    "Filter Cleaning",
-    "Basic Performance Check",
-  ],
-  estimatedDate: "Today, Oct 24, 2024",
-  estimatedTime: "09:00 - 13:00 GMT",
-  estimatedDuration: "4.0 hrs",
-  customerIssue: "My AC is not cooling properly and is making a strange noise.",
-  evidencePhotos: [
-    "/images/vendor/sample-ac-1.jpg",
-    "/images/vendor/sample-ac-2.jpg",
-    "/images/vendor/sample-ac-3.jpg",
-  ],
-  serviceAmount: 150,
-  platformFee: 5,
-  platformFeePercent: 3,
-  escrowHeld: 150,
-  yourEarnings: 155,
-  customerName: "Akua Mensah",
-  customerInitials: "AM",
-  memberSince: "Feb 2023",
-  servicesBooked: 14,
-  customerAddress: {
-    line1: "Plot 14, Boundary Road",
-    line2: "East Legon, Accra",
-    postalCode: "GA-382-0192",
-  },
-  isVerifiedUser: true,
-};
+import { DisputeDetail } from "@/src/components/vendor";
+import { useVendorDisputeDetail } from "@/src/hooks/useVendorDisputes";
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+function DisputeDetailSkeleton() {
+  return (
+    <div className="flex flex-col gap-8 px-8 py-10 animate-pulse">
+      <div className="h-6 w-48 bg-gray-200 rounded" />
+      <div className="h-12 w-96 bg-gray-200 rounded" />
+      <div className="flex gap-2">
+        <div className="flex-1 h-96 bg-gray-200 rounded-xl" />
+        <div className="flex-1 flex flex-col gap-2">
+          <div className="h-48 bg-gray-200 rounded-xl" />
+          <div className="h-48 bg-gray-200 rounded-xl" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DisputeDetailPage({ params }: PageProps) {
   const { id } = use(params);
 
-  const handleAcceptRework = () => {
-    console.log("Accept rework for dispute:", id);
+  const { dispute, loading, error, refetch, sendMessage, addEvidence } =
+    useVendorDisputeDetail(id);
+
+  const handleAcceptRework = async () => {
+    await sendMessage("I accept the rework request and will address the issues raised.");
   };
 
   const handleCallCustomer = () => {
-    console.log("Call customer");
+    // Phone number would need to come from the dispute details
   };
 
-  const handleMessageCustomer = () => {
-    console.log("Message customer");
+  const handleMessageCustomer = async () => {
+    // Opens messaging UI - for now send a greeting
+    await sendMessage("Hello, I wanted to follow up on your dispute.");
   };
 
-  const handleUploadImages = () => {
-    console.log("Upload images");
+  const handleUploadImages = async () => {
+    // In a real implementation, this would open a file picker
+    // and then call addEvidence with the uploaded URL
   };
 
   const handleOpenInMaps = () => {
-    console.log("Open in maps");
+    if (dispute?.location) {
+      const query = encodeURIComponent(
+        [dispute.location, dispute.customerAddress.postalCode]
+          .filter(Boolean)
+          .join(", ")
+      );
+      window.open(`https://maps.google.com?q=${query}`, "_blank");
+    }
   };
+
+  if (loading) {
+    return <DisputeDetailSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col gap-8 px-8 py-10">
+        <div className="bg-[#fef2f2] border border-[#fecaca] rounded-xl p-6 text-center">
+          <p className="text-[#dc2626] text-[14px] mb-4">{error.message}</p>
+          <button
+            onClick={refetch}
+            className="bg-[#02368c] text-white px-4 py-2 rounded-lg text-[12px]"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!dispute) {
+    return (
+      <div className="flex flex-col gap-8 px-8 py-10">
+        <p className="text-[14px] text-[#777]">Dispute not found.</p>
+      </div>
+    );
+  }
 
   return (
     <DisputeDetail
-      dispute={mockDispute}
+      dispute={dispute}
       onAcceptRework={handleAcceptRework}
       onCallCustomer={handleCallCustomer}
       onMessageCustomer={handleMessageCustomer}
