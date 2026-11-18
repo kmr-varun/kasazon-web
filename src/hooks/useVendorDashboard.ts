@@ -306,7 +306,7 @@ export function useVendorPendingRequestsFetch(limit = 3) {
   return { requests, total, loading, error, refetch, acceptJob, declineJob };
 }
 
-/** Fetches GET /vendor/balance — available balance */
+/** Fetches GET /vendor/transactions/balance — available balance */
 export function useVendorBalanceFetch() {
   const [balance, setBalance] = useState<VendorBalanceData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -316,7 +316,7 @@ export function useVendorBalanceFetch() {
     setLoading(true);
     setError(null);
     try {
-      const data = await vendorFetch<VendorBalanceData>("/vendor/balance");
+      const data = await vendorFetch<VendorBalanceData>("/vendor/transactions/balance");
       setBalance(data);
     } catch (err) {
       setError(err as DashboardError);

@@ -18,7 +18,7 @@ export function useVendorFinanceBalance() {
 
   const fetchBalance = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await fetchWithAuth<VendorFinanceBalance>("/vendor/balance");
+    const { data, error } = await fetchWithAuth<VendorFinanceBalance>("/vendor/transactions/balance");
     setBalance(data);
     setError(error);
     setLoading(false);
@@ -29,7 +29,7 @@ export function useVendorFinanceBalance() {
   }, [fetchBalance]);
 
   const withdraw = async (amount: number, payoutMethodId: string) => {
-    const result = await fetchWithAuth<{ message: string }>("/vendor/withdraw", {
+    const result = await fetchWithAuth<{ message: string }>("/vendor/transactions/withdraw", {
       method: "POST",
       body: JSON.stringify({ amount, payoutMethodId }),
     });
