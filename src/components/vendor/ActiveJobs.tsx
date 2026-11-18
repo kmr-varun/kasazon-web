@@ -28,30 +28,7 @@ interface ActiveJobsProps {
   jobs?: ActiveJob[];
 }
 
-const defaultJobs: ActiveJob[] = [
-  {
-    id: 1,
-    service: "Home Cleaning",
-    price: "GH₵ 60.00",
-    customer: "Kofi Asante",
-    startTime: "10:04 AM",
-    progress: 65,
-    currentDay: 6,
-    totalDays: 15,
-  },
-  {
-    id: 2,
-    service: "Home Cleaning",
-    price: "GH₵ 60.00",
-    customer: "Kofi Asante",
-    startTime: "10:04 AM",
-    progress: 65,
-    currentDay: 6,
-    totalDays: 15,
-  },
-];
-
-export function ActiveJobs({ jobs = defaultJobs }: ActiveJobsProps) {
+export function ActiveJobs({ jobs = [] }: ActiveJobsProps) {
   return (
     <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] overflow-hidden">
       {/* Header */}
@@ -70,7 +47,20 @@ export function ActiveJobs({ jobs = defaultJobs }: ActiveJobsProps) {
         </button>
       </div>
 
+      {/* Empty state */}
+      {jobs.length === 0 && (
+        <div className="p-8 text-center">
+          <p
+            className="text-[14px] text-[#94a3b8]"
+            style={{ fontFamily: "Roboto Flex, Roboto, sans-serif" }}
+          >
+            No active jobs at the moment.
+          </p>
+        </div>
+      )}
+
       {/* Job Cards */}
+      {jobs.length > 0 && (
       <div className="p-4 flex gap-3">
         {jobs.map((job) => (
           <div
@@ -159,6 +149,7 @@ export function ActiveJobs({ jobs = defaultJobs }: ActiveJobsProps) {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import {
   VendorBanner,
   StatsCards,
@@ -8,12 +7,7 @@ import {
   ActiveJobs,
   NewRequests,
 } from "@/src/components/vendor";
-import {
-  useVendorProfile,
-  useVendorDashboardStats,
-  useJobRequests,
-  useVendorBookings,
-} from "@/src/hooks/useVendorApi";
+import { useVendorDashboard } from "@/src/hooks/useVendorDashboard";
 
 // Loading skeleton component
 function DashboardSkeleton() {
@@ -53,80 +47,36 @@ function ErrorDisplay({ message, onRetry }: { message: string; onRetry: () => vo
 }
 
 export default function VendorDashboard() {
-  const { profile, loading: profileLoading, error: profileError, refetch: refetchProfile } = useVendorProfile();
-  const { stats, loading: statsLoading, error: statsError, refetch: refetchStats } = useVendorDashboardStats();
-  const { requests, loading: requestsLoading, acceptJob, declineJob, refetch: refetchRequests } = useJobRequests({ limit: 3 });
-  const { bookings, loading: bookingsLoading, refetch: refetchBookings } = useVendorBookings({ status: "IN_PROGRESS", limit: 2 });
+  const {
+    profile,
+    stats,
+    activeJobs,
+    newRequests,
+    loading,
+    error,
+    refetchAll,
+    acceptJob,
+    declineJob,
+    refetchJobs,
+    refetchStats,
+  } = useVendorDashboard();
 
-  // Transform job requests to match NewRequests component format
-  const transformedRequests = useMemo(() => {
-    return requests.map((req) => ({
-      id: `#${req.bookingCode}`,
-      service: req.service?.name || "Service",
-      price: `GH₵ ${Number(req.totalAmount || 0).toFixed(2)}`,
-      customer: req.customer?.fullName || "Customer",
-      avatar: req.customer?.avatarUrl || "/images/vendor/customer-avatar.png",
-      distance: req.address?.city ? `${req.address.city}` : "Location",
-      time: req.scheduledTime || "TBD",
-      bookingId: req.id,
-    }));
-  }, [requests]);
-
-  // Transform bookings to match ActiveJobs component format
-  const transformedBookings = useMemo(() => {
-    return bookings.map((booking, index) => {
-      // Calculate progress based on checklist if available
-      const checklistItems = booking.checklist || [];
-      const completedItems = checklistItems.filter((item) => item.isCompleted).length;
-      const progress = checklistItems.length > 0
-        ? Math.round((completedItems / checklistItems.length) * 100)
-        : 0;
-
-      // Calculate days if it's a multi-day job
-      const scheduledDate = new Date(booking.scheduledDate);
-      const today = new Date();
-      const daysDiff = Math.max(1, Math.ceil((today.getTime() - scheduledDate.getTime()) / (1000 * 60 * 60 * 24)));
-
-      return {
-        id: index + 1,
-        service: booking.service?.name || "Service",
-        price: `GH₵ ${Number(booking.totalAmount || 0).toFixed(2)}`,
-        customer: booking.customer?.fullName || "Customer",
-        startTime: booking.startedAt
-          ? new Date(booking.startedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
-          : booking.scheduledTime || "TBD",
-        progress,
-        currentDay: daysDiff,
-        totalDays: booking.estimatedDuration || 1,
-        bookingId: booking.id,
-      };
-    });
-  }, [bookings]);
-
-  // Handle accept job
   const handleAcceptJob = async (bookingId: string) => {
-    const { error } = await acceptJob(bookingId);
-    if (!error) {
-      refetchBookings();
+    const { error: acceptError } = await acceptJob(bookingId);
+    if (!acceptError) {
+      refetchJobs();
       refetchStats();
     }
   };
 
-  // Handle decline job
   const handleDeclineJob = async (bookingId: string) => {
-    const { error } = await declineJob(bookingId);
-    if (!error) {
+    const { error: declineError } = await declineJob(bookingId);
+    if (!declineError) {
       refetchStats();
     }
   };
 
-  // Combined loading state
-  const isLoading = profileLoading || statsLoading || requestsLoading || bookingsLoading;
-
-  // Combined error
-  const error = profileError || statsError;
-
-  if (isLoading && !profile) {
+  if (loading && !profile) {
     return <DashboardSkeleton />;
   }
 
@@ -134,12 +84,7 @@ export default function VendorDashboard() {
     return (
       <ErrorDisplay
         message={error.message || "Failed to load dashboard data"}
-        onRetry={() => {
-          refetchProfile();
-          refetchStats();
-          refetchRequests();
-          refetchBookings();
-        }}
+        onRetry={refetchAll}
       />
     );
   }
@@ -171,13 +116,11 @@ export default function VendorDashboard() {
       <ScheduleEarningsRow />
 
       {/* Active Jobs */}
-      <ActiveJobs
-        jobs={transformedBookings.length > 0 ? transformedBookings : undefined}
-      />
+      <ActiveJobs jobs={activeJobs} />
 
       {/* New Requests */}
       <NewRequests
-        requests={transformedRequests.length > 0 ? transformedRequests : undefined}
+        requests={newRequests}
         onAccept={handleAcceptJob}
         onDecline={handleDeclineJob}
       />

@@ -43,37 +43,7 @@ interface NewRequestsProps {
   onDecline?: (bookingId: string) => void;
 }
 
-const defaultRequests: NewRequest[] = [
-  {
-    id: "#KB 12345",
-    service: "Home Cleaning",
-    price: "GH₵ 60.00",
-    customer: "Kofi Asante",
-    avatar: "/images/vendor/customer-avatar.png",
-    distance: "1.8 Km Away",
-    time: "1:20pm",
-  },
-  {
-    id: "#KB 12345",
-    service: "Home Cleaning",
-    price: "GH₵ 60.00",
-    customer: "Kofi Asante",
-    avatar: "/images/vendor/customer-avatar.png",
-    distance: "1.8 Km Away",
-    time: "1:20pm",
-  },
-  {
-    id: "#KB 12345",
-    service: "Home Cleaning",
-    price: "GH₵ 60.00",
-    customer: "Kofi Asante",
-    avatar: "/images/vendor/customer-avatar.png",
-    distance: "1.8 Km Away",
-    time: "1:20pm",
-  },
-];
-
-export function NewRequests({ requests = defaultRequests, onAccept, onDecline }: NewRequestsProps) {
+export function NewRequests({ requests = [], onAccept, onDecline }: NewRequestsProps) {
   return (
     <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] overflow-hidden">
       {/* Header */}
@@ -92,7 +62,20 @@ export function NewRequests({ requests = defaultRequests, onAccept, onDecline }:
         </button>
       </div>
 
+      {/* Empty state */}
+      {requests.length === 0 && (
+        <div className="p-8 text-center">
+          <p
+            className="text-[14px] text-[#94a3b8]"
+            style={{ fontFamily: "Roboto Flex, Roboto, sans-serif" }}
+          >
+            No new job requests at the moment.
+          </p>
+        </div>
+      )}
+
       {/* Request Cards */}
+      {requests.length > 0 && (
       <div className="p-4 flex gap-3">
         {requests.map((request, index) => (
           <div
@@ -208,6 +191,7 @@ export function NewRequests({ requests = defaultRequests, onAccept, onDecline }:
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }

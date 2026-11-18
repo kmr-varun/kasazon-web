@@ -50,10 +50,10 @@ interface StatsCardsProps {
 }
 
 export function StatsCards({
-  todaysJobs = { value: 142, change: "+12.4%", changeLabel: "vs yesterday" },
-  newRequests = { value: 5, subtitle: "28 jobs awaiting signoff" },
-  monthlyEarnings = { value: "GH₵ 48,250", change: "+12.4%", changeLabel: "vs yesterday" },
-  avgRating = { value: 4.9, subtitle: "Based on 120 reviews" },
+  todaysJobs = { value: 0, change: "+0%", changeLabel: "vs yesterday" },
+  newRequests = { value: 0, subtitle: "0 active bookings" },
+  monthlyEarnings = { value: "GH₵ 0", change: "+0%", changeLabel: "vs last month" },
+  avgRating = { value: 0, subtitle: "No reviews yet" },
 }: StatsCardsProps) {
   return (
     <div className="grid grid-cols-4 gap-2">

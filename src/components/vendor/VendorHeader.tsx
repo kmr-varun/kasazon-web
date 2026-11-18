@@ -1,18 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useVendorDashboardProfile } from "@/src/hooks/useVendorDashboard";
 
 interface VendorHeaderProps {
   userName?: string;
   userAvatar?: string;
   notificationCount?: number;
   messageCount?: number;
-}
-
-interface UserData {
-  fullName?: string;
-  avatarUrl?: string;
 }
 
 const SearchIcon = () => (
@@ -40,35 +36,40 @@ export function VendorHeader({
   messageCount = 0,
 }: VendorHeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [userData, setUserData] = useState<UserData | null>(null);
 
-  // Load user data from localStorage on mount
-  useEffect(() => {
-    const loadUserData = () => {
-      try {
-        const stored = localStorage.getItem("kasazon_user");
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          setUserData({
-            fullName: parsed.fullName,
-            avatarUrl: parsed.avatarUrl,
-          });
-        }
-      } catch {
-        // Ignore parse errors
-      }
-    };
+  // Fetch fresh profile data from the API
+  const { profile } = useVendorDashboardProfile();
 
-    loadUserData();
+  // Prop overrides take precedence; API profile is the primary live source;
+  // localStorage fallback ensures fast first paint while the API call is in-flight.
+  const storedName =
+    typeof window !== "undefined"
+      ? (() => {
+          try {
+            const raw = localStorage.getItem("kasazon_user");
+            return raw ? (JSON.parse(raw) as { fullName?: string }).fullName : undefined;
+          } catch {
+            return undefined;
+          }
+        })()
+      : undefined;
 
-    // Listen for storage changes
-    window.addEventListener("storage", loadUserData);
-    return () => window.removeEventListener("storage", loadUserData);
-  }, []);
+  const storedAvatar =
+    typeof window !== "undefined"
+      ? (() => {
+          try {
+            const raw = localStorage.getItem("kasazon_user");
+            return raw ? (JSON.parse(raw) as { avatarUrl?: string }).avatarUrl : undefined;
+          } catch {
+            return undefined;
+          }
+        })()
+      : undefined;
 
-  // Use props if provided, otherwise fall back to stored data or defaults
-  const userName = propUserName || userData?.fullName || "Vendor";
-  const userAvatar = propUserAvatar || userData?.avatarUrl || "/images/vendor/header-avatar.png";
+  const userName =
+    propUserName ?? profile?.user?.fullName ?? storedName ?? "Vendor";
+  const userAvatar =
+    propUserAvatar ?? profile?.user?.avatarUrl ?? storedAvatar ?? "/images/vendor/header-avatar.png";
 
   return (
     <header className="fixed top-0 left-[248px] right-0 h-auto bg-white border-b border-[rgba(0,0,0,0.08)] flex items-center justify-between px-8 py-6 z-40">
