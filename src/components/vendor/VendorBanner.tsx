@@ -11,7 +11,7 @@ interface VendorBannerProps {
 }
 
 export function VendorBanner({
-  vendorName = "Cooper Curtis",
+  vendorName = "Vendor",
   vendorAvatar = "/images/vendor/banner-avatar.png",
   isAvailable = true,
   statusMessage = "Customers can currently find and book your services.",
