@@ -562,7 +562,7 @@ export function useBookingDetail(id: string | null) {
 
 /**
  * Fetch vendor job statistics.
- * Endpoint: GET /vendor/stats
+ * Endpoint: GET /vendor/performance/stats
  */
 export function useVendorStats() {
   const [stats, setStats] = useState<VendorJobStats>({
@@ -579,7 +579,7 @@ export function useVendorStats() {
     setLoading(true);
     const { data, error: fetchError } = await fetchWithAuth<
       Record<string, number>
-    >("/vendor/stats");
+    >("/vendor/performance/stats");
     if (data) {
       setStats(normaliseStats(data));
     }

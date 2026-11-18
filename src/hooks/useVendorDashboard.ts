@@ -191,7 +191,7 @@ export function useVendorDashboardProfile() {
   return { profile, loading, error, refetch };
 }
 
-/** Fetches GET /vendor/stats — performance stats (earnings, job counts) */
+/** Fetches GET /vendor/performance/stats — performance stats (earnings, job counts) */
 export function useVendorStatsFetch() {
   const [stats, setStats] = useState<VendorStatsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -201,7 +201,7 @@ export function useVendorStatsFetch() {
     setLoading(true);
     setError(null);
     try {
-      const data = await vendorFetch<VendorStatsData>("/vendor/stats");
+      const data = await vendorFetch<VendorStatsData>("/vendor/performance/stats");
       setStats(data);
     } catch (err) {
       setError(err as DashboardError);
@@ -342,7 +342,7 @@ export function useVendorBalanceFetch() {
  *
  * Data sources:
  *   - GET /vendor/profile     → profile, name, avatar, rating
- *   - GET /vendor/stats       → today's job count, earnings
+ *   - GET /vendor/performance/stats → today's job count, earnings
  *   - GET /vendor/balance     → total/monthly earnings
  *   - GET /bookings?role=vendor&status=IN_PROGRESS  → active jobs
  *   - GET /bookings?role=vendor&status=PENDING      → new requests
