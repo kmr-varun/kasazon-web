@@ -22,6 +22,7 @@ export interface Dispute {
 
 interface DisputesTableProps {
   disputes?: Dispute[];
+  total?: number;
   onViewDispute?: (disputeId: string) => void;
 }
 
@@ -98,13 +99,13 @@ const defaultDisputes: Dispute[] = [
 
 type TabType = "all" | "rework-requested" | "completed-reworks";
 
-export function DisputesTable({ disputes = defaultDisputes, onViewDispute }: DisputesTableProps) {
+export function DisputesTable({ disputes = defaultDisputes, total, onViewDispute }: DisputesTableProps) {
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const totalItems = 45;
+  const totalItems = total ?? disputes.length;
 
   const filteredDisputes = activeTab === "rework-requested"
     ? disputes.filter(d => d.status === "rework-in-progress" || d.status === "disputed")

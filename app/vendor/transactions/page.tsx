@@ -6,7 +6,11 @@ import {
   TransactionsTable,
   WithdrawEarnings,
 } from "@/src/components/vendor";
-import { useVendorBalance, useVendorTransactions } from "@/src/hooks/useVendorApi";
+import {
+  useVendorFinanceBalance,
+  useVendorFinanceTransactions,
+  usePayoutMethods,
+} from "@/src/hooks/useVendorFinance";
 
 // Loading skeleton
 function TransactionsSkeleton() {
@@ -24,6 +28,25 @@ function TransactionsSkeleton() {
   );
 }
 
+function mapTransactionStatus(
+  apiStatus: string
+): "completed" | "on-hold" | "pending" | "withdrawn" {
+  switch (apiStatus.toLowerCase()) {
+    case "paid":
+    case "completed":
+      return "completed";
+    case "pending":
+      return "pending";
+    case "on_hold":
+    case "held":
+      return "on-hold";
+    case "withdrawn":
+      return "withdrawn";
+    default:
+      return "pending";
+  }
+}
+
 export default function TransactionsPage() {
   const [withdrawing, setWithdrawing] = useState(false);
 
@@ -33,14 +56,19 @@ export default function TransactionsPage() {
     error: balanceError,
     refetch: refetchBalance,
     withdraw,
-  } = useVendorBalance();
+  } = useVendorFinanceBalance();
 
   const {
     transactions,
+    total: transactionsTotal,
     loading: transactionsLoading,
     error: transactionsError,
     refetch: refetchTransactions,
-  } = useVendorTransactions({ limit: 20 });
+  } = useVendorFinanceTransactions({ limit: 20 });
+
+  const {
+    methods: payoutMethods,
+  } = usePayoutMethods();
 
   // Transform transactions for component
   const tableTransactions = useMemo(() => {
@@ -48,7 +76,7 @@ export default function TransactionsPage() {
       id: tx.id,
       bookingId: tx.booking?.bookingCode || "N/A",
       customerName: tx.booking?.customer?.fullName || "Customer",
-      customerAvatar: tx.booking?.customer?.avatarUrl,
+      customerAvatar: tx.booking?.customer?.avatarUrl || undefined,
       serviceDescription: tx.booking?.service?.name || "Service",
       status: mapTransactionStatus(tx.status),
       serviceDate: tx.booking?.scheduledDate
@@ -69,15 +97,12 @@ export default function TransactionsPage() {
     }));
   }, [transactions]);
 
-  const availableBalance = balance?.available || 0;
+  const availableBalance = balance?.availableBalance ?? 0;
 
-  const handleWithdraw = async (amount: number) => {
+  const handleWithdraw = async (amount: number, payoutMethodId: string) => {
     setWithdrawing(true);
-    // Note: You'd need to implement payout method selection
-    const payoutMethodId = "default"; // This should come from user's saved payout methods
     const { error } = await withdraw(amount, payoutMethodId);
     setWithdrawing(false);
-
     if (!error) {
       refetchTransactions();
     }
@@ -85,7 +110,6 @@ export default function TransactionsPage() {
 
   const handleChangePayoutMethod = () => {
     // Navigate to payout method settings or open modal
-    console.log("Change payout method");
   };
 
   const isLoading = balanceLoading || transactionsLoading;
@@ -137,12 +161,16 @@ export default function TransactionsPage() {
         {/* Left Column - Balance Card & Table */}
         <div className="flex-1 flex flex-col gap-2">
           <TransactionsBalanceCard balance={availableBalance} />
-          <TransactionsTable transactions={tableTransactions} />
+          <TransactionsTable
+            transactions={tableTransactions}
+            total={transactionsTotal}
+          />
         </div>
 
         {/* Right Column - Withdraw Earnings */}
         <WithdrawEarnings
           availableBalance={availableBalance}
+          payoutMethods={payoutMethods}
           onWithdraw={handleWithdraw}
           onChangePayoutMethod={handleChangePayoutMethod}
           isWithdrawing={withdrawing}
@@ -150,22 +178,4 @@ export default function TransactionsPage() {
       </div>
     </div>
   );
-}
-
-// Helper function to map API status to component status
-function mapTransactionStatus(apiStatus: string): "completed" | "on-hold" | "pending" | "withdrawn" {
-  switch (apiStatus.toLowerCase()) {
-    case "paid":
-    case "completed":
-      return "completed";
-    case "pending":
-      return "pending";
-    case "on_hold":
-    case "held":
-      return "on-hold";
-    case "withdrawn":
-      return "withdrawn";
-    default:
-      return "pending";
-  }
 }

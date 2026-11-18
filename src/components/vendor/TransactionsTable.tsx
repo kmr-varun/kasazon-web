@@ -19,6 +19,7 @@ export interface Transaction {
 
 interface TransactionsTableProps {
   transactions?: Transaction[];
+  total?: number;
 }
 
 const statusStyles: Record<TransactionStatus, { borderColor: string; textColor: string; label: string }> = {
@@ -56,12 +57,12 @@ const TrashIcon = () => (
   </svg>
 );
 
-export function TransactionsTable({ transactions = defaultTransactions }: TransactionsTableProps) {
+export function TransactionsTable({ transactions = defaultTransactions, total }: TransactionsTableProps) {
   const [activeTab, setActiveTab] = useState<"all" | "withdrawn">("all");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const totalItems = 45;
+  const totalItems = total ?? transactions.length;
 
   const filteredTransactions = activeTab === "withdrawn"
     ? transactions.filter(t => t.status === "withdrawn")
