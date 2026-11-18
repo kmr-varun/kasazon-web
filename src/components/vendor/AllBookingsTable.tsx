@@ -53,6 +53,7 @@ const statusConfig: Record<BookingStatus, { label: string; bgColor: string; text
 
 interface AllBookingsTableProps {
   bookings?: BookingRow[];
+  total?: number;
 }
 
 const defaultBookings: BookingRow[] = [
@@ -68,10 +69,10 @@ const defaultBookings: BookingRow[] = [
   { id: "10", bookingId: "BK-010", customerName: "Kojo Asiedu", location: "Roman Ridge", serviceCategory: "Deep Cleaning", scheduledDate: "Thu, 19 Sept 2026", scheduledTime: "2:00 pm", status: "completed", amount: 320 },
 ];
 
-export function AllBookingsTable({ bookings = defaultBookings }: AllBookingsTableProps) {
+export function AllBookingsTable({ bookings = defaultBookings, total }: AllBookingsTableProps) {
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
-  const totalItems = 26;
+  const totalItems = total ?? bookings.length;
   const itemsPerPage = 10;
 
   const toggleRow = (id: string) => {

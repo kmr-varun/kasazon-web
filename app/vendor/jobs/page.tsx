@@ -10,15 +10,15 @@ import {
   JobRequestsGrid,
   JobRequestsTable,
 } from "@/src/components/vendor";
-import { useJobRequests } from "@/src/hooks/useVendorApi";
+import { useJobRequests } from "@/src/hooks/useVendorJobs";
 
 // Loading skeleton
 function JobRequestsSkeleton() {
   return (
     <div className="max-w-[1128px] space-y-8 animate-pulse">
       <div className="h-12 w-48 bg-gray-200 rounded" />
-      <div className="grid grid-cols-4 gap-2">
-        {[1, 2, 3, 4].map((i) => (
+      <div className="grid grid-cols-3 gap-2">
+        {[1, 2, 3].map((i) => (
           <div key={i} className="h-28 bg-gray-200 rounded-xl" />
         ))}
       </div>
@@ -54,11 +54,11 @@ export default function JobRequestsPage() {
       id: req.id,
       jobId: `#${req.bookingCode}`,
       title: req.service?.name || "Service",
-      price: req.totalAmount || 0,
+      price: typeof req.totalAmount === "string" ? parseFloat(req.totalAmount) : (req.totalAmount || 0),
       customerName: req.customer?.fullName || "Customer",
-      customerAvatar: req.customer?.avatarUrl,
+      customerAvatar: req.customer?.avatarUrl ?? undefined,
       distance: req.address?.city || "Location",
-      time: req.scheduledTime || "TBD",
+      time: req.scheduledTimeStart || "TBD",
     }));
   }, [requests]);
 
@@ -68,9 +68,9 @@ export default function JobRequestsPage() {
       id: req.id,
       bookingId: req.bookingCode,
       customerName: req.customer?.fullName || "Customer",
-      customerAvatar: req.customer?.avatarUrl,
+      customerAvatar: req.customer?.avatarUrl ?? undefined,
       distance: req.address?.city || "Location",
-      amount: req.totalAmount || 0,
+      amount: typeof req.totalAmount === "string" ? parseFloat(req.totalAmount) : (req.totalAmount || 0),
       serviceCategory: req.service?.name || "Service",
       createdDate: new Date(req.scheduledDate).toLocaleDateString("en-GB", {
         weekday: "short",
@@ -78,39 +78,45 @@ export default function JobRequestsPage() {
         month: "short",
         year: "numeric",
       }),
-      createdTime: req.scheduledTime || "TBD",
+      createdTime: req.scheduledTimeStart || "TBD",
     }));
   }, [requests]);
 
   // Calculate stats from API data
   const stats = useMemo(() => {
     const pendingCount = pagination.total;
-    const avgPrice = requests.length > 0
-      ? requests.reduce((sum, r) => sum + (r.totalAmount || 0), 0) / requests.length
-      : 0;
+    const avgPrice =
+      requests.length > 0
+        ? requests.reduce((sum, r) => {
+            const amt = typeof r.totalAmount === "string" ? parseFloat(r.totalAmount) : (r.totalAmount || 0);
+            return sum + amt;
+          }, 0) / requests.length
+        : 0;
 
     return {
       pending: pendingCount,
       avgPrice: `GH₵ ${Number(avgPrice).toFixed(2)}`,
-      responseRate: "98%", // Would need separate API for this
-      todayRequests: requests.filter(r => {
+      responseRate: "98%",
+      todayRequests: requests.filter((r) => {
         const today = new Date().toDateString();
         return new Date(r.createdAt).toDateString() === today;
       }).length,
     };
   }, [requests, pagination.total]);
 
-  const handleAccept = useCallback(async (bookingId: string) => {
-    await acceptJob(bookingId);
-  }, [acceptJob]);
+  const handleAccept = useCallback(
+    async (bookingId: string) => {
+      await acceptJob(bookingId);
+    },
+    [acceptJob]
+  );
 
-  const handleDecline = useCallback(async (bookingId: string) => {
-    await declineJob(bookingId);
-  }, [declineJob]);
-
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
-  }, []);
+  const handleDecline = useCallback(
+    async (bookingId: string) => {
+      await declineJob(bookingId);
+    },
+    [declineJob]
+  );
 
   if (loading && requests.length === 0) {
     return <JobRequestsSkeleton />;
@@ -141,7 +147,9 @@ export default function JobRequestsPage() {
           className="flex items-center gap-1 text-[12px]"
           style={{ fontFamily: "Roboto Flex, Roboto, sans-serif" }}
         >
-          <Link href="/vendor/jobs" className="text-[#475569] hover:underline">Jobs</Link>
+          <Link href="/vendor/jobs" className="text-[#475569] hover:underline">
+            Jobs
+          </Link>
           <span className="text-[#475569]">/</span>
           <span className="text-[#111]">Job Requests</span>
         </div>
@@ -183,6 +191,7 @@ export default function JobRequestsPage() {
         ) : (
           <JobRequestsTable
             jobs={tableJobs}
+            total={pagination.total}
             onApprove={handleAccept}
             onReject={handleDecline}
           />

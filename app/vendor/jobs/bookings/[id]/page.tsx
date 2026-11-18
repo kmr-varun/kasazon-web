@@ -1,97 +1,124 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { BookingDetail, BookingDetailData, WorkCompletionOTPModal } from "@/src/components/vendor";
+import { useState, useMemo } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { BookingDetail, WorkCompletionOTPModal } from "@/src/components/vendor";
+import {
+  useBookingDetail,
+  toBookingDetailData,
+} from "@/src/hooks/useVendorJobs";
 
-const ongoingBooking: BookingDetailData = {
-  id: "1",
-  bookingId: "KB-12345",
-  serviceName: "AC Servicing",
-  type: "contract",
-  status: "in-progress",
-  location: "East Legon, Greater Accra",
-  locationCode: "GA-382-0192",
-  bookedDate: "Oct 24, 2024 at 08:30 GMT",
-  checklist: [
-    { id: "1", title: "Comprehensive AC Servicing × 1", description: "Visual inspection of exterior casing, mount bracket tightness, and initial fan spin vibration.", status: "completed" },
-    { id: "2", title: "Clean and sanitize filters", description: "Dismount dual poly-mesh filters, apply high-pressure water rinse, and treat with anti-bacterial agent.", status: "completed" },
-    { id: "3", title: "Perform Foam-Jet deep cleaning", description: "High-density chemical foam spray across evaporator cooling fins and rotary blower wheel.", status: "completed" },
-    { id: "4", title: "Flush condensate drainage & pan", description: "Vacuum drain line, eliminate algae blocks, and verify zero overflow or wall stains.", status: "in-progress" },
-    { id: "5", title: "Final performance & noise verification", description: "Run 10-minute cold test at 18°C. Confirm quiet fan balance and minimum 8°C temperature differential.", status: "pending" },
-  ],
-  serviceCategory: "AC Servicing",
-  serviceDetails: ["AC Servicing × 1", "Foam-Jet Cleaning", "Filter Cleaning", "Basic Performance Check"],
-  estimatedDate: "Today, Oct 24, 2024",
-  estimatedTime: "09:00 - 13:00 GMT",
-  estimatedDuration: "4.0 hrs",
-  customerIssue: "\"My AC is not cooling properly and is making a strange noise.\"",
-  evidencePhotos: ["/images/vendor/evidence/photo1.jpeg", "/images/vendor/evidence/photo2.jpeg", "/images/vendor/evidence/photo3.jpeg"],
-  payment: { serviceAmount: 150, platformFee: 5, platformFeePercent: 3, escrowHeld: 150, yourEarnings: 155 },
-  customer: {
-    name: "Akua Mensah",
-    initials: "AM",
-    memberSince: "Feb 2023",
-    servicesBooked: 14,
-    address: ["Plot 14, Boundary Road", "East Legon, Accra"],
-    postalCode: "GA-382-0192",
-    isVerified: true,
-  },
-};
-
-const completedBooking: BookingDetailData = {
-  ...ongoingBooking,
-  status: "completed",
-  checklist: ongoingBooking.checklist.map(item => ({ ...item, status: "completed" as const })),
-  afterImages: ["/images/vendor/evidence/photo1.jpeg", "/images/vendor/evidence/photo2.jpeg", "/images/vendor/evidence/photo3.jpeg"],
-  confirmationNote: "AC was thoroughly foam-jet cleaned and tested successfully. High dust build-up removed from primary evaporator coils and blower wheel lubricated. Operating temperature stabilized at 17.5°C with quiet fan balance. Recommended next filter wash in 90 days.",
-};
-
-const upcomingBooking: BookingDetailData = {
-  ...ongoingBooking,
-  status: "upcoming",
-  checklist: ongoingBooking.checklist.map(item => ({ ...item, status: "pending" as const })),
-};
+// Loading skeleton
+function DetailSkeleton() {
+  return (
+    <div className="flex flex-col gap-8 px-8 py-10 animate-pulse">
+      <div className="h-8 w-96 bg-gray-200 rounded" />
+      <div className="h-6 w-64 bg-gray-200 rounded" />
+      <div className="flex flex-col gap-2">
+        <div className="h-48 bg-gray-200 rounded-xl" />
+        <div className="flex gap-2">
+          <div className="flex-1 h-96 bg-gray-200 rounded-xl" />
+          <div className="flex-1 h-96 bg-gray-200 rounded-xl" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function BookingDetailPage() {
+  const params = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const status = searchParams.get("status") || "ongoing";
-  const [showOTPModal, setShowOTPModal] = useState(false);
+  const id = typeof params?.id === "string" ? params.id : null;
 
-  const booking = status === "completed" ? completedBooking : status === "upcoming" ? upcomingBooking : ongoingBooking;
+  const { booking, loading, error, refetch, releasePayment, cancelBooking } =
+    useBookingDetail(id);
+
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  // Transform raw booking to the shape BookingDetail component expects
+  const bookingDetailData = useMemo(() => {
+    if (!booking) return undefined;
+    return toBookingDetailData(booking);
+  }, [booking]);
 
   const handleStartJob = () => {
-    console.log("Starting job...");
+    // Start job is handled on the backend by status transitions
+    // For now, navigate to in-progress view by refetching
+    refetch();
   };
 
-  const handleDeclineJob = () => {
-    console.log("Declining job...");
-    router.push("/vendor/jobs/bookings");
+  const handleDeclineJob = async () => {
+    setActionLoading(true);
+    setActionError(null);
+    const { error: err } = await cancelBooking("vendor_declined");
+    setActionLoading(false);
+    if (err) {
+      setActionError(err.message);
+    } else {
+      router.push("/vendor/jobs/bookings");
+    }
   };
 
   const handleMarkComplete = () => {
+    // Open the OTP modal — the actual release-payment call happens on OTP confirmation
     setShowOTPModal(true);
   };
 
-  const handleOTPConfirm = (otp: string) => {
-    console.log("OTP confirmed:", otp);
-    setShowOTPModal(false);
-    router.push("/vendor/jobs/bookings/1?status=completed");
+  const handleOTPConfirm = async (otp: string) => {
+    setActionLoading(true);
+    setActionError(null);
+    const { error: err } = await releasePayment(otp);
+    setActionLoading(false);
+    if (err) {
+      setActionError(err.message);
+      // Keep modal open so the vendor can try again
+    } else {
+      setShowOTPModal(false);
+      // Refresh to show completed state
+      refetch();
+    }
   };
 
-  const handleResendOTP = () => {
-    console.log("Resending OTP...");
+  const handleResendOTP = async () => {
+    // Calling release-payment without an OTP re-triggers the OTP flow
+    await releasePayment();
   };
 
   const handleContactSupport = () => {
-    console.log("Contacting support...");
+    router.push("/vendor/support");
   };
+
+  if (loading) {
+    return <DetailSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col gap-8 px-8 py-10">
+        <div className="bg-[#fef2f2] border border-[#fecaca] rounded-xl p-6 text-center">
+          <p className="text-[#dc2626] text-[14px] mb-4">{error.message}</p>
+          <button
+            onClick={refetch}
+            className="bg-[#02368c] text-white px-4 py-2 rounded-lg text-[12px]"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
+      {actionError && (
+        <div className="mx-8 mt-4 bg-[#fef2f2] border border-[#fecaca] rounded-xl p-3 text-center">
+          <p className="text-[#dc2626] text-[13px]">{actionError}</p>
+        </div>
+      )}
       <BookingDetail
-        booking={booking}
+        booking={bookingDetailData}
         onStartJob={handleStartJob}
         onDeclineJob={handleDeclineJob}
         onMarkComplete={handleMarkComplete}
@@ -100,7 +127,7 @@ export default function BookingDetailPage() {
         isOpen={showOTPModal}
         onClose={() => setShowOTPModal(false)}
         onConfirm={handleOTPConfirm}
-        customerName={booking.customer.name}
+        customerName={bookingDetailData?.customer.name ?? "Customer"}
         onResendOTP={handleResendOTP}
         onContactSupport={handleContactSupport}
       />

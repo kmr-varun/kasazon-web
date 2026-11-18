@@ -10,7 +10,11 @@ import {
   AllBookingsTable,
   BookingsGrid,
 } from "@/src/components/vendor";
-import { useVendorBookings } from "@/src/hooks/useVendorApi";
+import {
+  useAllBookings,
+  mapStatusToCardStatus,
+  mapStatusToTableStatus,
+} from "@/src/hooks/useVendorJobs";
 
 // Loading skeleton
 function BookingsSkeleton() {
@@ -29,29 +33,28 @@ function BookingsSkeleton() {
 
 type BookingTab = "all" | "upcoming" | "ongoing" | "completed" | "cancelled";
 
+/** Map tab selection to backend status value (uppercase). */
+function tabToStatus(tab: BookingTab): string | undefined {
+  switch (tab) {
+    case "upcoming":
+      return "PENDING";
+    case "ongoing":
+      return "IN_PROGRESS";
+    case "completed":
+      return "COMPLETED";
+    case "cancelled":
+      return "CANCELLED";
+    default:
+      return undefined;
+  }
+}
+
 export default function AllBookingsPage() {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [activeTab, setActiveTab] = useState<BookingTab>("all");
 
-  // Map tab to API status filter
-  const statusFilter = useMemo(() => {
-    switch (activeTab) {
-      case "upcoming": return "confirmed";
-      case "ongoing": return "in_progress";
-      case "completed": return "completed";
-      case "cancelled": return "cancelled";
-      default: return undefined;
-    }
-  }, [activeTab]);
-
-  const {
-    bookings,
-    pagination,
-    loading,
-    error,
-    refetch,
-  } = useVendorBookings({
-    status: statusFilter,
+  const { bookings, pagination, loading, error, refetch } = useAllBookings({
+    status: tabToStatus(activeTab),
     limit: 20,
   });
 
@@ -61,18 +64,24 @@ export default function AllBookingsPage() {
       id: booking.id,
       bookingId: booking.bookingCode,
       customerName: booking.customer?.fullName || "Customer",
-      customerAvatar: booking.customer?.avatarUrl,
+      customerAvatar: booking.customer?.avatarUrl ?? undefined,
       location: booking.address?.city || "Location",
-      amount: booking.totalAmount || 0,
+      amount:
+        typeof booking.totalAmount === "string"
+          ? parseFloat(booking.totalAmount)
+          : booking.totalAmount || 0,
       serviceCategory: booking.service?.name || "Service",
-      scheduledDate: new Date(booking.scheduledDate).toLocaleDateString("en-GB", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      }),
-      scheduledTime: booking.scheduledTime || "TBD",
-      status: mapApiStatusToTableStatus(booking.status),
+      scheduledDate: new Date(booking.scheduledDate).toLocaleDateString(
+        "en-GB",
+        {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        }
+      ),
+      scheduledTime: booking.scheduledTimeStart || "TBD",
+      status: mapStatusToTableStatus(booking.status),
     }));
   }, [bookings]);
 
@@ -81,51 +90,80 @@ export default function AllBookingsPage() {
     return bookings.map((booking) => {
       // Calculate progress based on checklist if available
       const checklistItems = booking.checklist || [];
-      const completedItems = checklistItems.filter((item) => item.isCompleted).length;
-      const progressPercentage = checklistItems.length > 0
-        ? Math.round((completedItems / checklistItems.length) * 100)
-        : 0;
+      const completedItems = checklistItems.filter((item) => item.isCompleted)
+        .length;
+      const progressPercentage =
+        checklistItems.length > 0
+          ? Math.round((completedItems / checklistItems.length) * 100)
+          : 0;
 
       // Calculate days for multi-day jobs
       const scheduledDate = new Date(booking.scheduledDate);
       const today = new Date();
-      const daysDiff = Math.max(1, Math.ceil((today.getTime() - scheduledDate.getTime()) / (1000 * 60 * 60 * 24)));
+      const daysDiff = Math.max(
+        1,
+        Math.ceil(
+          (today.getTime() - scheduledDate.getTime()) / (1000 * 60 * 60 * 24)
+        )
+      );
+
+      const durationMins =
+        booking.estimatedDuration ?? booking.service?.durationMinutes ?? 0;
 
       return {
         id: booking.id,
         bookingId: booking.bookingCode,
-        type: (booking.estimatedDuration || 1) > 1 ? "contract" as const : "one-time" as const,
-        status: mapApiStatusToCardStatus(booking.status),
+        type:
+          durationMins > 120
+            ? ("contract" as const)
+            : ("one-time" as const),
+        status: mapStatusToCardStatus(booking.status),
         serviceName: booking.service?.name || "Service",
-        amount: booking.totalAmount || 0,
+        amount:
+          typeof booking.totalAmount === "string"
+            ? parseFloat(booking.totalAmount)
+            : booking.totalAmount || 0,
         customerName: booking.customer?.fullName || "Customer",
-        customerAvatar: booking.customer?.avatarUrl,
+        customerAvatar: booking.customer?.avatarUrl ?? undefined,
         distance: booking.address?.city || "Location",
-        scheduledDate: new Date(booking.scheduledDate).toLocaleDateString("en-GB", {
-          weekday: "short",
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        }),
-        scheduledTime: booking.scheduledTime || "TBD",
-        progress: booking.status === "in_progress" ? {
-          currentDay: daysDiff,
-          totalDays: booking.estimatedDuration || 1,
-          percentage: progressPercentage,
-        } : undefined,
+        scheduledDate: new Date(booking.scheduledDate).toLocaleDateString(
+          "en-GB",
+          {
+            weekday: "short",
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }
+        ),
+        scheduledTime: booking.scheduledTimeStart || "TBD",
+        progress:
+          booking.status === "IN_PROGRESS"
+            ? {
+                currentDay: daysDiff,
+                totalDays: Math.ceil(durationMins / (8 * 60)) || 1,
+                percentage: progressPercentage,
+              }
+            : undefined,
       };
     });
   }, [bookings]);
 
   // Calculate stats from bookings data
   const stats = useMemo(() => {
-    const ongoingCount = bookings.filter(b => ["in_progress", "en_route"].includes(b.status)).length;
-    const scheduledCount = bookings.filter(b => b.status === "confirmed").length;
-    const completedCount = bookings.filter(b => b.status === "completed").length;
+    const ongoingCount = bookings.filter((b) =>
+      ["IN_PROGRESS"].includes(b.status.toUpperCase())
+    ).length;
+    const scheduledCount = bookings.filter(
+      (b) => b.status.toUpperCase() === "PENDING"
+    ).length;
+    const completedCount = bookings.filter(
+      (b) => b.status.toUpperCase() === "COMPLETED"
+    ).length;
 
-    // Filter for today's jobs
     const today = new Date().toDateString();
-    const todayCount = bookings.filter(b => new Date(b.scheduledDate).toDateString() === today).length;
+    const todayCount = bookings.filter(
+      (b) => new Date(b.scheduledDate).toDateString() === today
+    ).length;
 
     return {
       ongoing: { value: ongoingCount, subtitle: "Services in Progress" },
@@ -164,7 +202,9 @@ export default function AllBookingsPage() {
           className="flex items-center gap-1 text-[12px]"
           style={{ fontFamily: "Roboto Flex, Roboto, sans-serif" }}
         >
-          <Link href="/vendor/jobs" className="text-[#475569] hover:underline">Jobs</Link>
+          <Link href="/vendor/jobs" className="text-[#475569] hover:underline">
+            Jobs
+          </Link>
           <span className="text-[#475569]">/</span>
           <span className="text-[#111]">All Bookings</span>
         </div>
@@ -201,63 +241,9 @@ export default function AllBookingsPage() {
         {viewMode === "grid" ? (
           <BookingsGrid bookings={gridBookings} />
         ) : (
-          <AllBookingsTable bookings={tableBookings} />
+          <AllBookingsTable bookings={tableBookings} total={pagination.total} />
         )}
       </div>
     </div>
   );
-}
-
-// Helper function to map API status to table component status
-function mapApiStatus(apiStatus: string): "scheduled" | "in-progress" | "completed" | "cancelled" {
-  switch (apiStatus) {
-    case "confirmed":
-    case "pending":
-      return "scheduled";
-    case "in_progress":
-    case "en_route":
-      return "in-progress";
-    case "completed":
-      return "completed";
-    case "cancelled":
-      return "cancelled";
-    default:
-      return "scheduled";
-  }
-}
-
-// Helper function to map API status to BookingCard status
-function mapApiStatusToCardStatus(apiStatus: string): "in-progress" | "upcoming" | "completed" | "cancelled" {
-  switch (apiStatus) {
-    case "confirmed":
-    case "pending":
-      return "upcoming";
-    case "in_progress":
-    case "en_route":
-      return "in-progress";
-    case "completed":
-      return "completed";
-    case "cancelled":
-      return "cancelled";
-    default:
-      return "upcoming";
-  }
-}
-
-// Helper function to map API status to AllBookingsTable status
-function mapApiStatusToTableStatus(apiStatus: string): "upcoming" | "ongoing" | "completed" | "cancelled" {
-  switch (apiStatus) {
-    case "confirmed":
-    case "pending":
-      return "upcoming";
-    case "in_progress":
-    case "en_route":
-      return "ongoing";
-    case "completed":
-      return "completed";
-    case "cancelled":
-      return "cancelled";
-    default:
-      return "upcoming";
-  }
 }

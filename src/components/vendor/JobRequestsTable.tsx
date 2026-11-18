@@ -60,6 +60,7 @@ export interface JobRequestRow {
 
 interface JobRequestsTableProps {
   jobs?: JobRequestRow[];
+  total?: number;
   onApprove?: (jobId: string) => void;
   onReject?: (jobId: string) => void;
 }
@@ -77,12 +78,13 @@ const defaultJobs: JobRequestRow[] = Array.from({ length: 10 }, (_, i) => ({
 
 export function JobRequestsTable({
   jobs = defaultJobs,
+  total,
   onApprove,
   onReject,
 }: JobRequestsTableProps) {
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
-  const totalItems = 45;
+  const totalItems = total ?? jobs.length;
   const itemsPerPage = 10;
 
   const toggleRow = (id: string) => {
