@@ -15,8 +15,8 @@ const policyLinks = ['Help Center', 'Privacy', 'Terms', 'FAQs'];
 const socialLinks = [
   { icon: '/images/icons/instagram.svg', href: '#', label: 'Instagram' },
   { icon: '/images/icons/facebook.svg', href: '#', label: 'Facebook' },
-  { icon: '/images/icons/twitter.svg', href: '#', label: 'Twitter' },
-  { icon: '/images/icons/linkedin.svg', href: '#', label: 'LinkedIn' },
+  { icon: '/images/icons/x-twitter.svg', href: '#', label: 'X' },
+  { icon: '/images/icons/youtube.svg', href: '#', label: 'YouTube' },
 ];
 
 export function Footer({ className = '' }: FooterProps) {
@@ -56,7 +56,7 @@ export function Footer({ className = '' }: FooterProps) {
               placeholder="Your email address"
               required
               className="
-                flex-1 h-14 rounded-full
+                flex-1 max-w-md h-14 rounded-full
                 bg-[rgba(255,248,240,0.06)] border border-[rgba(255,248,240,0.2)]
                 px-6
                 text-white placeholder:text-[rgba(255,248,240,0.4)]
@@ -89,7 +89,7 @@ export function Footer({ className = '' }: FooterProps) {
             <div className="relative w-[180px] h-[60px] mb-4">
               <Image
                 src="/images/footer-logo.png"
-                alt="Kasazon"
+                alt="WallKas"
                 fill
                 className="object-contain object-left"
               />
@@ -105,7 +105,7 @@ export function Footer({ className = '' }: FooterProps) {
               font-poppins text-sm text-[rgba(245,245,245,0.62)]
               leading-relaxed mb-6
             ">
-              From quick repairs to complete home projects, Kasazon connects you with trusted professionals for reliable service at your doorstep.
+              From quick repairs to complete home projects, WallKas connects you with trusted professionals for reliable service at your doorstep.
             </p>
 
             {/* Contact Info */}
@@ -257,7 +257,7 @@ export function Footer({ className = '' }: FooterProps) {
               font-poppins text-sm text-[#fff8f0]
               text-center sm:text-left
             ">
-              © 2026 Kasazon. All rights reserved.
+              © 2026 WallKas. All rights reserved.
             </p>
 
             {/* Social Links */}

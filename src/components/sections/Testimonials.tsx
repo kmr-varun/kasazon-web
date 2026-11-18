@@ -6,7 +6,7 @@ export interface TestimonialsProps {
 
 const testimonials = [
   {
-    quote: '"Kasazon made booking a home service incredibly easy. I found a professional quickly, knew the price upfront, and the service was excellent."',
+    quote: '"WallKas made booking a home service incredibly easy. I found a professional quickly, knew the price upfront, and the service was excellent."',
     name: 'Ananya Rao',
     location: 'Bengaluru',
     avatar: '/images/testimonials/avatar-1.png',

@@ -261,7 +261,7 @@ export function BookingSummary({
               font-roboto-condensed text-xs text-[#424655]
               leading-normal
             ">
-              Kasazon Support 24/7 on call
+              WallKas Support 24/7 on call
             </span>
           </div>
         </div>

@@ -174,7 +174,7 @@ export function TimeSlotPageContent({
                     font-poppins text-sm text-[#424655]
                     leading-normal
                   ">
-                    Professionals follow stringent Kasazon quality & safety protocols.
+                    Professionals follow stringent WallKas quality & safety protocols.
                   </p>
                 </div>
 

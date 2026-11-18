@@ -36,7 +36,7 @@ export function BecomeProvider({ className = '' }: BecomeProviderProps) {
           <div className="flex flex-col gap-10 lg:gap-11 max-w-2xl">
             {/* Title */}
             <h2 className="
-              font-roboto-condensed font-normal text-black
+              font-roboto-condensed font-semibold text-black
               text-4xl sm:text-5xl lg:text-6xl
               leading-tight lg:leading-[1.25]
             ">
@@ -49,7 +49,7 @@ export function BecomeProvider({ className = '' }: BecomeProviderProps) {
               text-lg lg:text-xl
               leading-relaxed
             ">
-              Grow your business by connecting with customers who are looking for trusted professionals. Whether you offer cleaning, repairs, beauty services, painting, or specialized home services, Kasazon gives you the tools to manage bookings, showcase your skills, and get paid securely.
+              Grow your business by connecting with customers who are looking for trusted professionals. Whether you offer cleaning, repairs, beauty services, painting, or specialized home services, WallKas gives you the tools to manage bookings, showcase your skills, and get paid securely.
             </p>
 
             {/* Benefits Section */}
@@ -71,10 +71,10 @@ export function BecomeProvider({ className = '' }: BecomeProviderProps) {
                       font-poppins font-normal text-[#464646]
                       text-base lg:text-lg
                       leading-loose
-                      flex items-start gap-2
+                      flex items-start gap-3
                     "
                   >
-                    <span className="text-[#02368c] font-bold">✓</span>
+                    <span className="text-[#464646] font-bold text-xl mt-0.5">✓</span>
                     {benefit}
                   </li>
                 ))}
@@ -87,7 +87,7 @@ export function BecomeProvider({ className = '' }: BecomeProviderProps) {
                 variant="primary"
                 size="md"
                 onClick={handleBecomeProvider}
-                className="w-full sm:w-auto min-w-[222px]"
+                className="w-full sm:w-auto min-w-[222px] normal-case"
               >
                 Become a Provider
               </Button>
@@ -95,7 +95,7 @@ export function BecomeProvider({ className = '' }: BecomeProviderProps) {
                 variant="outline"
                 size="md"
                 onClick={handleLearnMore}
-                className="w-full sm:w-auto min-w-[222px]"
+                className="w-full sm:w-auto min-w-[222px] normal-case"
               >
                 Learn More
               </Button>
@@ -109,7 +109,7 @@ export function BecomeProvider({ className = '' }: BecomeProviderProps) {
             src="/images/providers-bg.png"
             alt="Service Providers"
             fill
-            className="object-cover"
+            className="object-cover object-[70%_center]"
             priority
           />
         </div>

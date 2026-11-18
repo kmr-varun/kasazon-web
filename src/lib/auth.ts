@@ -71,9 +71,13 @@ export interface RegisterRequest {
 }
 
 export interface RegisterResponse {
-  accessToken: string;
-  refreshToken: string;
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: number;
+  };
   user: User;
+  isNewUser: boolean;
 }
 
 export interface RefreshResponse {
@@ -255,7 +259,7 @@ export async function register(data: RegisterRequest): Promise<RegisterResponse>
   });
 
   // Update tokens and user after registration
-  setTokens(response.accessToken, response.refreshToken);
+  setTokens(response.tokens.accessToken, response.tokens.refreshToken);
   setStoredUser(response.user);
 
   return response;

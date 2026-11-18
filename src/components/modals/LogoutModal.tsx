@@ -41,7 +41,7 @@ export function LogoutModal({ isOpen, onClose, onConfirm }: LogoutModalProps) {
             {/* Text */}
             <div className="flex flex-col gap-3 text-center">
               <h2 className="font-roboto-condensed font-medium text-xl text-[#111] leading-normal">
-                Log out of Kasazon?
+                Log out of WallKas?
               </h2>
               <p className="font-poppins text-base text-[#777] leading-normal">
                 You'll need to verify your phone number again to log back in.

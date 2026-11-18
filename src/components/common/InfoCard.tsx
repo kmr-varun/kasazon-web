@@ -49,7 +49,7 @@ export function InfoCard({
       <div
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(90deg, rgb(0, 0, 0) 17%, rgba(0, 0, 0, 0) 100%)',
+          background: 'linear-gradient(90deg, rgba(0, 0, 0, 0.4) 17%, rgba(0, 0, 0, 0) 100%)',
         }}
       />
 
@@ -97,9 +97,9 @@ export function InfoCard({
           {/* Button */}
           <Button
             variant="primary"
-            size="md"
+            size="sm"
             onClick={handleClick}
-            className="w-full sm:w-auto min-w-[237px]"
+            className="w-full sm:w-auto sm:max-w-[250px] px-4"
           >
             {buttonText}
           </Button>

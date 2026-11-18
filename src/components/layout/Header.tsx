@@ -15,6 +15,8 @@ export interface HeaderProps {
 const navItems = [
   { label: 'Home', href: '/' },
   { label: 'Services', href: '/services' },
+  { label: 'My Booking', href: '/bookings' },
+  { label: 'Contact', href: '/contact' },
 ];
 
 export function Header({ className = '' }: HeaderProps) {
@@ -128,22 +130,13 @@ export function Header({ className = '' }: HeaderProps) {
                 )}
               </div>
             ) : (
-              <>
-                <Button
-                  variant="outline"
-                  size="md"
-                  onClick={() => router.push('/register')}
-                >
-                  Register
-                </Button>
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={() => setShowLoginModal(true)}
-                >
-                  Login
-                </Button>
-              </>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => setShowLoginModal(true)}
+              >
+                Login
+              </Button>
             )}
           </div>
 
@@ -215,30 +208,17 @@ export function Header({ className = '' }: HeaderProps) {
                   </button>
                 </div>
               ) : (
-                <div className="flex flex-col gap-2">
-                  <Button
-                    variant="outline"
-                    size="md"
-                    fullWidth
-                    onClick={() => {
-                      router.push('/register');
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    Register
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="md"
-                    fullWidth
-                    onClick={() => {
-                      setShowLoginModal(true);
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    Login
-                  </Button>
-                </div>
+                <Button
+                  variant="primary"
+                  size="md"
+                  fullWidth
+                  onClick={() => {
+                    setShowLoginModal(true);
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  Login
+                </Button>
               )}
             </div>
           </div>

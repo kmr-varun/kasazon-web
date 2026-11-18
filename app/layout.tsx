@@ -39,8 +39,8 @@ const montaga = Montaga({
 // });
 
 export const metadata: Metadata = {
-  title: "Kasazon - Global Trust",
-  description: "Kasazon - Your trusted service platform",
+  title: "WallKas - Your Space, Our Care",
+  description: "WallKas - Your trusted service platform for cleaning, repairs, maintenance, beauty, painting, and more",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
